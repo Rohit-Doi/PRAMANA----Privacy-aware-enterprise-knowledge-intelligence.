@@ -1,5 +1,9 @@
-# PRAMĀṆA v2 — local datastores.
-# Default profile is the minimum the platform needs (about 2 GB RAM).
+# PRAMĀṆA v2
+#
+#   docker compose up -d                    datastores only (about 2 GB RAM); run the API and the
+#                                           web app on the host — the normal way to develop
+#   docker compose --profile app up -d      everything in containers (about 7 GB RAM in total)
+#
 # Ports bind to 127.0.0.1 only. Credentials come from .env (see scripts/init_env.py).
 name: pramana2
 
@@ -38,7 +42,7 @@ services:
     restart: unless-stopped
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.19.0
     container_name: pramana2-qdrant
     ports:
       - "127.0.0.1:${QDRANT_PORT:-6333}:6333"
@@ -48,7 +52,7 @@ services:
     restart: unless-stopped
 
   neo4j:
-    image: neo4j:5-community
+    image: neo4j:5.26-community
     container_name: pramana2-neo4j
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?run scripts/init_env.py first}
@@ -69,7 +73,7 @@ services:
     restart: unless-stopped
 
   opa:
-    image: openpolicyagent/opa:latest
+    image: openpolicyagent/opa:1.21.1
     container_name: pramana2-opa
     # Policies and data are pushed by the backend at startup (see pramana.privacy.policy),
     # so every decision can be tied to a stored policy version.
@@ -79,7 +83,95 @@ services:
     mem_limit: 128m
     restart: unless-stopped
 
+  # ── Application (profile "app") ───────────────────────────────────────────
+  # First run, in order:
+  #   docker compose --profile app run --rm setup     migrate the database, seed roles and personas
+  #   docker compose --profile app run --rm models    download the local models (about 1.5 GB, once)
+  #   docker compose --profile app up -d
+  setup:
+    profiles: ["app"]
+    build: &backend_build
+      context: .
+      dockerfile: backend/Dockerfile
+    image: pramana-backend:local
+    env_file: .env
+    environment: &backend_env
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
+      QDRANT_URL: http://qdrant:6333
+      NEO4J_URI: bolt://neo4j:7687
+      OPA_URL: http://opa:8181
+    command: ["sh", "-c", "alembic upgrade head && python /app/scripts/seed.py"]
+    depends_on: &backend_depends
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      neo4j: { condition: service_healthy }
+      qdrant: { condition: service_started }
+      opa: { condition: service_started }
+    restart: "no"
+
+  models:
+    profiles: ["app"]
+    image: pramana-backend:local
+    env_file: .env
+    environment: *backend_env
+    command: ["python", "/app/scripts/download_models.py"]
+    volumes:
+      - model_cache:/app/.cache
+    restart: "no"
+
+  api:
+    profiles: ["app"]
+    build: *backend_build
+    image: pramana-backend:local
+    container_name: pramana2-api
+    env_file: .env
+    environment:
+      <<: *backend_env
+      EMBEDDED_WORKER: "false"   # ingestion runs in the worker service below
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    volumes:
+      - model_cache:/app/.cache
+      - document_storage:/app/data
+    depends_on: *backend_depends
+    mem_limit: 3g
+    restart: unless-stopped
+
+  worker:
+    profiles: ["app"]
+    image: pramana-backend:local
+    container_name: pramana2-worker
+    env_file: .env
+    environment: *backend_env
+    command: ["python", "-m", "pramana.worker"]
+    volumes:
+      - model_cache:/app/.cache
+      - document_storage:/app/data
+    depends_on: *backend_depends
+    mem_limit: 3g
+    restart: unless-stopped
+
+  web:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:${API_PORT:-8000}
+    image: pramana-web:local
+    container_name: pramana2-web
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    depends_on:
+      - api
+    mem_limit: 256m
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   qdrant_data:
   neo4j_data:
+  model_cache:
+  document_storage:

@@ -81,9 +81,10 @@ def create_app() -> FastAPI:
         version=__version__,
         description=DESCRIPTION,
         lifespan=lifespan,
-        docs_url="/docs",
+        # The interactive documentation describes every endpoint; it is not published in production.
+        docs_url=None if settings.is_production else "/docs",
         redoc_url=None,
-        openapi_url="/openapi.json",
+        openapi_url=None if settings.is_production else "/openapi.json",
     )
     # Outermost first: CORS, then request context (ids, headers, metrics), then rate limiting.
     app.add_middleware(RateLimitMiddleware)
