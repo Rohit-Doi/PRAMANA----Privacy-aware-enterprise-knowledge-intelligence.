@@ -14,7 +14,78 @@ against a source you are allowed to read — or no answer at all.
 | **Accountable** | Hash-chained audit log, versioned policies, trust score with its components, review queue, stored benchmark runs |
 | **One key** | Runs on a laptop CPU with one free API key. Every model except the drafting LLM is local |
 
-<!-- RESULTS -->
+## Measured results
+
+Everything below was measured on this repository's code on a laptop CPU (i7-1360P,
+16 GB RAM, no GPU). Each run is stored and shown on the **Reports** page, and can be
+reproduced with the commands in [docs/RUNBOOK.md](docs/RUNBOOK.md).
+
+### Whole pipeline — 65 golden questions over 1,744 documents
+
+| | Result | Target |
+|---|---|---|
+| Answerable questions answered correctly | **53 of 55** (96.4 %); 0 wrong, 2 declined | ≥ 85 % |
+| Unanswerable questions declined | **10 of 10** | ≥ 80 % |
+| Sentences in final answers that are verified | 95.1 % | ≥ 95 % |
+| Restricted facts leaked to roles without access | **0** | 0 |
+| Median response time | 6.1 s (95th percentile 13.7 s) | ≤ 10 s |
+| LLM calls | 50 for 77 runs; 17 answers were quoted locally with none | ≤ 4 per question |
+
+### Access control — 28 planted facts, asked as every role
+
+| | Result |
+|---|---|
+| Unauthorised attempts | 149 |
+| Leaks (planted value in any returned passage) | **0** |
+| Authorised lookups that found the fact | 47 of 47 |
+
+### Retrieval — is the passage with the answer in the top 8?
+
+| Configuration | Recall@8 | MRR |
+|---|---|---|
+| Meaning (dense) only | 92.7 % | 0.900 |
+| Keywords (BM25) only | 100 % | 0.975 |
+| Meaning + keywords | 100 % | 0.944 |
+| + graph, before reranking | 100 % | 0.805 |
+| Full pipeline, reranked | **100 %** | **0.977** |
+
+The graph retriever does not help on these single-fact questions (it lowers the order
+before reranking, which then repairs it). It is there for questions that need two
+documents joined by an entity; that case is not measured here.
+
+### Verifier — does it catch unsupported sentences?
+
+Held-out data, split by source document. "v1" is the word-overlap check of the first
+version of this project, reproduced on the same sentences.
+
+| Benchmark | | Errors caught | False alarms | AUROC |
+|---|---|---|---|---|
+| **RAGTruth** — human-annotated errors in real LLM answers (846 sentences) | v2 | **77.5 %** | 14.0 % | **0.916** |
+| | single grounding model | 58.4 % | 14.4 % | 0.817 |
+| | v1 | 18.0 % | 8.2 % | 0.726 |
+| **Injected errors** in this corpus (485 sentences) | v2 | **95.2 %** | 0.0 % | **0.994** |
+| | single grounding model | 76.0 % | 0.0 % | 0.952 |
+| | v1 | 46.3 % | 0.0 % | 0.772 |
+| **HaluEval** — never used for fitting (245 answers) | v2 | **70.3 %** | 18.5 % | 0.765 |
+| | v1 | 10.7 % | 3.2 % | 0.802 |
+
+By kind of injected error, v2 catches: a changed number 100 %, a flipped meaning 93 %,
+an unrelated true statement 98 %, a swapped name or entity 84 %. Version 1 caught none of
+the first, second and fourth kinds.
+
+What these numbers do not show:
+
+* On RAGTruth, at answer level (flag the answer if any sentence is flagged), F1 is 0.50
+  against a target of 0.70 that was set before measuring. Small CPU models do not reach
+  it; the target is left in place and shown as not met.
+* Roughly one supported sentence in seven is flagged on RAGTruth. In the answer pipeline
+  such a sentence gets a second opinion from the LLM judge; in Verify Studio the reader
+  sees the passage and decides.
+* The golden questions were written for the synthetic company documents by the same
+  process that built the system. They show the pipeline works end to end, not how it
+  performs on your documents.
+
+
 
 ## What you can do with it
 
