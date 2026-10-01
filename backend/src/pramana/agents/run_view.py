@@ -22,6 +22,7 @@ _SIGNAL_KEYS = (
     "numbers_ok",
     "names_ok",
     "overlap",
+    "primary_evidence",
     "supporting_documents",
     "numbers_missing",
     "names_missing",
@@ -105,7 +106,14 @@ async def run_payload(db: AsyncSession, run: QueryRun) -> dict[str, Any]:
                         "section_path": x.section_path,
                         "page": x.page,
                     }
-                    for x in sorted(citations.get(c.id, []), key=lambda x: -x.support_score)
+                    # The passage the verdict rests on comes first, then other supporting passages.
+                    for x in sorted(
+                        citations.get(c.id, []),
+                        key=lambda x, primary=c.signals.get("primary_evidence"): (  # type: ignore[misc]
+                            x.evidence_ref != primary,
+                            -x.support_score,
+                        ),
+                    )
                 ],
                 "unsupported_spans": c.unsupported_spans,
                 "signals": {k: c.signals.get(k) for k in _SIGNAL_KEYS},

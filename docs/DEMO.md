@@ -25,20 +25,22 @@ As **emma.employee**, on **Ask**:
 
 > How many days per week may full-time employees work remotely?
 
-Watch the seven agents run on the right. The answer arrives with a trust score; each
-sentence carries a verdict. Click a sentence: the supporting passage opens with the
-quoted words highlighted. Open **Why this answer** for the retrieval, verification and
-policy details, and **Download report** for a self-contained validation report.
+Watch the seven agents run. The answer arrives with a trust score; each sentence carries
+a verdict. Click a sentence: the supporting passage opens with the quoted words
+highlighted. The answer states the current rule (3 days) and notes that the superseded
+2024 policy said 2. The tabs on the right show the evidence, the claims with their
+signals, the trust breakdown, the reasoning and the policy decision; the download button
+saves a self-contained validation report.
 
 ## 2. The same question, different people (3 minutes)
 
-Ask each persona:
+Ask as three personas:
 
 > How many days of paid annual leave do I get?
 
-Emma (EMEA), Marcus (AMER) and Arjun (APAC) get different, correct answers: each one's
-scope includes only their own region's leave policy. Nothing in the question says
-where they work — it comes from the verified session.
+Emma (EMEA) is told 28 days, Marcus (AMER) 20, Arjun (APAC) 22. Each one's scope
+contains only their own region's leave policy, and "I" is resolved from the verified
+session — nothing in the question says where they work.
 
 ## 3. Refusal without leaking (2 minutes)
 
@@ -46,22 +48,28 @@ As **emma.employee**:
 
 > What is the proposed purchase price for Brightwater Analytics?
 
-Emma is told the sources she can access do not contain this. She is not shown the
-price, a paraphrase of it, or the document title.
+Emma is told the sources she can access do not contain this, and that three relevant
+sources exist outside her access. She is not shown the price, a paraphrase of it, or
+the document titles. (Whether the count is shown at all is a policy setting.)
 
-As **elena.executive**, the same question is answered with the figure. Open **Why this
-answer**: the evidence is RESTRICTED, above the egress ceiling, so **no language model
-was called** — the answer is quoted directly from the memo, on this machine.
+As **elena.executive**, the same question is answered with the figure. Open the
+**Reasoning** and **Policy** tabs: the evidence is RESTRICTED, above the egress ceiling,
+so **no language model was called** — a local reading model found the answer and the
+sentence is quoted directly from the memo, on this machine. Ask her *What is the
+purchase price of the Corvane Logistics acquisition?* (there is no such acquisition):
+the system declines instead of quoting the Brightwater price.
 
 ## 4. Personal data (2 minutes)
 
-As **fatima.finance**:
+As **marcus.manager** (HR):
 
-> What is the maximum base salary for level L3?
+> Who chaired the H1 2026 performance calibration?
 
-Fatima's answer comes from a CONFIDENTIAL finance document. Names in the evidence were
-replaced by placeholders before the prompt was built; in her view they appear as
-`[REDACTED:PERSON]` because her role may not read personal data. Elena sees the names.
+The answer comes from a CONFIDENTIAL HR document. The name was replaced by a placeholder
+before the prompt was built, and Marcus sees `[REDACTED:PERSON], Chief People Officer`
+because his role may not read personal data. **elena.executive** asks the same question
+and sees the name. **fatima.finance** asks *What is the maximum base salary for level
+L3?* and is told her sources do not contain it: the salary bands belong to HR.
 
 ## 5. Verify Studio — check any text (3 minutes)
 
@@ -71,9 +79,10 @@ As any persona, open **Verify** and paste:
 > require multi-factor authentication. Employees receive a monthly stipend of $250 for
 > home internet. Lost devices must be reported within 72 hours.
 
-Each sentence is checked against the knowledge base. Correct sentences are marked
-supported with their source; the invented stipend and the wrong reporting deadline are
-flagged, with the passage that contradicts them. This works for text written by any
+Each sentence is checked against the knowledge base. The two correct sentences are marked
+supported with their source (the current policy, not the superseded one); the invented
+stipend and the wrong reporting deadline are flagged, with the passage they were measured
+against. This works for text written by any
 tool — paste the output of another assistant to audit it.
 
 As **elena.executive**, open **Compare roles** and ask the acquisition question as Emma

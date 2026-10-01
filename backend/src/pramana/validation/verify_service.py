@@ -125,6 +125,12 @@ class VerifyService:
             use_judge=may_use_judge,
             run_id=run_id,
         )
+        for claim in report.claims:
+            # Here the "citations" are the passages retrieved for each sentence, not references the
+            # author wrote, so the explanation should not speak of a cited source.
+            claim.reason = claim.reason.replace(
+                "supported, by a different passage than the one cited", "supported by the source"
+            ).replace("the cited source", "the source")
         steps.append(
             _step(
                 "fact_checking",

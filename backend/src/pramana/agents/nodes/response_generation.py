@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from pramana.agents.extractive import extractive_answer
@@ -29,8 +30,20 @@ def evidence_block(evidence: list[Evidence]) -> str:
     return "\n\n".join(blocks)
 
 
+FIRST_PERSON = re.compile(r"\b(?:I|[Mm]y|[Mm]e|[Mm]ine|[Ww]e|[Oo]ur|[Uu]s)\b")
+
+
 def build_user_prompt(state: PipelineState, question: str) -> str:
-    parts = [f"Question: {question}", "Evidence:", evidence_block(state["llm_evidence"])]
+    parts = [f"Question: {question}"]
+    if FIRST_PERSON.search(question):
+        # "How much leave do I get?" depends on who is asking. Department and region come from the
+        # verified session, never from the question.
+        principal = state["principal"]
+        parts.append(
+            f"About the person asking: works in the {principal.department} department, "
+            f"{principal.region.upper()} region."
+        )
+    parts += ["Evidence:", evidence_block(state["llm_evidence"])]
     # Graph facts orient the model but are not citable. Only facts drawn from the evidence
     # documents are used, and none from CONFIDENTIAL or higher go to an external model:
     # entity names are not pseudonymised the way passage text is.

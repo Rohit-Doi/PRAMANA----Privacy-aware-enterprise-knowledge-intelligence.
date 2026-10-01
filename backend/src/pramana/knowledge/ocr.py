@@ -7,6 +7,7 @@ has no text layer; born-digital documents never go through it.
 
 from __future__ import annotations
 
+import re
 import threading
 from dataclasses import dataclass
 from typing import Any
@@ -61,13 +62,25 @@ class OcrEngine:
             result, _ = engine(image)
         lines: list[OcrLine] = []
         for box, text, confidence in result or []:
-            text = str(text).strip()
+            text = repair_digits(str(text).strip())
             if not text or float(confidence) < MIN_CONFIDENCE:
                 continue
             ys = [float(point[1]) for point in box]
             xs = [float(point[0]) for point in box]
             lines.append(OcrLine(text, min(ys), min(xs), max(ys) - min(ys), float(confidence)))
         return _reading_order(lines)
+
+
+_LETTER_O_IN_NUMBER = re.compile(r"(?<=[\d,.])[oO](?=[\d,.%])|(?<=\d)[oO](?![A-Za-z])")
+_LETTER_L_IN_NUMBER = re.compile(r"(?<=[\d,.])[lI](?=[\d,.])")
+
+
+def repair_digits(text: str) -> str:
+    """Undo the commonest recognition slip inside figures: a letter O read for a zero, an l or I for a one.
+
+    Only a letter standing between digits (or digit separators) is changed, so words are untouched.
+    """
+    return _LETTER_L_IN_NUMBER.sub("1", _LETTER_O_IN_NUMBER.sub("0", text))
 
 
 def _reading_order(lines: list[OcrLine]) -> list[OcrLine]:

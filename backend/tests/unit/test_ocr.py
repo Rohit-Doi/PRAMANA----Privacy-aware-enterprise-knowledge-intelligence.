@@ -5,7 +5,7 @@ from __future__ import annotations
 import pymupdf
 import pytest
 
-from pramana.knowledge.ocr import OcrLine, group_paragraphs
+from pramana.knowledge.ocr import OcrLine, group_paragraphs, repair_digits
 from pramana.knowledge.parsers import detect_mime, parse_document
 
 pytest.importorskip("rapidocr_onnxruntime")
@@ -87,3 +87,22 @@ def test_lines_are_grouped_into_paragraphs_by_vertical_gaps() -> None:
         ["First line of the paragraph", "second line of the paragraph."],
         ["A new paragraph after a gap."],
     ]
+
+
+@pytest.mark.parametrize(
+    ("read", "meant"),
+    [
+        ("above 85,0o0 dollars", "above 85,000 dollars"),
+        ("a limit of 1O0 per day", "a limit of 100 per day"),
+        ("version 2.O.1", "version 2.0.1"),
+        ("room 1l4", "room 114"),
+        ("growth of 2O%", "growth of 20%"),
+        ("costs 50O", "costs 500"),
+        # Words and identifiers are left alone.
+        ("the Ohio office", "the Ohio office"),
+        ("ticket SEC-2041 for Olga", "ticket SEC-2041 for Olga"),
+        ("go to level 3 or 4", "go to level 3 or 4"),
+    ],
+)
+def test_letters_read_for_digits_inside_figures_are_repaired(read: str, meant: str) -> None:
+    assert repair_digits(read) == meant

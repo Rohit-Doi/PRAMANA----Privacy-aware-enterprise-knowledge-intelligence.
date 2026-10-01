@@ -37,6 +37,7 @@ NO_SUPPORT = 0.10
 CONFLICT_THRESHOLD = 0.85
 CONFLICT_MIN_OVERLAP = 0.5
 SUPPORTING_SOURCE_THRESHOLD = 0.5
+SUPERSEDED_PENALTY = 0.25
 EXTRA_SOURCES_PER_CLAIM = 2
 WIDE_CONTEXT_PASSAGES = 2
 WIDE_CONTEXT_CHARS = 2400
@@ -210,12 +211,23 @@ class ValidationEngine:
         recited: dict[int, bool] = {}
         for draft in checkable:
             cited = [ref for ref in draft.cited if ref in by_ref]
-            ranked = sorted(candidates[draft.ordinal], key=lambda ref, d=draft: -grounding[(d.ordinal, ref)])  # type: ignore[misc]
-            best_cited = max(cited, key=lambda ref, d=draft: grounding[(d.ordinal, ref)], default=None)  # type: ignore[misc]
+            # Among passages that were not cited, a current document is preferred to a superseded one:
+            # the claim should be measured against what holds today.
+            strength = {
+                ref: grounding[(draft.ordinal, ref)] - (0.0 if by_ref[ref].is_current else SUPERSEDED_PENALTY)
+                for ref in candidates[draft.ordinal]
+            }
+            ranked = sorted(candidates[draft.ordinal], key=lambda ref: -strength[ref])
+            supporting_refs = [r for r in ranked if grounding[(draft.ordinal, r)] >= SUPPORTING_SOURCE_THRESHOLD]
+            best_other = next((r for r in supporting_refs if by_ref[r].is_current), None) or (
+                supporting_refs[0] if supporting_refs else None
+            )
+            best_cited = max(cited, key=lambda ref: strength[ref], default=None)
             if best_cited is not None and grounding[(draft.ordinal, best_cited)] >= SUPPORTING_SOURCE_THRESHOLD:
                 primary[draft.ordinal], recited[draft.ordinal] = best_cited, False
-            elif ranked and grounding[(draft.ordinal, ranked[0])] >= SUPPORTING_SOURCE_THRESHOLD:
-                primary[draft.ordinal], recited[draft.ordinal] = ranked[0], True
+            elif best_other is not None:
+                # Supported, but not by the passage the sentence cites (if it cites one at all).
+                primary[draft.ordinal], recited[draft.ordinal] = best_other, bool(cited)
             else:
                 primary[draft.ordinal], recited[draft.ordinal] = best_cited or ranked[0], False
 
@@ -309,6 +321,9 @@ class ValidationEngine:
                 }
             )
             verdict, reason = _decide(signals, probability, self.support_threshold)
+            if not draft.cited:
+                # Text checked in Verify Studio carries no citations: there is no "cited" source.
+                reason = reason.replace("the cited source", "the closest source")
             citation_refs = [
                 ref,
                 *[r for r in cited if r != ref and grounding[(draft.ordinal, r)] >= SUPPORTING_SOURCE_THRESHOLD],
