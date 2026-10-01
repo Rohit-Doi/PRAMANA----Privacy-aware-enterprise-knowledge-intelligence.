@@ -108,7 +108,7 @@ class Settings(BaseSettings):
     # ── Validation ───────────────────────────────────────────────────────
     support_threshold: float = 0.60
     uncertain_low: float = 0.30
-    uncertain_high: float = 0.75
+    uncertain_high: float = 0.90
     max_correction_rounds: int = 2
     min_supported_ratio: float = 0.80
 

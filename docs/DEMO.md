@@ -76,7 +76,10 @@ supported with their source; the invented stipend and the wrong reporting deadli
 flagged, with the passage that contradicts them. This works for text written by any
 tool — paste the output of another assistant to audit it.
 
-**Compare** runs the same question as two personas side by side.
+As **elena.executive**, open **Compare roles** and ask the acquisition question as Emma
+and as herself, side by side. A preview is only possible as someone whose access lies
+within your own — the administrator can preview as an employee, not as an executive —
+and each preview is written to the audit log.
 
 ## 6. Prompt injection (1 minute)
 

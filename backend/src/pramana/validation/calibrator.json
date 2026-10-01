@@ -1,54 +1,54 @@
 {
-  "version": "trained-20261002-0139",
+  "version": "trained-20261002-0352",
   "features": [
     "grounding",
-    "entailment",
-    "contradiction",
+    "entailment_window",
+    "entailment_sentence",
+    "contradiction_window",
+    "contradiction_sentence",
     "span_fraction",
-    "numbers_ok",
-    "names_ok",
-    "overlap"
+    "names_ok"
   ],
   "coefficients": {
-    "grounding": 3.6929518882788783,
-    "entailment": 1.8799860246157096,
-    "contradiction": -2.458103615328734,
-    "span_fraction": -4.011380023775171,
-    "numbers_ok": -0.22913057452416963,
-    "names_ok": 0.5231337503938396,
-    "overlap": -2.869499274928179
+    "grounding": 2.1831467500585844,
+    "entailment_window": 1.1447052840655214,
+    "entailment_sentence": 1.0056772783981367,
+    "contradiction_window": -1.1863235149682543,
+    "contradiction_sentence": -2.7821263381106704,
+    "span_fraction": -3.572951889174833,
+    "names_ok": 0.4503820863092751
   },
-  "intercept": 0.9672488301411487,
-  "threshold": 0.49,
+  "intercept": 0.27735965370773935,
+  "threshold": 0.74,
   "metrics": {
     "trained_on_sentences": 1427,
     "sources": {
       "injected": 515.0,
       "ragtruth": 912.0
     },
-    "train_catch_rate": 0.8511,
-    "train_false_alarm_rate": 0.098,
+    "train_catch_rate": 0.9176,
+    "train_false_alarm_rate": 0.0971,
     "held_out": {
       "ragtruth": {
         "sentences": 846,
-        "catch_rate": 0.6966,
-        "false_alarm_rate": 0.103,
-        "f1": 0.5415,
-        "calibration_error": 0.0524
+        "catch_rate": 0.7753,
+        "false_alarm_rate": 0.14,
+        "f1": 0.5227,
+        "calibration_error": 0.0548
       },
       "injected": {
         "sentences": 485,
-        "catch_rate": 0.8818,
-        "false_alarm_rate": 0.0058,
-        "f1": 0.9356,
-        "calibration_error": 0.0902
+        "catch_rate": 0.9521,
+        "false_alarm_rate": 0.0,
+        "f1": 0.9755,
+        "calibration_error": 0.0963
       },
       "halueval": {
         "sentences": 245,
-        "catch_rate": 0.6529,
-        "false_alarm_rate": 0.2258,
-        "f1": 0.693,
-        "calibration_error": 0.2018
+        "catch_rate": 0.7025,
+        "false_alarm_rate": 0.1855,
+        "f1": 0.7424,
+        "calibration_error": 0.1664
       }
     }
   }

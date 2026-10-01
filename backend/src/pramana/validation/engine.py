@@ -32,6 +32,8 @@ from pramana.validation.facts import check_facts
 log = get_logger(__name__)
 
 CONTRADICTION_THRESHOLD = 0.75
+NO_ENTAILMENT = 0.25
+NO_SUPPORT = 0.10
 CONFLICT_THRESHOLD = 0.85
 CONFLICT_MIN_OVERLAP = 0.5
 SUPPORTING_SOURCE_THRESHOLD = 0.5
@@ -269,6 +271,10 @@ class ValidationEngine:
                 "grounding": round(grounding[(draft.ordinal, ref)], 4),
                 "entailment": round(entailment, 4),
                 "contradiction": round(contradiction, 4),
+                "entailment_window": round(scores.entailment, 4),
+                "contradiction_window": round(scores.contradiction, 4),
+                "entailment_sentence": round(near.entailment, 4),
+                "contradiction_sentence": round(near.contradiction, 4),
                 "span_fraction": round(min(1.0, span_chars / max(len(model_text), 1)), 4),
                 "numbers_ok": 1.0 if facts.numbers_ok else 0.0,
                 "names_ok": 1.0 if facts.names_ok else 0.0,
@@ -299,10 +305,6 @@ class ValidationEngine:
                     "conflicting_evidence": conflicts,
                     "conflict_with_current": any(by_ref[r].is_current for r in conflicts),
                     "probability": round(probability, 4),
-                    "entailment_window": round(scores.entailment, 4),
-                    "contradiction_window": round(scores.contradiction, 4),
-                    "entailment_sentence": round(near.entailment, 4),
-                    "contradiction_sentence": round(near.contradiction, 4),
                     "judge": None,
                 }
             )
@@ -412,6 +414,25 @@ class ValidationEngine:
                 claim.reason = "the source supports the main point but not every detail"
 
 
+def states_the_opposite(signals: dict[str, Any]) -> bool:
+    """The closest source sentence contradicts the claim, and no reading of the passage entails it."""
+    return bool(signals["contradiction_sentence"] >= CONTRADICTION_THRESHOLD and signals["entailment"] < NO_ENTAILMENT)
+
+
+def nothing_supports(signals: dict[str, Any]) -> bool:
+    """Neither the grounding model nor either entailment reading finds any support at all.
+
+    The trained model alone would let some of these through: in real LLM answers most sentences are
+    true, so with no evidence either way it leans towards "supported". A verifier must not.
+    """
+    return bool(signals["grounding"] < NO_SUPPORT and signals["entailment"] < NO_SUPPORT)
+
+
+def overruled(signals: dict[str, Any]) -> bool:
+    """Rules that settle a claim as not supported whatever the model's probability says."""
+    return not signals["numbers_ok"] or states_the_opposite(signals) or nothing_supports(signals)
+
+
 def _decide(signals: dict[str, Any], probability: float, support_threshold: float) -> tuple[Verdict, str]:
     if signals["invalid_citations"] and signals["grounding"] < SUPPORTING_SOURCE_THRESHOLD:
         return Verdict.UNSUPPORTED, "cites a source that is not in the evidence"
@@ -420,8 +441,10 @@ def _decide(signals: dict[str, Any], probability: float, support_threshold: floa
         if signals["contradiction"] >= CONTRADICTION_THRESHOLD:
             return Verdict.CONTRADICTED, f"the source gives a different figure (not found: {missing})"
         return Verdict.UNSUPPORTED, f"figure not found in the cited source: {missing}"
-    if signals["contradiction"] >= CONTRADICTION_THRESHOLD and signals["grounding"] < SUPPORTING_SOURCE_THRESHOLD:
+    if states_the_opposite(signals):
         return Verdict.CONTRADICTED, "the cited source states the opposite"
+    if nothing_supports(signals):
+        return Verdict.UNSUPPORTED, "nothing in the source supports this"
     if probability >= support_threshold:
         if signals["conflicting_evidence"] and signals["conflict_with_current"]:
             return Verdict.CONFLICTING, "supported by one source but contradicted by another current source"

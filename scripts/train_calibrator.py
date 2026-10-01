@@ -102,13 +102,17 @@ def fit(rows: list[ClaimRow]) -> tuple[Calibrator, dict[str, float]]:
 
 
 def choose_threshold(rows: list[ClaimRow], calibrator: Calibrator) -> tuple[float, dict[str, float]]:
-    """Highest catch rate whose false-alarm rate stays within the limit, on the training half."""
+    """Highest catch rate at which the model raises false alarms within the limit, on the training half.
+
+    The limit is applied to the model's own decisions. The engine's overriding rules (a missing
+    figure, a stated opposite, no support at all) are fixed, apply on top, and are included in every
+    result that is reported."""
     truth = [r.hallucinated for r in rows]
+    probabilities = [calibrator.probability(r.signals) for r in rows]
     best = (0.5, -1.0, 1.0)
     for step in range(20, 91):
         threshold = step / 100
-        flagged = [r.flagged for r in rescore(rows, calibrator, threshold)]
-        result = detection_metrics(truth, flagged)
+        result = detection_metrics(truth, [p < threshold for p in probabilities])
         if result.false_alarm_rate <= MAX_FALSE_ALARM and result.catch_rate > best[1]:
             best = (threshold, result.catch_rate, result.false_alarm_rate)
     return best[0], {"train_catch_rate": round(best[1], 4), "train_false_alarm_rate": round(best[2], 4)}

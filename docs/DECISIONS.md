@@ -59,6 +59,13 @@ that all four formulations agree.
 Managing users and policy is separated from reading restricted documents. The admin
 role reads what an ordinary employee reads. This is deliberate separation of duties.
 
+Two consequences are enforced in code. *Previewing as another user* (the Compare page) is
+allowed only when that user's access lies within the previewer's own, so it can never be
+used to read more. And every policy change is an audit entry under the administrator's
+name. What is **not** prevented: an administrator can raise a role's ceiling, including
+their own, by publishing a new policy version. That is visible in the audit log; a
+production deployment should require a second person to approve policy changes.
+
 ## 9. Egress ceiling with an extractive fallback
 
 Rather than trusting a third party with the most sensitive material, evidence above a

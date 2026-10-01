@@ -17,11 +17,11 @@ from pramana.evaluation.metrics import auroc, detection_metrics, expected_calibr
 from pramana.evaluation.samples import VerifierSample
 from pramana.shared.types import Verdict
 from pramana.validation.calibration import FEATURES, Calibrator
-from pramana.validation.engine import CONTRADICTION_THRESHOLD, SUPPORTING_SOURCE_THRESHOLD, ValidationEngine
+from pramana.validation.engine import ValidationEngine, overruled
 
 GROUNDING_ONLY_THRESHOLD = 0.5
 # Stored next to the calibrator's features so that other combinations can be studied offline.
-EXTRA_SIGNALS = ("entailment_window", "contradiction_window", "entailment_sentence", "contradiction_sentence")
+EXTRA_SIGNALS = ("entailment", "contradiction", "numbers_ok", "overlap")
 
 
 @dataclass(slots=True)
@@ -96,16 +96,11 @@ async def score_samples(
 
 
 def rescore(rows: list[ClaimRow], calibrator: Calibrator, threshold: float) -> list[ClaimRow]:
-    """Apply a (new) calibrator to stored signals, with the engine's hard rules (see ``engine._decide``):
-    a figure missing from the evidence, or a clear contradiction without grounding, is never supported."""
+    """Apply a (new) calibrator to stored signals, together with the engine's overriding rules."""
     out: list[ClaimRow] = []
     for row in rows:
         probability = calibrator.probability(row.signals)
-        contradicted = (
-            row.signals["contradiction"] >= CONTRADICTION_THRESHOLD
-            and row.signals["grounding"] < SUPPORTING_SOURCE_THRESHOLD
-        )
-        supported = probability >= threshold and row.signals["numbers_ok"] == 1.0 and not contradicted
+        supported = probability >= threshold and not overruled(row.signals)
         out.append(
             ClaimRow(
                 **{

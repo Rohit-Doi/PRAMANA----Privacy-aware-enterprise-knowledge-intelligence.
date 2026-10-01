@@ -116,9 +116,9 @@ def _signals(**overrides: float) -> dict[str, float]:
 
 def test_default_calibrator_orders_obvious_cases() -> None:
     calibrator = Calibrator.load(Path("does-not-exist.json"))
-    supported = calibrator.probability(_signals(grounding=0.97, entailment=0.95, overlap=0.9))
+    supported = calibrator.probability(_signals(grounding=0.97, entailment_window=0.9, entailment_sentence=0.95))
     unsupported = calibrator.probability(
-        _signals(grounding=0.05, entailment=0.02, contradiction=0.9, span_fraction=0.8)
+        _signals(grounding=0.05, contradiction_window=0.6, contradiction_sentence=0.9, span_fraction=0.8)
     )
     assert 0.0 <= unsupported < 0.2 < 0.8 < supported <= 1.0
 
@@ -143,3 +143,71 @@ def test_probability_is_bounded_for_extreme_inputs() -> None:
     calibrator = Calibrator(dict.fromkeys(FEATURES, 100.0), 0.0)
     assert calibrator.probability(dict.fromkeys(FEATURES, 1e6)) <= 1.0
     assert calibrator.probability(dict.fromkeys(FEATURES, -1e6)) >= 0.0
+
+
+def test_every_feature_has_a_direction_and_defaults_respect_it() -> None:
+    from pramana.validation.calibration import DIRECTIONS
+
+    assert set(DIRECTIONS) == set(FEATURES)
+    default = Calibrator.load(Path("does-not-exist.json"))
+    for name in FEATURES:
+        assert default.coefficients[name] * DIRECTIONS[name] >= 0
+
+
+def test_the_shipped_calibrator_respects_the_directions() -> None:
+    """A trained weight with the wrong sign means the model learned a quirk of its data."""
+    from pramana.validation.calibration import DIRECTIONS
+
+    trained = Calibrator.load()
+    for name in FEATURES:
+        assert trained.coefficients[name] * DIRECTIONS[name] >= 0, name
+    # With nothing in its favour, a claim is not called supported.
+    nothing = dict.fromkeys(FEATURES, 0.0)
+    assert trained.probability(nothing) < (trained.threshold or 0.6)
+
+
+# ── Overriding rules and the two readings ───────────────────────────────────
+def test_two_readings_are_combined_sensibly() -> None:
+    from pramana.validation.detectors import NliScores
+    from pramana.validation.engine import combine_nli
+
+    entails, contradicts, neutral = (
+        NliScores(0.97, 0.02, 0.01),
+        NliScores(0.01, 0.04, 0.95),
+        NliScores(0.02, 0.96, 0.02),
+    )
+    # Support from either reading counts.
+    assert combine_nli(neutral, entails)[0] == pytest.approx(0.97)
+    assert combine_nli(entails, neutral)[0] == pytest.approx(0.97)
+    # A window that "contradicts" a sentence it contains word for word is overruled by the sentence.
+    assert combine_nli(contradicts, entails)[1] < 0.05
+    # A real contradiction survives when the other reading does not entail the claim.
+    assert combine_nli(neutral, contradicts)[1] > 0.9
+
+
+def test_overriding_rules() -> None:
+    from pramana.validation.engine import nothing_supports, overruled, states_the_opposite
+
+    fine = {"numbers_ok": 1.0, "grounding": 0.9, "entailment": 0.9, "contradiction_sentence": 0.01}
+    assert not overruled(fine)
+    assert overruled(fine | {"numbers_ok": 0.0})
+    opposite = fine | {"entailment": 0.02, "contradiction_sentence": 0.97}
+    assert states_the_opposite(opposite) and overruled(opposite)
+    # Entailed by the wider passage: the closest sentence alone does not overrule it.
+    assert not overruled(opposite | {"entailment": 0.8})
+    # No detector finds any support: never "supported", whatever the probability.
+    unrelated = fine | {"grounding": 0.02, "entailment": 0.01}
+    assert nothing_supports(unrelated) and overruled(unrelated)
+    assert not nothing_supports(unrelated | {"grounding": 0.4})
+
+
+def test_fragments_are_judged_with_their_question() -> None:
+    from pramana.validation.engine import hypothesis_text
+
+    assert (
+        hypothesis_text("Which band released OK Computer?", "Radiohead") == "Which band released OK Computer? Radiohead"
+    )
+    assert hypothesis_text("Is MFA required", "Yes.") == "Is MFA required? Yes."
+    full = "Multi-factor authentication is required for every VPN connection."
+    assert hypothesis_text("Is MFA required?", full) == full
+    assert hypothesis_text("", "Yes.") == "Yes."

@@ -14,31 +14,42 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-FEATURES = ("grounding", "entailment", "contradiction", "span_fraction", "numbers_ok", "names_ok", "overlap")
+FEATURES = (
+    "grounding",
+    "entailment_window",
+    "entailment_sentence",
+    "contradiction_window",
+    "contradiction_sentence",
+    "span_fraction",
+    "names_ok",
+)
 MODEL_PATH = Path(__file__).with_name("calibrator.json")
 # The direction in which each signal may move the probability of support. Training respects these:
 # a fitted weight with the wrong sign would mean the model learned a quirk of its training data
 # (for example "word-for-word overlap is suspicious"), not something true of evidence.
 DIRECTIONS = {
     "grounding": 1,
-    "entailment": 1,
-    "contradiction": -1,
+    "entailment_window": 1,
+    "entailment_sentence": 1,
+    "contradiction_window": -1,
+    "contradiction_sentence": -1,
     "span_fraction": -1,
-    "numbers_ok": 1,
     "names_ok": 1,
-    "overlap": 1,
 }
+# Two signals are deliberately not in the model. A figure missing from the evidence is a hard rule
+# in the engine, not a weight. Lexical overlap is recorded for the reader but carries no evidence of
+# its own: in training it only ever earned a weight by exploiting how the test errors were made.
 
 _DEFAULT_COEFFICIENTS = {
-    "grounding": 3.6,
-    "entailment": 1.4,
-    "contradiction": -2.8,
-    "span_fraction": -1.8,
-    "numbers_ok": 2.2,
-    "names_ok": 0.8,
-    "overlap": 1.0,
+    "grounding": 2.2,
+    "entailment_window": 1.1,
+    "entailment_sentence": 1.0,
+    "contradiction_window": -1.2,
+    "contradiction_sentence": -2.8,
+    "span_fraction": -3.5,
+    "names_ok": 0.4,
 }
-_DEFAULT_INTERCEPT = -4.6
+_DEFAULT_INTERCEPT = 0.3
 
 
 @dataclass(frozen=True, slots=True)
