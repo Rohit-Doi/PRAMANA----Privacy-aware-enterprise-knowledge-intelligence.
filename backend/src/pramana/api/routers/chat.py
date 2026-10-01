@@ -68,8 +68,12 @@ class FeedbackRequest(BaseModel):
     claim_id: uuid.UUID | None = None
 
 
-async def _effective_principal(body: AskRequest, principal: Principal, db: DbSession) -> tuple[Principal, bool]:
-    """The identity the question runs as. Simulation is a privileged, audited preview."""
+async def _effective_principal(
+    body: AskRequest, principal: Principal, db: DbSession, runtime: RuntimeDep
+) -> tuple[Principal, bool]:
+    """The identity the question runs as. A preview as another user is privileged, audited, and
+    only possible when that user's access lies within the caller's own: it can show less than
+    the caller may read, never more."""
     if body.as_user_id is None or body.as_user_id == principal.user_id:
         return principal, True
     if not principal.has(Permission.SIMULATE_USER):
@@ -77,6 +81,17 @@ async def _effective_principal(body: AskRequest, principal: Principal, db: DbSes
     target = await db.get(User, body.as_user_id)
     if target is None or not target.is_active:
         raise NotFound("User not found")
+    simulated = principal_from_user(target, simulated_by=principal.user_id)
+    if not (await runtime.policy.scope(principal)).covers(await runtime.policy.scope(simulated)):
+        await AuditTrail().record(
+            action="user.simulate",
+            decision="DENIED",
+            principal=principal,
+            resource_type="user",
+            resource_id=str(target.id),
+            details={"target_email": target.email, "target_role": target.role.key, "reason": "wider access"},
+        )
+        raise PermissionDenied("You can only preview as a user whose access is within your own.")
     await AuditTrail().record(
         action="user.simulate",
         decision="GRANTED",
@@ -85,12 +100,12 @@ async def _effective_principal(body: AskRequest, principal: Principal, db: DbSes
         resource_id=str(target.id),
         details={"target_email": target.email, "target_role": target.role.key},
     )
-    return principal_from_user(target, simulated_by=principal.user_id), False
+    return simulated, False
 
 
 @router.post("/chat/ask", summary="Ask a question and receive the verified answer")
 async def ask(body: AskRequest, principal: Asker, db: DbSession, runtime: RuntimeDep) -> dict[str, Any]:
-    effective, persist = await _effective_principal(body, principal, db)
+    effective, persist = await _effective_principal(body, principal, db, runtime)
     return await runtime.services.query.run(
         principal=effective,
         question=body.question,
@@ -102,7 +117,7 @@ async def ask(body: AskRequest, principal: Asker, db: DbSession, runtime: Runtim
 
 @router.post("/chat/ask/stream", summary="Ask a question; agent progress and the answer arrive as server-sent events")
 async def ask_stream(body: AskRequest, principal: Asker, db: DbSession, runtime: RuntimeDep) -> EventSourceResponse:
-    effective, persist = await _effective_principal(body, principal, db)
+    effective, persist = await _effective_principal(body, principal, db, runtime)
     queue: asyncio.Queue[dict[str, Any] | None] = asyncio.Queue()
 
     async def emit(event: dict[str, Any]) -> None:

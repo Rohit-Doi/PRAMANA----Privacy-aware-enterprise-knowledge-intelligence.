@@ -16,6 +16,18 @@ from typing import Any
 
 FEATURES = ("grounding", "entailment", "contradiction", "span_fraction", "numbers_ok", "names_ok", "overlap")
 MODEL_PATH = Path(__file__).with_name("calibrator.json")
+# The direction in which each signal may move the probability of support. Training respects these:
+# a fitted weight with the wrong sign would mean the model learned a quirk of its training data
+# (for example "word-for-word overlap is suspicious"), not something true of evidence.
+DIRECTIONS = {
+    "grounding": 1,
+    "entailment": 1,
+    "contradiction": -1,
+    "span_fraction": -1,
+    "numbers_ok": 1,
+    "names_ok": 1,
+    "overlap": 1,
+}
 
 _DEFAULT_COEFFICIENTS = {
     "grounding": 3.6,

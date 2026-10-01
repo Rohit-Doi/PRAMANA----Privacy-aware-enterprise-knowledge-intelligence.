@@ -11,7 +11,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 from pramana.api.deps import DbSession, RuntimeDep, require
 from pramana.auth.models import Role, User
-from pramana.auth.principal import Principal
+from pramana.auth.principal import Principal, principal_from_user
 from pramana.auth.service import UserAdminService
 from pramana.governance.audit import AuditTrail
 from pramana.privacy.policy import PolicyStore
@@ -132,6 +132,42 @@ def _check_region(region: str | None) -> None:
 @router.get("/users", response_model=list[UserResponse], summary="List users")
 async def list_users(_: UserAdmin, db: DbSession) -> list[UserResponse]:
     return [_user(u) for u in await UserAdminService(db).list_users()]
+
+
+class PreviewUser(BaseModel):
+    id: uuid.UUID
+    full_name: str
+    role: str
+    role_name: str
+    department: str
+    region: str
+    is_self: bool
+
+
+@router.get("/users/previewable", response_model=list[PreviewUser], summary="Users you may preview the system as")
+async def previewable_users(
+    principal: Annotated[Principal, Depends(require(Permission.SIMULATE_USER))], db: DbSession, runtime: RuntimeDep
+) -> list[PreviewUser]:
+    """Active people whose access lies within the caller's own (see ``AccessScope.covers``)."""
+    own = await runtime.policy.scope(principal)
+    result = []
+    for user in await UserAdminService(db).list_users():
+        if not user.is_active or user.is_service_account:
+            continue
+        if user.id != principal.user_id and not own.covers(await runtime.policy.scope(principal_from_user(user))):
+            continue
+        result.append(
+            PreviewUser(
+                id=user.id,
+                full_name=user.full_name,
+                role=user.role.key,
+                role_name=user.role.name,
+                department=user.department.key,
+                region=user.region,
+                is_self=user.id == principal.user_id,
+            )
+        )
+    return result
 
 
 @router.post("/users", response_model=UserResponse, status_code=201, summary="Create a user")

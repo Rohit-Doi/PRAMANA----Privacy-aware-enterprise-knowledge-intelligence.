@@ -67,6 +67,24 @@ class AccessScope:
             return True
         return department in self.departments and sensitivity_rank <= self.max_rank_own_dept
 
+    def covers(self, other: AccessScope) -> bool:
+        """True when everything ``other`` may read, this scope may read too.
+
+        Used for previews ("ask as another user"): looking through someone else's eyes may
+        narrow what you see, never widen it.
+        """
+        if other.can_read_pii and not self.can_read_pii:
+            return False
+        if not self.all_regions and (other.all_regions or not set(other.regions) <= set(self.regions)):
+            return False
+        if other.max_rank_other_dept > self.max_rank_other_dept:
+            return False
+        for department in other.departments:
+            ceiling = self.max_rank_own_dept if department in self.departments else self.max_rank_other_dept
+            if other.max_rank_own_dept > max(ceiling, self.max_rank_other_dept):
+                return False
+        return True
+
     # ── Qdrant ──────────────────────────────────────────────────────────
     def qdrant_filter(self, *extra: qm.Condition) -> qm.Filter:
         any_department = qm.FieldCondition(key="sensitivity_rank", range=qm.Range(lte=self.max_rank_other_dept))

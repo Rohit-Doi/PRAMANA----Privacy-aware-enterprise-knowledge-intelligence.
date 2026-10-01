@@ -9,7 +9,7 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from tests.conftest import EMAIL, TEST_PASSWORD, login
+from tests.conftest import CSRF, EMAIL, TEST_PASSWORD, login
 
 SERVICE_ACCOUNT = "employee_it"  # the helpdesk bot: it has a role and a scope, but no interactive sign-in
 PERSONAS = sorted(set(EMAIL) - {SERVICE_ACCOUNT})
@@ -70,3 +70,38 @@ async def test_unknown_ids_are_not_found_rather_than_errors(client: httpx.AsyncC
         response = await client.get(path, headers=headers)
         assert response.status_code in (403, 404), f"{path}: {response.status_code}"
     assert (await client.get("/api/v1/documents/not-a-uuid", headers=headers)).status_code == 422
+
+
+async def test_a_preview_can_never_widen_access(client: httpx.AsyncClient) -> None:
+    """An administrator manages users but reads like an employee, and a preview must not change that."""
+    admin = await login(client, "admin")
+    users = {u["email"]: u for u in (await client.get("/api/v1/users", headers=admin)).json()}
+
+    eligible = (await client.get("/api/v1/users/previewable", headers=admin)).json()
+    roles = {u["role"] for u in eligible}
+    assert "employee" in roles
+    assert roles.isdisjoint({"executive", "manager", "analyst", "compliance_officer"})
+
+    for persona in ("executive", "manager", "analyst"):
+        response = await client.post(
+            "/api/v1/chat/ask",
+            headers={**admin, **CSRF},
+            json={"question": "What is the acquisition price?", "as_user_id": users[EMAIL[persona]]["id"]},
+        )
+        assert response.status_code == 403, f"admin could preview as {persona}"
+
+    # The refusal is on the record.
+    audit = (await client.get("/api/v1/audit", headers=admin, params={"action": "user.simulate"})).json()
+    entries = audit["items"] if isinstance(audit, dict) else audit
+    assert any(e["decision"] == "DENIED" for e in entries)
+
+    # The executive's access covers everyone's, so every person is previewable.
+    executive = await login(client, "executive")
+    everyone = (await client.get("/api/v1/users/previewable", headers=executive)).json()
+    assert {"employee", "manager", "analyst", "compliance_officer", "admin", "executive"} <= {
+        u["role"] for u in everyone
+    }
+
+    # Without the permission the list is closed.
+    employee = await login(client, "employee")
+    assert (await client.get("/api/v1/users/previewable", headers=employee)).status_code == 403

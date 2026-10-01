@@ -24,7 +24,7 @@ import sys
 from datetime import datetime
 
 import numpy as np
-from sklearn.linear_model import LogisticRegression
+from scipy.optimize import minimize
 from sqlalchemy import String, cast, func, select
 
 from pramana.evaluation.metrics import detection_metrics
@@ -40,7 +40,7 @@ from pramana.evaluation.verifier import ClaimRow, load_rows, rescore, save_rows,
 from pramana.knowledge.models import Chunk, Document
 from pramana.shared.config import get_settings
 from pramana.shared.db import dispose_engine, session_scope, utcnow
-from pramana.validation.calibration import FEATURES, MODEL_PATH, Calibrator
+from pramana.validation.calibration import DIRECTIONS, FEATURES, MODEL_PATH, Calibrator
 from pramana.validation.detectors import get_detectors
 from pramana.validation.engine import ValidationEngine
 
@@ -67,6 +67,24 @@ async def corpus_chunks(handbook_limit: int) -> list[tuple[str, str, str]]:
         return [(str(c), str(d), t) for c, d, t in [*aurelia.all(), *handbook.all()]]
 
 
+def fit_logistic(x: np.ndarray, y: np.ndarray, weights: np.ndarray, l2: float = 1.0) -> tuple[np.ndarray, float]:
+    """Weighted, L2-regularised logistic regression whose coefficients keep their expected sign."""
+    count, width = x.shape
+    total = weights.sum()
+
+    def loss(theta: np.ndarray) -> tuple[float, np.ndarray]:
+        z = np.clip(x @ theta[:width] + theta[width], -30, 30)
+        p = 1.0 / (1.0 + np.exp(-z))
+        log_loss = -(weights * (y * np.log(p + 1e-12) + (1 - y) * np.log(1 - p + 1e-12))).sum() / total
+        slope = weights * (p - y) / total
+        gradient = np.concatenate([x.T @ slope + l2 * theta[:width] / count, [slope.sum()]])
+        return float(log_loss + 0.5 * l2 * (theta[:width] ** 2).sum() / count), gradient
+
+    bounds = [(0, None) if DIRECTIONS[name] > 0 else (None, 0) for name in FEATURES] + [(None, None)]
+    result = minimize(loss, np.zeros(width + 1), jac=True, bounds=bounds, method="L-BFGS-B")
+    return result.x[:width], float(result.x[width])
+
+
 def fit(rows: list[ClaimRow]) -> tuple[Calibrator, dict[str, float]]:
     x = np.array([[row.signals[name] for name in FEATURES] for row in rows])
     y = np.array([0 if row.hallucinated else 1 for row in rows])  # 1 = supported
@@ -74,11 +92,10 @@ def fit(rows: list[ClaimRow]) -> tuple[Calibrator, dict[str, float]]:
     sources = sorted({row.source.split("-")[0] for row in rows})
     counts = {s: sum(1 for row in rows if row.source.startswith(s)) for s in sources}
     weights = np.array([len(rows) / (len(sources) * counts[row.source.split("-")[0]]) for row in rows])
-    model = LogisticRegression(C=1.0, max_iter=2000)
-    model.fit(x, y, sample_weight=weights)
+    coefficients, intercept = fit_logistic(x, y, weights)
     calibrator = Calibrator(
-        coefficients={name: float(c) for name, c in zip(FEATURES, model.coef_[0], strict=True)},
-        intercept=float(model.intercept_[0]),
+        coefficients={name: float(c) for name, c in zip(FEATURES, coefficients, strict=True)},
+        intercept=intercept,
         version="trained-" + datetime.now().strftime("%Y%m%d-%H%M"),
     )
     return calibrator, {s: float(counts[s]) for s in sources}
@@ -132,7 +149,10 @@ async def main() -> int:
         await get_detectors().warm_up()
 
         async def score(samples: list[VerifierSample], label: str) -> list[ClaimRow]:
-            return await score_samples(engine, samples, label=label)
+            rows = await score_samples(engine, samples, label=label)
+            # Each part is kept as soon as it is done: an hour of inference is not lost to a late failure.
+            save_rows(rows, eval_dir / "parts" / f"{label.lower().replace(' ', '_')}.jsonl")
+            return rows
 
         train_rows = await score(ragtruth_train, "RAGTruth train") + await score(injected_train, "injected train")
         test_rows = (

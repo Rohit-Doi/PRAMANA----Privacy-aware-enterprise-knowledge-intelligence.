@@ -264,6 +264,16 @@ export interface JobView {
   finished_at: string | null;
 }
 
+export interface PreviewUser {
+  id: string;
+  full_name: string;
+  role: string;
+  role_name: string;
+  department: string;
+  region: string;
+  is_self: boolean;
+}
+
 export interface UserView {
   id: string;
   email: string;

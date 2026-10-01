@@ -5,10 +5,10 @@ from __future__ import annotations
 import asyncio
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pramana.agents.models import AgentStep, Conversation, Message, QueryRun
@@ -34,6 +34,27 @@ _DECISIONS = {"answered": "ANSWERED", "abstained": "ABSTAINED", "denied": "DENIE
 
 async def _discard(event: dict[str, Any]) -> None:
     return None
+
+
+INTERRUPTED_AFTER = timedelta(minutes=15)
+
+
+async def close_interrupted_runs() -> int:
+    """Runs still marked as running long after they started were cut off by a restart: record that,
+    so that monitoring does not show them as in progress for ever."""
+    now = utcnow()
+    async with session_scope() as db:
+        result = await db.execute(
+            update(QueryRun)
+            .where(QueryRun.status == "running", QueryRun.started_at < now - INTERRUPTED_AFTER)
+            .values(
+                status="failed",
+                outcome="error",
+                error="The server stopped while this request was being processed.",
+                finished_at=now,
+            )
+        )
+    return int(getattr(result, "rowcount", 0) or 0)
 
 
 class QueryPipeline:

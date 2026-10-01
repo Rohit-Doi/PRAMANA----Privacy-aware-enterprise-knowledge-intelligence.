@@ -10,6 +10,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from pramana import __version__
+from pramana.agents.pipeline import close_interrupted_runs
 from pramana.api.middleware import RateLimitMiddleware, RequestContextMiddleware, install_error_handlers
 from pramana.api.routers import (
     audit,
@@ -44,6 +45,9 @@ Privacy-aware enterprise knowledge platform.
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     runtime = await start_runtime()
     app.state.runtime = runtime
+    interrupted = await close_interrupted_runs()
+    if interrupted:
+        log.info("runs.closed_after_restart", count=interrupted)
     stop = asyncio.Event()
     worker: asyncio.Task[None] | None = None
     if runtime.settings.embedded_worker:

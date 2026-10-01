@@ -72,7 +72,7 @@ ROLES: dict[str, RoleSpec] = {
         "Reads everything including RESTRICTED, in every region, with personal data.",
         S.RESTRICTED,
         S.RESTRICTED,
-        [*_BASIC, P.PII_READ, P.REGION_ALL, P.REPORTS_READ, P.ANALYTICS_READ],
+        [*_BASIC, P.PII_READ, P.REGION_ALL, P.REPORTS_READ, P.ANALYTICS_READ, P.SIMULATE_USER],
     ),
     # Separation of duties: administrators run the platform but get no elevated content access.
     "admin": RoleSpec(

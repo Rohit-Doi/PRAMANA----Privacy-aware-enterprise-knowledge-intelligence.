@@ -219,3 +219,53 @@ def test_injected_samples_change_the_sentence_and_stay_grouped() -> None:
     train, test = split_by_group(samples)
     assert train and test
     assert {s.group for s in train}.isdisjoint({s.group for s in test})
+
+
+# ── Previews ("ask as another user") ────────────────────────────────────────
+def _scope(
+    own: int, other: int, departments: tuple[str, ...], *, regions=("emea", "global"), all_regions=False, pii=False
+):  # type: ignore[no-untyped-def]
+    return AccessScope(own, other, departments, tuple(regions), all_regions, pii)
+
+
+def test_a_scope_covers_only_scopes_that_read_no_more() -> None:
+    employee = _scope(1, 1, ("engineering",))
+    manager = _scope(2, 1, ("finance",))
+    analyst = _scope(2, 2, ("security",))
+    admin = _scope(1, 1, ("it",), all_regions=True)
+    executive = _scope(3, 3, ("company",), all_regions=True, pii=True)
+
+    for scope in (employee, manager, analyst, admin, executive):
+        assert scope.covers(scope)
+        assert executive.covers(scope)
+    # An administrator reads what an employee reads: previewing a manager or an executive would widen it.
+    assert admin.covers(employee)
+    assert not admin.covers(manager)
+    assert not admin.covers(analyst)
+    assert not admin.covers(executive)
+    # A wider region or the right to read personal data cannot be borrowed either.
+    assert not employee.covers(admin)
+    assert not analyst.covers(_scope(1, 1, ("hr",), regions=("apac", "global")))
+    assert not analyst.covers(_scope(1, 1, ("hr",), pii=True))
+    # Confidential everywhere covers a manager who reads confidential in one department.
+    assert analyst.covers(manager)
+
+
+def test_covers_agrees_with_the_reference_rule() -> None:
+    """If A covers B then every document B may read, A may read (checked exhaustively)."""
+    departments = ("engineering", "finance", "hr")
+    regions = ("emea", "apac", "global")
+    scopes = [
+        _scope(own, other, (department,), regions=region_set, all_regions=everywhere, pii=pii)
+        for own in range(4)
+        for other in range(own + 1)
+        for department in departments[:2]
+        for region_set, everywhere in ((("emea", "global"), False), (("apac", "global"), False), ((), True))
+        for pii in (False, True)
+    ]
+    for a, b in itertools.product(scopes, scopes):
+        if not a.covers(b):
+            continue
+        for department, rank, region in itertools.product(departments, range(4), regions):
+            if b.permits(department=department, sensitivity_rank=rank, region=region):
+                assert a.permits(department=department, sensitivity_rank=rank, region=region), (a, b)

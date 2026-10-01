@@ -2,14 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { GitCompareArrows } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { SensitivityBadge } from "@/components/badges";
 import { AnswerText, OutcomeIcon, RunSummary } from "@/components/run-view";
 import { PageBody, RequirePermission } from "@/components/shell";
 import { Badge, Button, Card, ErrorNote, Field, Input, PageHeader, Select, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
-import type { RunResult, UserView } from "@/lib/types";
+import type { PreviewUser, RunResult } from "@/lib/types";
 import { ROLE_LABEL, departmentLabel, errorMessage } from "@/lib/utils";
 
 const QUESTIONS = [
@@ -27,7 +27,7 @@ interface Side {
 }
 const EMPTY: Side = { loading: false, run: null, error: null };
 
-function Column({ user, side }: { user: UserView | undefined; side: Side }) {
+function Column({ user, side }: { user: PreviewUser | undefined; side: Side }) {
   return (
     <Card className="flex min-h-64 flex-col p-4">
       {user && (
@@ -75,20 +75,21 @@ function Column({ user, side }: { user: UserView | undefined; side: Side }) {
 }
 
 function ComparePage() {
-  const users = useQuery({ queryKey: ["users"], queryFn: () => api<UserView[]>("/users") });
-  const people = (users.data ?? []).filter((u) => u.is_active && !u.is_service_account);
+  // Only people whose access lies within your own: a preview can show less than you may read, never more.
+  const users = useQuery({ queryKey: ["users", "previewable"], queryFn: () => api<PreviewUser[]>("/users/previewable") });
+  const people = useMemo(() => users.data ?? [], [users.data]);
   const [leftId, setLeftId] = useState("");
   const [rightId, setRightId] = useState("");
   const [question, setQuestion] = useState("");
   const [left, setLeft] = useState<Side>(EMPTY);
   const [right, setRight] = useState<Side>(EMPTY);
 
-  const leftUser = people.find((u) => u.id === leftId) ?? people.find((u) => u.role === "employee");
-  const rightUser = people.find((u) => u.id === rightId) ?? people.find((u) => u.role === "executive");
+  const leftUser = people.find((u) => u.id === leftId) ?? people.find((u) => u.role === "employee" && !u.is_self) ?? people[0];
+  const rightUser = people.find((u) => u.id === rightId) ?? people.find((u) => u.is_self) ?? people[0];
 
   async function run(text: string) {
     if (!text.trim() || !leftUser || !rightUser) return;
-    const ask = async (user: UserView, set: (side: Side) => void) => {
+    const ask = async (user: PreviewUser, set: (side: Side) => void) => {
       set({ loading: true, run: null, error: null });
       try {
         set({ loading: false, error: null, run: await api<RunResult>("/chat/ask", { method: "POST", body: { question: text, as_user_id: user.id } }) });
@@ -105,7 +106,7 @@ function ComparePage() {
     <PageBody>
       <PageHeader
         title="Compare roles"
-        description="Ask one question as two different users to see access control at work. The same pipeline runs twice; only the identity changes. Every simulated run is recorded in the audit log under your name."
+        description="Ask one question as two different users to see access control at work. The same pipeline runs twice; only the identity changes. You can preview as people whose access lies within your own, and every preview is recorded in the audit log under your name."
       />
       {users.error && <ErrorNote error={users.error} />}
       <Card className="mb-4 p-4">
@@ -114,7 +115,7 @@ function ComparePage() {
             <Select value={leftUser?.id ?? ""} onChange={(e) => setLeftId(e.target.value)}>
               {people.map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.full_name} ({ROLE_LABEL[u.role] ?? u.role}, {departmentLabel(u.department)})
+                  {u.full_name}{u.is_self ? " — you" : ""} ({ROLE_LABEL[u.role] ?? u.role}, {departmentLabel(u.department)}, {u.region.toUpperCase()})
                 </option>
               ))}
             </Select>
@@ -123,7 +124,7 @@ function ComparePage() {
             <Select value={rightUser?.id ?? ""} onChange={(e) => setRightId(e.target.value)}>
               {people.map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.full_name} ({ROLE_LABEL[u.role] ?? u.role}, {departmentLabel(u.department)})
+                  {u.full_name}{u.is_self ? " — you" : ""} ({ROLE_LABEL[u.role] ?? u.role}, {departmentLabel(u.department)}, {u.region.toUpperCase()})
                 </option>
               ))}
             </Select>
