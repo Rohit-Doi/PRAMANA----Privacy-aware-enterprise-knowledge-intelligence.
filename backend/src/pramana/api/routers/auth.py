@@ -16,6 +16,7 @@ from fastapi import APIRouter, Cookie, Header, Request, Response
 from pydantic import BaseModel, EmailStr, Field
 
 from pramana.api.deps import CurrentPrincipal, DbSession, client_ip
+from pramana.auth.models import User
 from pramana.auth.service import AuthService, TokenPair
 from pramana.governance.audit import AuditTrail
 from pramana.shared.config import get_settings
@@ -237,6 +238,16 @@ async def revoke_session(session_id: uuid.UUID, principal: CurrentPrincipal, db:
         resource_type="session",
         resource_id=str(session_id),
     )
+
+
+class MfaStatusResponse(BaseModel):
+    mfa_enabled: bool
+
+
+@router.get("/mfa/status", response_model=MfaStatusResponse, summary="Whether two-step sign-in is on for your account")
+async def mfa_status(principal: CurrentPrincipal, db: DbSession) -> MfaStatusResponse:
+    user = await db.get(User, principal.user_id)
+    return MfaStatusResponse(mfa_enabled=bool(user and user.mfa_enabled))
 
 
 @router.post("/mfa/setup", response_model=MfaSetupResponse, summary="Start authenticator-app enrolment")
