@@ -73,6 +73,7 @@ async def _warm_up(runtime: Runtime) -> None:
         await asyncio.to_thread(runtime.services.pii.analyze, "Warm up for Jane Doe")
         await asyncio.to_thread(runtime.services.extractor.extract_fast, ["Warm up."])
         await runtime.services.detectors.warm_up()
+        await runtime.services.reader.warm_up()
         log.info("models.ready")
     except Exception as exc:  # the models still load on first use
         log.warning("models.warm_up_failed", error=repr(exc))

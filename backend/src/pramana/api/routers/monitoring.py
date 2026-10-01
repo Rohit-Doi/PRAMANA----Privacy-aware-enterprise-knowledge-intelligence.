@@ -182,6 +182,7 @@ async def system(_: Operator, db: DbSession, runtime: RuntimeDep) -> dict[str, A
             "grounding": settings.grounding_model,
             "nli": settings.nli_model,
             "spans": settings.span_model,
+            "reader": settings.reader_model,
             "calibrator": calibrator.version,
             "calibrator_metrics": calibrator.metrics,
         },

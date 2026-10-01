@@ -1,4 +1,4 @@
-"""Download every local model once (about 1.5 GB). No account or token is needed.
+"""Download every local model once (about 2 GB). No account or token is needed.
 
     python scripts/download_models.py
 
@@ -26,6 +26,7 @@ def main() -> int:
     from pramana.graph.extraction import get_graph_extractor
     from pramana.privacy.pii import get_pii_engine
     from pramana.retrieval.local_models import get_retrieval_models
+    from pramana.retrieval.reader import get_reader
     from pramana.validation.detectors import get_detectors
 
     retrieval = get_retrieval_models()
@@ -54,6 +55,10 @@ def main() -> int:
         (
             "unsupported spans  " + settings.span_model,
             lambda: detectors.spans_sync(["The sky is blue."], "Colour?", "The sky is blue."),
+        ),
+        (
+            "answer reader      " + settings.reader_model,
+            lambda: get_reader().read_sync("What colour is the sky?", ["The sky is blue."]),
         ),
         ("personal data      Presidio", lambda: get_pii_engine().analyze("Contact Jane Doe at jane@example.com")),
     ]

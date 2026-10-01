@@ -26,6 +26,7 @@ from pramana.llm.gateway import LLMGateway
 from pramana.privacy.pii import PiiEngine, get_pii_engine
 from pramana.privacy.policy import PolicyEngine, PolicyStore
 from pramana.retrieval.local_models import RetrievalModels, get_retrieval_models
+from pramana.retrieval.reader import ExtractiveReader, get_reader
 from pramana.retrieval.retriever import HybridRetriever
 from pramana.retrieval.vector_store import VectorStore
 from pramana.shared.config import Settings, get_settings
@@ -55,6 +56,7 @@ class Services:
     pipeline: IngestionPipeline
     llm: LLMGateway
     detectors: Detectors
+    reader: ExtractiveReader
     validation: ValidationEngine
     query: QueryPipeline
 
@@ -139,6 +141,7 @@ def _build_services(
     pipeline = IngestionPipeline(models=models, vector_store=vectors, blob_store=blobs, pii=pii, graph=graph)
     llm = LLMGateway(settings, redis)
     detectors = get_detectors()
+    reader = get_reader()
     validation = ValidationEngine(detectors, llm=llm)
     query = QueryPipeline(
         AgentDeps(
@@ -146,6 +149,7 @@ def _build_services(
             policy=policy,
             retriever=retriever,
             models=models,
+            reader=reader,
             pii=pii,
             llm=llm,
             validation=validation,
@@ -165,6 +169,7 @@ def _build_services(
         pipeline=pipeline,
         llm=llm,
         detectors=detectors,
+        reader=reader,
         validation=validation,
         query=query,
     )

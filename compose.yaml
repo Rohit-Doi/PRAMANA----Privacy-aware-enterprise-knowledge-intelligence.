@@ -86,7 +86,7 @@ services:
   # ── Application (profile "app") ───────────────────────────────────────────
   # First run, in order:
   #   docker compose --profile app run --rm setup     migrate the database, seed roles and personas
-  #   docker compose --profile app run --rm models    download the local models (about 1.5 GB, once)
+  #   docker compose --profile app run --rm models    download the local models (about 2 GB, once)
   #   docker compose --profile app up -d
   setup:
     profiles: ["app"]

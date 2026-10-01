@@ -66,12 +66,20 @@ name. What is **not** prevented: an administrator can raise a role's ceiling, in
 their own, by publishing a new policy version. That is visible in the audit log; a
 production deployment should require a second person to approve policy changes.
 
-## 9. Egress ceiling with an extractive fallback
+## 9. Egress ceiling with an extractive reader
 
 Rather than trusting a third party with the most sensitive material, evidence above a
-configurable sensitivity is never put in a prompt. The answer is assembled from quoted
-sentences selected by the local reranker. It is less fluent and cannot synthesise
-across passages; it also cannot hallucinate or leak.
+configurable sensitivity is never put in a prompt. The answer is the sentence a local
+question-answering model points to, quoted verbatim. It is less fluent and cannot
+synthesise across passages; it also cannot hallucinate or leak.
+
+The first version ranked sentences by relevance and quoted the best ones. On the golden
+questions that produced answers that were *related* rather than *right* (revenue when
+asked for net income) and it could not decline: asked for the price of an acquisition
+that does not exist, it quoted the price of the one that does. A SQuAD 2.0 reader is
+trained on exactly that distinction. Measured as the only answering method on all 65
+golden questions: 49 right, 1 wrong, 5 declined, and none of the 10 unanswerable
+questions answered.
 
 ## 10. A cascade of small verifiers instead of one LLM judge
 
@@ -80,12 +88,29 @@ judges. Small specialised models are fast and independent, and literal checks ca
 what models miss (a changed number). The LLM judge is used only for the uncertain band
 and must quote its evidence verbatim.
 
-## 11. A trained calibrator
+## 11. A trained, constrained calibrator
 
 Raw model scores are not probabilities and the detectors disagree. A logistic model
 over seven signals, fitted on labelled data and scored on held-out documents, gives one
-number with a measured error. The decision threshold is chosen for the highest catch
-rate under a 10 % false-alarm limit.
+number with a measured error. Three choices were made from measurements
+(`scripts/analyze_signals.py` reproduces them):
+
+* **Weights keep their expected sign.** The first, unconstrained fit gave lexical
+  overlap a *negative* weight: the injected test errors are near-copies of the source,
+  so "almost word for word" had become a sign of error. That is a property of how the
+  test errors were made, not of evidence, and would have penalised honest quoting.
+* **A simple model.** Gradient boosting was no better on real LLM answers (RAGTruth)
+  and clearly worse on HaluEval, the benchmark neither model was fitted on (33 % false
+  alarms against 19 %). The simpler model generalises better and can be read.
+* **A rule that was rejected.** "Nearly verbatim but not entailed" found 284 injected
+  errors without a false alarm; on RAGTruth it found 5 real errors and raised 80 false
+  alarms. It detects how the test errors were made, not errors.
+
+The threshold is set so that the model alone raises at most 10 % false alarms on the
+training half; the overriding rules (missing figure, stated opposite, no support at
+all) apply on top. This is deliberately on the strict side: in the answer pipeline a
+flagged sentence gets a second opinion from the LLM judge, and an unverified sentence
+left out costs less than a wrong one left in.
 
 ## 12. Hash-chained audit log in Postgres
 

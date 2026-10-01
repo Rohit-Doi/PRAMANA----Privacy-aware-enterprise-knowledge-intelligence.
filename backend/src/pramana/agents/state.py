@@ -15,6 +15,7 @@ from pramana.llm.gateway import LLMGateway
 from pramana.privacy.pii import PiiEngine, Pseudonymizer
 from pramana.privacy.policy import AccessContext, PolicyEngine
 from pramana.retrieval.local_models import RetrievalModels
+from pramana.retrieval.reader import ExtractiveReader
 from pramana.retrieval.retriever import (
     Evidence,
     GraphCandidates,
@@ -45,6 +46,7 @@ class AgentDeps:
     policy: PolicyEngine
     retriever: HybridRetriever
     models: RetrievalModels
+    reader: ExtractiveReader
     pii: PiiEngine
     llm: LLMGateway
     validation: ValidationEngine
@@ -76,6 +78,9 @@ class PipelineState(TypedDict, total=False):
     retrieval: RetrievalResult
     evidence: list[Evidence]  # text as this reader may see it
     llm_evidence: list[Evidence]  # text as the generator sees it
+    # Only when some evidence may not leave the machine: the passages that may, prepared for the
+    # external model. Used if no sentence can be quoted from the full evidence.
+    open_llm_evidence: list[Evidence]
     route: str  # "external" | "local" | "extractive"
     evidence_notes: list[str]
 

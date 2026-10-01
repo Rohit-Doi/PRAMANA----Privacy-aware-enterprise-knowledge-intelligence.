@@ -90,6 +90,20 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
             )
     else:
         llm_evidence = reader_evidence
+        if blocked and deps.llm.configured:
+            # If nothing can be quoted from the full evidence, the external model may still be asked,
+            # with only the passages at or below the egress ceiling.
+            pseudonymizer = state["pseudonymizer"]
+            updates["open_llm_evidence"] = [
+                replace(
+                    e,
+                    text=pseudonymizer.protect(
+                        e.text, sensitivity_rank=e.sensitivity_rank, pseudonymize_contact=egress.pseudonymize_names
+                    ),
+                )
+                for e in reader_evidence
+                if e.sensitivity_rank <= egress.max_rank
+            ]
 
     updates.update({"evidence": reader_evidence, "llm_evidence": llm_evidence, "route": route, "evidence_notes": notes})
     if not sufficient:

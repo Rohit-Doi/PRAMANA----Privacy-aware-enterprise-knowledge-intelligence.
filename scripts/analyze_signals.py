@@ -8,9 +8,11 @@ the training half under the false-alarm limit), AUROC and calibration error per 
 It answers "would a more flexible model do better?" and changes nothing by itself.
 
 What it showed when the current model was chosen (see docs/DECISIONS.md):
-    * gradient boosting fits the injected errors better and real LLM answers (RAGTruth) worse;
-    * a rule "nearly verbatim but not entailed" catches every injected error and, on RAGTruth,
-      raises ten false alarms for each real error it finds — so it is not used.
+    * left unconstrained, the fit gives lexical overlap a negative weight ("word for word is
+      suspicious"): a quirk of how the injected errors are made;
+    * gradient boosting is no better on real LLM answers (RAGTruth) and worse on HaluEval;
+    * a rule "nearly verbatim but not entailed" finds every injected error and, on RAGTruth,
+      raises sixteen false alarms for each real error it finds — so it is not used.
 """
 
 from __future__ import annotations
@@ -45,12 +47,13 @@ def weights(rows: list[ClaimRow]) -> np.ndarray:
     return np.array([len(rows) / (len(sources) * counts[row.source.split("-")[0]]) for row in rows])
 
 
-def threshold_for(probabilities: np.ndarray, supported: np.ndarray, failed: np.ndarray) -> float:
-    """Highest catch rate with the false-alarm rate within the limit (as train_calibrator does)."""
+def threshold_for(probabilities: np.ndarray, supported: np.ndarray) -> float:
+    """Highest catch rate at which the model alone stays within the false-alarm limit
+    (as train_calibrator does; the overriding rules are applied on top when scoring)."""
     best, best_catch = 0.5, -1.0
     for step in range(20, 91):
         threshold = step / 100
-        flagged = (probabilities < threshold) | failed
+        flagged = probabilities < threshold
         false_alarm = flagged[supported == 1].mean()
         catch = flagged[supported == 0].mean()
         if false_alarm <= MAX_FALSE_ALARM and catch > best_catch:
@@ -59,10 +62,9 @@ def threshold_for(probabilities: np.ndarray, supported: np.ndarray, failed: np.n
 
 
 def report(name: str, train_p: np.ndarray, test_p: np.ndarray, train: list[ClaimRow], test: list[ClaimRow]) -> None:
-    failed_train = np.array([overruled(r.signals) for r in train])
     failed_test = np.array([overruled(r.signals) for r in test])
     y_test = labels(test)
-    threshold = threshold_for(train_p, labels(train), failed_train)
+    threshold = threshold_for(train_p, labels(train))
     print(f"\n{name}  (threshold {threshold:.2f})")
     for source in ("ragtruth", "injected", "halueval"):
         mask = np.array([r.source.startswith(source) for r in test])
@@ -98,14 +100,19 @@ def main() -> int:
         test,
     )
 
-    free = LogisticRegression(C=1.0, max_iter=5000).fit(matrix(train), y, sample_weight=w)
+    # Unconstrained, and with lexical overlap offered as an extra signal.
+    def with_overlap(rows: list[ClaimRow]) -> np.ndarray:
+        return np.hstack([matrix(rows), np.array([[row.signals["overlap"]] for row in rows])])
+
+    free = LogisticRegression(C=1.0, max_iter=5000).fit(with_overlap(train), y, sample_weight=w)
     report(
-        "logistic, signs unconstrained",
-        free.predict_proba(matrix(train))[:, 1],
-        free.predict_proba(matrix(test))[:, 1],
+        "logistic, signs unconstrained, plus overlap",
+        free.predict_proba(with_overlap(train))[:, 1],
+        free.predict_proba(with_overlap(test))[:, 1],
         train,
         test,
     )
+    print(f"  weight given to overlap: {free.coef_[0][-1]:+.2f}  (negative = 'word for word is suspicious')")
 
     boosted = HistGradientBoostingClassifier(
         max_depth=3,
@@ -123,6 +130,16 @@ def main() -> int:
         train,
         test,
     )
+
+    print("\nrejected rule: nearly verbatim (overlap >= 0.8) but not entailed (< 0.5), all sentences")
+    for source in ("injected", "ragtruth"):
+        hits = [
+            r
+            for r in [*train, *test]
+            if r.source.startswith(source) and r.signals["overlap"] >= 0.8 and r.signals["entailment"] < 0.5
+        ]
+        errors = sum(1 for r in hits if r.hallucinated)
+        print(f"  {source:<9} real errors found {errors:<4} false alarms {len(hits) - errors}")
 
     print("\nsingle signals, held-out AUROC for telling supported from unsupported:")
     y_test = labels(test)

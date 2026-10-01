@@ -10,7 +10,7 @@ against a source you are allowed to read — or no answer at all.
 |---|---|
 | **Access-aware** | Role, department, sensitivity and region decide what a user can retrieve. The rule is enforced inside every datastore query and re-checked afterwards |
 | **Verified** | Each sentence is checked by local models (grounding, entailment, unsupported spans, numbers and names). Sentences that fail are rewritten once or removed |
-| **Private** | Personal data is masked for readers and pseudonymised before any prompt. Restricted material never leaves the machine: it is answered by quoting, with no LLM call |
+| **Private** | Personal data is masked for readers and pseudonymised before any prompt. Restricted material never leaves the machine: a local reading model quotes the sentence that answers, with no LLM call |
 | **Accountable** | Hash-chained audit log, versioned policies, trust score with its components, review queue, stored benchmark runs |
 | **One key** | Runs on a laptop CPU with one free API key. Every model except the drafting LLM is local |
 
@@ -64,7 +64,7 @@ python scripts/init_env.py            # creates .env; put your GOOGLE_API_KEY in
 docker compose up -d --wait           # Postgres, Redis, Qdrant, Neo4j, OPA
 cd backend && uv sync && uv run alembic upgrade head && cd ..
 python scripts/seed.py                # roles, demo personas, first policy version
-python scripts/download_models.py     # local models, about 1.5 GB, once
+python scripts/download_models.py     # local models, about 2 GB, once
 python scripts/fetch_data.py          # free public corpora
 python scripts/generate_synthetic.py  # the fictional company's confidential documents
 python scripts/ingest_corpus.py       # index everything (1–2 hours on CPU)
@@ -132,6 +132,6 @@ cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 * Scanned pages are read by a small OCR model. It has been tested only on clean printed pages; tables in scans lose their structure.
 * English only: the local models are English models.
 * The free LLM tier limits throughput to a few questions per minute.
-* Extractive answers (for restricted material) quote; they do not synthesise.
+* Answers from restricted material are a quoted sentence: they do not combine passages, and questions whose answer sits in a restricted table are declined.
 * Built and measured on one laptop; not load-tested, and the container images and CI
   workflow have not yet been run.

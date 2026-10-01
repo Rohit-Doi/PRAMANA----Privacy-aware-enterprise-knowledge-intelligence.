@@ -85,6 +85,8 @@ class Settings(BaseSettings):
     grounding_model_revision: str = "8e4a2e6e96c708cc76c2344f7e4757df2515292c"
     nli_model: str = "cross-encoder/nli-deberta-v3-base"
     span_model: str = "KRLabsOrg/lettucedect-base-modernbert-en-v1"
+    # Reads the answer out of a passage, or reports that the passage does not answer the question.
+    reader_model: str = "deepset/roberta-base-squad2"
     spacy_model: str = "en_core_web_sm"
     # Models are fetched once by scripts/download_models.py; at run time nothing is downloaded.
     models_offline: bool = True

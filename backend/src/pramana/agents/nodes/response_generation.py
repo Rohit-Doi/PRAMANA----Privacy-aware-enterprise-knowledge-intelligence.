@@ -53,8 +53,16 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
     updates: dict[str, Any] = {"round": round_number}
 
     if route == "extractive":
-        draft = await extractive_answer(reader_question, state["llm_evidence"], deps.models)
-        if not draft:
+        draft = await extractive_answer(reader_question, state["llm_evidence"], deps.reader)
+        if draft:
+            return {
+                **updates,
+                "draft": draft,
+                "_summary": "Extractive answer: quoted from the sources by the local reader, nothing generated",
+                "_details": {"route": route, "sentences": draft.count("[E")},
+            }
+        open_evidence = state.get("open_llm_evidence") or []
+        if not open_evidence:
             return {
                 **updates,
                 "draft": "",
@@ -63,12 +71,21 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
                 "_summary": "No sentence in the evidence answers the question",
                 "_details": {"route": route},
             }
-        return {
-            **updates,
-            "draft": draft,
-            "_summary": "Extractive answer: sentences quoted from the sources, nothing generated",
-            "_details": {"route": route, "sentences": draft.count("[E")},
-        }
+        # No single sentence answers the question (it may need a table, or several passages).
+        # The external model is asked instead, and is given only the passages that may leave.
+        route = "external"
+        note = (
+            f"No sentence could be quoted as the answer; the model was given the {len(open_evidence)} passage(s) "
+            "at or below the egress ceiling and none above it"
+        )
+        updates.update(
+            {
+                "route": route,
+                "llm_evidence": open_evidence,
+                "evidence_notes": [*state.get("evidence_notes", []), note],
+            }
+        )
+        state = {**state, "route": route, "llm_evidence": open_evidence}
 
     # Names in the question are replaced by the same placeholders as in the evidence.
     question = reader_question
@@ -98,7 +115,7 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
         )
     except DependencyUnavailable as exc:
         # Degraded, not faked: fall back to quoting the sources and say so.
-        draft = await extractive_answer(reader_question, state["evidence"], deps.models)
+        draft = await extractive_answer(reader_question, state["evidence"], deps.reader)
         note = f"The language model was unavailable ({exc.code}); the answer is quoted directly from the sources"
         if not draft:
             return {

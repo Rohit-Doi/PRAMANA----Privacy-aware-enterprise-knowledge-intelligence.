@@ -103,9 +103,12 @@ each audit entry records the version that decided it.
   prompt is built; the mapping stays in memory for that one request and the answer is
   restored locally, only for readers allowed to see it.
 * **Egress ceiling.** Evidence above the configured sensitivity (default CONFIDENTIAL)
-  never leaves the machine. The question is then answered *extractively*: the most
-  relevant sentences are quoted verbatim, selected by the local cross-encoder, with no
-  LLM call.
+  never leaves the machine. The question is then answered *extractively*: a local
+  reading model (RoBERTa trained on SQuAD 2.0) finds the words that answer it and the
+  sentence around them is quoted verbatim, with no LLM call. The reader can also say
+  "no answer here", in which case nothing is quoted. If no single sentence answers
+  (the answer is in a table, or needs several passages), the external model is asked
+  with only the passages at or below the ceiling.
 * **Withheld sources.** If relevant passages exist that the user may not read, roles
   permitted to know are told how many were withheld — never what they contain.
 
@@ -127,16 +130,25 @@ For each sentence of a draft answer:
 
 1. **Align** — find the evidence window with the highest lexical overlap.
 2. **Grounding** — HHEM-2.1-open scores whether the window supports the sentence.
-3. **Entailment** — DeBERTa-v3 NLI gives entailment and contradiction probabilities,
-   also across documents (two sources that disagree are reported as CONFLICTING).
+3. **Entailment** — DeBERTa-v3 NLI reads the sentence twice: against the surrounding
+   window, and against the single closest source sentence. The window catches claims
+   that combine neighbouring sentences; the closest sentence catches a near-copy with
+   one word changed (a swapped name, a dropped "not"), which a long premise blurs into
+   "neutral". Across documents, two current sources that disagree are reported as
+   CONFLICTING.
 4. **Spans** — LettuceDetect marks unsupported character spans.
 5. **Literal checks** — every number, identifier and proper name in the sentence must
    appear in the evidence.
 6. **Calibration** — a logistic model, trained on labelled data, turns the signals into
-   one probability. `scripts/train_calibrator.py` fits it and picks the decision
-   threshold under a false-alarm limit.
-7. **Judge** — only sentences in the uncertain band go to the LLM, which must return a
-   verbatim quote; the quote is checked against the evidence.
+   one probability. Its weights are constrained to the direction each signal can
+   legitimately push (more grounding never lowers confidence).
+   `scripts/train_calibrator.py` fits it and picks the decision threshold.
+7. **Overriding rules** — whatever the probability, a sentence is not supported if a
+   figure in it is missing from the evidence, if the closest source sentence states the
+   opposite, or if no detector finds any support at all.
+8. **Judge** — sentences in the uncertain band go to the LLM in one batched call. It
+   must return a verbatim quote, and the quote is checked against the evidence. A
+   one- or two-word answer ("Yes.") is judged together with the question it answers.
 
 Verdicts: SUPPORTED · PARTIAL · UNSUPPORTED · CONTRADICTED · CONFLICTING.
 The same engine powers **Verify Studio**, where a user pastes any text (from any tool)

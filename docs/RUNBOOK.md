@@ -12,7 +12,7 @@ Python commands use the backend environment: `backend/.venv/Scripts/python` on W
 | Python 3.12 and [uv](https://docs.astral.sh/uv/) | backend |
 | Node.js 20 or newer | web app |
 | RAM | 8 GB free for the backend with all models loaded; 16 GB machine recommended |
-| Disk | about 6 GB (models 1.5 GB, Python environment 2 GB, data and indexes) |
+| Disk | about 6 GB (models 2 GB, Python environment 2 GB, data and indexes) |
 | API key | `GOOGLE_API_KEY` from Google AI Studio (free). Nothing else is required |
 
 No GPU is needed.
@@ -29,7 +29,7 @@ uv run alembic upgrade head           # database schema
 cd ..
 
 python scripts/seed.py                # departments, roles, demo personas, first policy version
-python scripts/download_models.py     # local models, about 1.5 GB, once
+python scripts/download_models.py     # local models, about 2 GB, once
 
 python scripts/fetch_data.py          # public corpora (handbook, regulations, contracts, emails, benchmarks)
 python scripts/generate_synthetic.py  # the fictional company's confidential documents

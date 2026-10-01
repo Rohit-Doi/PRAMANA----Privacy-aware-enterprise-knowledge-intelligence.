@@ -1,37 +1,56 @@
-"""Extractive answering: an answer made only of sentences quoted from the evidence.
+"""Extractive answering: an answer made only of a sentence quoted from the evidence.
 
 Used when the evidence may not be sent to an external model (it is above the egress ceiling
 and no local model is configured) and when every LLM provider is unavailable. Nothing is
-generated, so nothing can be invented; the cost is a less fluent answer.
+generated, so nothing can be invented; the cost is a shorter, less fluent answer.
+
+A local reading model finds the words that answer the question and the sentence around them
+is quoted. When the reader finds no answer in the passages, nothing is quoted: a sentence that
+is merely related to the question is not an answer.
 """
 
 from __future__ import annotations
 
-from pramana.retrieval.local_models import RetrievalModels
+from pramana.retrieval.reader import ExtractiveReader
 from pramana.retrieval.retriever import Evidence
 from pramana.shared.text import split_sentences
 
-MAX_SENTENCES = 4
-MIN_SCORE = 0.0
-SCORE_WINDOW = 5.0
+# Passages are read in order of relevance, and only those close to the best one: measured on the
+# golden questions, an answer taken from a clearly less relevant passage was usually the wrong one.
+MAX_PASSAGES = 6
+RELEVANCE_WINDOW = 2.0
+# Reader margin (answer score minus "no answer" score) from which a passage counts as answering.
+MIN_MARGIN = 0.0
+MIN_QUOTE_WORDS = 3
+MIN_UNPUNCTUATED_WORDS = 8
 
 
-async def extractive_answer(question: str, evidence: list[Evidence], models: RetrievalModels) -> str:
-    """The most relevant sentences from the best passages, each with its reference."""
-    candidates: list[tuple[int, int, str, str]] = []  # evidence index, sentence index, ref, sentence
-    for evidence_index, item in enumerate(evidence[:4]):
-        for sentence_index, (start, end) in enumerate(split_sentences(item.text)):
-            sentence = item.text[start:end].strip()
-            # Headings and fragments make poor answers.
-            if len(sentence.split()) >= 5 and sentence[-1:] in ".!?":
-                candidates.append((evidence_index, sentence_index, item.ref, sentence))
-    if not candidates:
+async def extractive_answer(question: str, evidence: list[Evidence], reader: ExtractiveReader) -> str:
+    """The sentence that answers the question, quoted with its reference, or "" if none does."""
+    if not evidence:
         return ""
-    scores = await models.rerank(question, [c[3] for c in candidates])
-    ranked = sorted(zip(scores, candidates, strict=True), key=lambda pair: -pair[0])
-    best = ranked[0][0]
-    if best < MIN_SCORE:
+    best = evidence[0].rerank_score
+    candidates = [e for e in evidence[:MAX_PASSAGES] if e.rerank_score >= best - RELEVANCE_WINDOW]
+    readings = await reader.read(question, [e.text for e in candidates])
+    for item, reading in zip(candidates, readings, strict=True):
+        if reading is None or reading.margin < MIN_MARGIN:
+            continue
+        quote = quotable(item.text, reading.start, reading.end)
+        if quote:
+            return f"{quote.rstrip('.!?')} [{item.ref}]."
+    return ""
+
+
+def quotable(text: str, start: int, end: int) -> str:
+    """The whole sentence (or sentences) around an answer span; "" if it is not a quotable sentence."""
+    spans = [(s, e) for s, e in split_sentences(text) if s < end and start < e]
+    if not spans:
         return ""
-    chosen = [c for score, c in ranked[:MAX_SENTENCES] if score >= max(MIN_SCORE, best - SCORE_WINDOW)]
-    chosen.sort(key=lambda c: (c[0], c[1]))  # back into reading order
-    return " ".join(f"{sentence.rstrip('.!?')} [{ref}]." for _, _, ref, sentence in chosen)
+    quote = text[spans[0][0] : spans[-1][1]].strip()
+    # A table row needs its header to mean anything, and a heading is not a statement.
+    words = len(quote.split())
+    if "|" in quote or "\n" in quote or words < MIN_QUOTE_WORDS:
+        return ""
+    if quote[-1] not in ".!?" and words < MIN_UNPUNCTUATED_WORDS:
+        return ""  # a short line without a full stop is a heading or a label
+    return quote
