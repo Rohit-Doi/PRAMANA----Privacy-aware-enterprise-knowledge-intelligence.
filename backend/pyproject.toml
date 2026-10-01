@@ -45,6 +45,7 @@ dependencies = [
     "prometheus-client>=0.20",
     "email-validator>=2.2",
     "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
+    "rapidocr-onnxruntime>=1.4",
 ]
 
 [dependency-groups]
@@ -123,7 +124,7 @@ packages = ["pramana"]
 module = [
     "fastembed.*", "presidio_analyzer.*", "presidio_anonymizer.*", "gliner2.*",
     "lettucedetect.*", "networkx.*", "sklearn.*", "fitz.*", "pymupdf.*", "docx.*",
-    "pptx.*", "pyotp.*", "spacy.*", "transformers.*", "neo4j.*", "datasets.*",
+    "pptx.*", "pyotp.*", "spacy.*", "transformers.*", "neo4j.*", "datasets.*", "cv2.*", "rapidocr_onnxruntime.*",
 ]
 ignore_missing_imports = true
 

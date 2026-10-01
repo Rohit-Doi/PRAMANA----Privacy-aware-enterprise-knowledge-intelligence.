@@ -1,0 +1,55 @@
+{
+  "version": "trained-20261002-0139",
+  "features": [
+    "grounding",
+    "entailment",
+    "contradiction",
+    "span_fraction",
+    "numbers_ok",
+    "names_ok",
+    "overlap"
+  ],
+  "coefficients": {
+    "grounding": 3.6929518882788783,
+    "entailment": 1.8799860246157096,
+    "contradiction": -2.458103615328734,
+    "span_fraction": -4.011380023775171,
+    "numbers_ok": -0.22913057452416963,
+    "names_ok": 0.5231337503938396,
+    "overlap": -2.869499274928179
+  },
+  "intercept": 0.9672488301411487,
+  "threshold": 0.49,
+  "metrics": {
+    "trained_on_sentences": 1427,
+    "sources": {
+      "injected": 515.0,
+      "ragtruth": 912.0
+    },
+    "train_catch_rate": 0.8511,
+    "train_false_alarm_rate": 0.098,
+    "held_out": {
+      "ragtruth": {
+        "sentences": 846,
+        "catch_rate": 0.6966,
+        "false_alarm_rate": 0.103,
+        "f1": 0.5415,
+        "calibration_error": 0.0524
+      },
+      "injected": {
+        "sentences": 485,
+        "catch_rate": 0.8818,
+        "false_alarm_rate": 0.0058,
+        "f1": 0.9356,
+        "calibration_error": 0.0902
+      },
+      "halueval": {
+        "sentences": 245,
+        "catch_rate": 0.6529,
+        "false_alarm_rate": 0.2258,
+        "f1": 0.693,
+        "calibration_error": 0.2018
+      }
+    }
+  }
+}

@@ -23,6 +23,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # ── Runtime stage ───────────────────────────────────────────────────────────
 FROM python:3.12-slim-bookworm AS runtime
+# Shared libraries that OpenCV (used by the OCR model) loads at import time.
+RUN apt-get update     && apt-get install -y --no-install-recommends libgl1 libglib2.0-0     && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 10001 pramana \
     && useradd --system --uid 10001 --gid pramana --home-dir /app --shell /usr/sbin/nologin pramana
 

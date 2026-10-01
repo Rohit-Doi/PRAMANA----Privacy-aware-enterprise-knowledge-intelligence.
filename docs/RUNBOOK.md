@@ -114,7 +114,7 @@ npx tsc --noEmit && npx eslint src && npm run build
 | API exits with "secrets are not set" | run `python scripts/init_env.py` |
 | `/readyz` shows `policy: unavailable` | OPA container is not running: `docker compose up -d opa`, then restart the API (it pushes the policy at start-up) |
 | A model fails to load with an offline error | run `python scripts/download_models.py`; at run time nothing is downloaded |
-| "This PDF has no text layer … OCR is not enabled" | the file is a scan; export it with a text layer and upload again |
+| "No readable text was found in this PDF, even with OCR" | the scan is blank or too poor to read; rescan at 200 dpi or more |
 | Answers say "the language model is unavailable" | every provider in the chain is out of quota or unreachable; see *LLM quota exhausted* |
 | The machine swaps during ingestion or training | another process is holding the models too; stop the API, or stop other containers |
 | Browser shows a network error on every call | the API is not running, or `FRONTEND_ORIGIN` in `.env` does not match the web app's address |

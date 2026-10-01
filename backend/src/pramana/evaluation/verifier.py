@@ -17,9 +17,11 @@ from pramana.evaluation.metrics import auroc, detection_metrics, expected_calibr
 from pramana.evaluation.samples import VerifierSample
 from pramana.shared.types import Verdict
 from pramana.validation.calibration import FEATURES, Calibrator
-from pramana.validation.engine import ValidationEngine
+from pramana.validation.engine import CONTRADICTION_THRESHOLD, SUPPORTING_SOURCE_THRESHOLD, ValidationEngine
 
 GROUNDING_ONLY_THRESHOLD = 0.5
+# Stored next to the calibrator's features so that other combinations can be studied offline.
+EXTRA_SIGNALS = ("entailment_window", "contradiction_window", "entailment_sentence", "contradiction_sentence")
 
 
 @dataclass(slots=True)
@@ -81,7 +83,7 @@ async def score_samples(
                     error_type=sample.error_type,
                     claim=claim.text,
                     hallucinated=hallucinated,
-                    signals={name: float(claim.signals.get(name, 0.0)) for name in FEATURES},
+                    signals={name: float(claim.signals.get(name, 0.0)) for name in (*FEATURES, *EXTRA_SIGNALS)},
                     probability=float(claim.signals.get("probability", claim.confidence)),
                     verdict=str(claim.verdict),
                     v1_score=v1_overlap_score(claim.text, all_evidence),
@@ -94,11 +96,16 @@ async def score_samples(
 
 
 def rescore(rows: list[ClaimRow], calibrator: Calibrator, threshold: float) -> list[ClaimRow]:
-    """Apply a (new) calibrator to stored signals, with the engine's literal-check rule."""
+    """Apply a (new) calibrator to stored signals, with the engine's hard rules (see ``engine._decide``):
+    a figure missing from the evidence, or a clear contradiction without grounding, is never supported."""
     out: list[ClaimRow] = []
     for row in rows:
         probability = calibrator.probability(row.signals)
-        supported = probability >= threshold and row.signals["numbers_ok"] == 1.0
+        contradicted = (
+            row.signals["contradiction"] >= CONTRADICTION_THRESHOLD
+            and row.signals["grounding"] < SUPPORTING_SOURCE_THRESHOLD
+        )
+        supported = probability >= threshold and row.signals["numbers_ok"] == 1.0 and not contradicted
         out.append(
             ClaimRow(
                 **{

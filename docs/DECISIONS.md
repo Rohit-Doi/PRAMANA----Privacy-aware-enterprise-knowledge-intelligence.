@@ -92,7 +92,7 @@ hash, and triggers reject modification. Verification needs only the table.
 | Planned | Built | Reason |
 |---|---|---|
 | Taskiq + Redis for background jobs | Postgres queue with `FOR UPDATE SKIP LOCKED` | one less moving part; jobs are transactional with the documents they describe |
-| Docling for parsing, with OCR | PyMuPDF, python-docx, python-pptx, BeautifulSoup; **no OCR** | lighter: the development machine (16 GB RAM, no GPU) was already at its limit with the verification models, so Docling was not attempted. Scanned PDFs are rejected with a clear message rather than ingested empty |
+| Docling for parsing and OCR | PyMuPDF, python-docx, python-pptx, BeautifulSoup; RapidOCR (ONNX, about 15 MB) for scanned pages and images | lighter: the development machine (16 GB RAM, no GPU) was already at its limit with the verification models. OCR runs only on pages without a text layer |
 | LangGraph Postgres checkpointer | none | a request completes in seconds; the run, its steps and claims are stored in normal tables |
 | GLiNER2 extraction for every document | GLiNER2 for the company and uploaded collections; spaCy for the bulk corpus | 3–6 s per passage on CPU would have meant about twelve hours for the 9,800 passages |
 | Strict/live answer mode toggle | answers are always delivered after verification | the safer default; streaming unverified text conflicts with the product's purpose |

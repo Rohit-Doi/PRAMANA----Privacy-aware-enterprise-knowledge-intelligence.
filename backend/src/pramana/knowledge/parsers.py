@@ -15,6 +15,8 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 
+from pramana.knowledge import ocr
+from pramana.shared.config import get_settings
 from pramana.shared.errors import ValidationFailed
 from pramana.shared.text import normalize_text
 
@@ -49,7 +51,19 @@ SUPPORTED_EXTENSIONS = {
     ".htm": "text/html",
     ".eml": "message/rfc822",
     ".csv": "text/csv",
+    # Images go through OCR.
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".tif": "image/tiff",
+    ".tiff": "image/tiff",
+    ".bmp": "image/bmp",
+    ".webp": "image/webp",
 }
+
+# Scanned pages are slow to read (a few seconds each on CPU); a very long scan is cut off here
+# and the number of unread pages is recorded with the document.
+MAX_OCR_PAGES = 150
 
 
 def detect_mime(filename: str) -> str:
@@ -80,6 +94,8 @@ def parse_document(data: bytes, *, filename: str, mime_type: str | None = None) 
         parsed = _parse_email(data)
     elif mime == "text/csv":
         parsed = _parse_plain(_decode(data))
+    elif mime.startswith("image/"):
+        parsed = _parse_image(data)
     else:
         raise ValidationFailed(f"Unsupported content type: {mime}")
     if not parsed.title.strip():
@@ -239,6 +255,8 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
     # One entry per layout block: page, lines as (font size, bold, text).
     layout: list[tuple[int, list[tuple[float, bool, str]]]] = []
     pages_without_text = 0
+    ocr_pages = 0
+    ocr_enabled = get_settings().ocr_enabled
     with pdf:
         page_count = pdf.page_count
         title = (pdf.metadata or {}).get("title", "") or ""
@@ -263,11 +281,25 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
                     found_text = True
             if not found_text:
                 pages_without_text += 1
+                # No text layer on this page: it is a scan (or blank). Read it from the image.
+                if ocr_enabled and ocr_pages < MAX_OCR_PAGES:
+                    ocr_pages += 1
+                    image = ocr.image_from_pixmap(page.get_pixmap(dpi=ocr.RENDER_DPI))
+                    for paragraph in ocr.group_paragraphs(ocr.get_ocr_engine().read(image)):
+                        # Box height in pixels -> points, so headings can be told from body text.
+                        layout.append(
+                            (
+                                page_index,
+                                [(round(line.height * 72 / ocr.RENDER_DPI, 1), False, line.text) for line in paragraph],
+                            )
+                        )
 
     all_lines = [line for _, block_lines in layout for line in block_lines]
     if not all_lines:
         raise ValidationFailed(
-            "This PDF has no text layer (it looks scanned). Run OCR on it first; OCR is not enabled here."
+            "No readable text was found in this PDF, even with OCR."
+            if ocr_enabled
+            else "This PDF has no text layer (it looks scanned) and OCR is switched off (OCR_ENABLED=false)."
         )
 
     # Running headers and footers repeat on most pages: drop them.
@@ -318,10 +350,19 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
             previous.text = _join_pdf_lines([previous.text, text])
         else:
             blocks.append(Block("text", text, page=page_index))
+    if not title:
+        # No metadata title and no top-level heading: a prominent heading on the first page serves.
+        first = next((b for b in blocks if b.kind == "heading" and b.page == 1 and b.level <= 2), None)
+        title = first.text if first else ""
     return ParsedDocument(
         title=title.strip(),
         blocks=blocks,
-        meta={"pages": page_count, "pages_without_text": pages_without_text},
+        meta={
+            "pages": page_count,
+            "pages_without_text": pages_without_text,
+            "ocr_pages": ocr_pages,
+            "pages_not_read": max(0, pages_without_text - ocr_pages) if ocr_enabled else pages_without_text,
+        },
     )
 
 
@@ -331,6 +372,36 @@ def _join_pdf_lines(lines: list[str]) -> str:
     for line in lines[1:]:
         out = out[:-1] + line if out.endswith("-") and line[:1].islower() else out + " " + line
     return out
+
+
+# ── Images ──────────────────────────────────────────────────────────────────
+def _parse_image(data: bytes) -> ParsedDocument:
+    """A photographed or scanned page: every word comes from OCR."""
+    if not get_settings().ocr_enabled:
+        raise ValidationFailed("Images need OCR, which is switched off (OCR_ENABLED=false).")
+    paragraphs = ocr.group_paragraphs(ocr.get_ocr_engine().read(ocr.image_from_bytes(data)))
+    if not paragraphs:
+        raise ValidationFailed("No readable text was found in this image.")
+    heights = sorted(line.height for paragraph in paragraphs for line in paragraph)
+    body_height = heights[len(heights) // 2]
+    blocks: list[Block] = []
+    title = ""
+    for paragraph in paragraphs:
+        text = _join_pdf_lines([line.text for line in paragraph])
+        height = max(line.height for line in paragraph)
+        is_heading = (
+            len(paragraph) <= 2
+            and len(text.split()) <= 14
+            and height >= body_height * 1.25
+            and not text.endswith((".", ",", ";", ":"))
+        )
+        if is_heading:
+            level = 1 if height >= body_height * 1.6 else 2
+            blocks.append(Block("heading", text, level=level, page=1))
+            title = title or text
+        else:
+            blocks.append(Block("text", text, page=1))
+    return ParsedDocument(title=title, blocks=blocks, meta={"pages": 1, "ocr_pages": 1})
 
 
 # ── DOCX ────────────────────────────────────────────────────────────────────

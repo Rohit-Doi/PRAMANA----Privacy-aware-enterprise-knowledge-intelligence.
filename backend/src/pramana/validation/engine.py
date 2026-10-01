@@ -174,11 +174,14 @@ class ValidationEngine:
         # The models read natural text: privacy placeholders are swapped for neutral stand-ins,
         # the same on both sides, so a masked name still matches itself.
         texts = {d.ordinal: natural_text(d.text) for d in checkable}
+        # What the models are asked to judge. A fragment ("Yes.", "Radiohead") says nothing by itself,
+        # so it is read together with the question it answers.
+        hypotheses = {d.ordinal: hypothesis_text(question, texts[d.ordinal]) for d in checkable}
         # A passage is read together with where it comes from (document title and section), exactly
         # as the generator saw it: "the 2026 policy" is a fact carried by the title, not the body.
         headers = {e.ref: source_header(e) for e in evidence}
         premises = {key: natural_text(headers[key[1]] + windows[key].text) for key in windows}
-        grounding_scores = await self._detectors.grounding([(premises[key], texts[key[0]]) for key in pair_keys])
+        grounding_scores = await self._detectors.grounding([(premises[key], hypotheses[key[0]]) for key in pair_keys])
         grounding = dict(zip(pair_keys, grounding_scores, strict=True))
 
         # Second look for claims no short window supports: read the whole passage. A sentence such as
@@ -192,7 +195,7 @@ class ValidationEngine:
         if weak:
             wide_keys = [(d.ordinal, ref) for d in weak for ref in candidates[d.ordinal][:WIDE_CONTEXT_PASSAGES]]
             wide = {key: natural_text(headers[key[1]] + by_ref[key[1]].text[:WIDE_CONTEXT_CHARS]) for key in wide_keys}
-            wide_scores = await self._detectors.grounding([(wide[key], texts[key[0]]) for key in wide_keys])
+            wide_scores = await self._detectors.grounding([(wide[key], hypotheses[key[0]]) for key in wide_keys])
             for key, score in zip(wide_keys, wide_scores, strict=True):
                 if score > grounding[key]:
                     grounding[key], premises[key] = score, wide[key]
@@ -225,8 +228,17 @@ class ValidationEngine:
             and by_ref[ref].document_id != by_ref[primary[d.ordinal]].document_id
             and windows[(d.ordinal, ref)].overlap >= CONFLICT_MIN_OVERLAP
         ]
-        nli_results = await self._detectors.nli([(premises[key], texts[key[0]]) for key in nli_keys + conflict_keys])
-        nli = dict(zip(nli_keys + conflict_keys, nli_results, strict=True))
+        # Each claim is read twice against its primary passage: against the surrounding window, and
+        # against the single closest sentence. The window catches claims that combine neighbouring
+        # sentences; the sentence catches a near-copy with one word changed (a swapped name, a dropped
+        # "not"), which a long premise tends to blur into "neutral".
+        closest = {key: natural_text(headers[key[1]] + windows[key].quote) for key in nli_keys}
+        nli_results = await self._detectors.nli(
+            [(premises[key], hypotheses[key[0]]) for key in nli_keys + conflict_keys]
+            + [(closest[key], hypotheses[key[0]]) for key in nli_keys]
+        )
+        nli = dict(zip(nli_keys + conflict_keys, nli_results, strict=False))
+        nli_closest = dict(zip(nli_keys, nli_results[len(nli_keys) + len(conflict_keys) :], strict=True))
         report.timings_ms["nli"] = _ms(started)
 
         # ── Unsupported spans across the whole answer ───────────────────
@@ -251,11 +263,12 @@ class ValidationEngine:
             span_chars = sum(s["end"] - s["start"] for s in claim_spans)
             if model_text != draft.text:
                 claim_spans = []  # offsets refer to the stand-in text, not to what the reader sees
-            scores = nli[(draft.ordinal, ref)]
+            scores, near = nli[(draft.ordinal, ref)], nli_closest[(draft.ordinal, ref)]
+            entailment, contradiction = combine_nli(scores, near)
             signals: dict[str, Any] = {
                 "grounding": round(grounding[(draft.ordinal, ref)], 4),
-                "entailment": round(scores.entailment, 4),
-                "contradiction": round(scores.contradiction, 4),
+                "entailment": round(entailment, 4),
+                "contradiction": round(contradiction, 4),
                 "span_fraction": round(min(1.0, span_chars / max(len(model_text), 1)), 4),
                 "numbers_ok": 1.0 if facts.numbers_ok else 0.0,
                 "names_ok": 1.0 if facts.names_ok else 0.0,
@@ -286,6 +299,10 @@ class ValidationEngine:
                     "conflicting_evidence": conflicts,
                     "conflict_with_current": any(by_ref[r].is_current for r in conflicts),
                     "probability": round(probability, 4),
+                    "entailment_window": round(scores.entailment, 4),
+                    "contradiction_window": round(scores.contradiction, 4),
+                    "entailment_sentence": round(near.entailment, 4),
+                    "contradiction_sentence": round(near.contradiction, 4),
                     "judge": None,
                 }
             )
@@ -452,6 +469,32 @@ def _unverifiable(draft: ClaimDraft, reason: str) -> ClaimResult:
         0.0,
         reason or "could not be verified",
     )
+
+
+FRAGMENT_MAX_WORDS = 4
+
+
+def hypothesis_text(question: str, claim: str) -> str:
+    """The statement the models judge: the claim, or question + claim when the claim is a fragment."""
+    question = question.strip()
+    if not question or len(claim.split()) > FRAGMENT_MAX_WORDS:
+        return claim
+    return f"{question if question.endswith('?') else question + '?'} {claim}"
+
+
+def combine_nli(window: Any, sentence: Any) -> tuple[float, float]:
+    """One entailment and one contradiction score from the two readings of a claim.
+
+    Support from either reading counts. A contradiction counts when a reading asserts it and the
+    other reading does not entail the claim: a long window sometimes "contradicts" a sentence it
+    contains word for word, and the sentence-level reading settles that.
+    """
+    entailment = max(window.entailment, sentence.entailment)
+    contradiction = max(
+        min(window.contradiction, 1.0 - sentence.entailment),
+        min(sentence.contradiction, 1.0 - window.entailment),
+    )
+    return entailment, contradiction
 
 
 def source_header(evidence: Any) -> str:

@@ -93,6 +93,8 @@ class Settings(BaseSettings):
     qdrant_collection: str = "pramana_chunks"
     qdrant_entity_collection: str = "pramana_entities"
     chunk_target_tokens: int = 320
+    # Read scanned PDF pages and images with a local OCR model.
+    ocr_enabled: bool = True
     chunk_overlap_sentences: int = 1
     retrieval_candidates: int = 30
     rerank_candidates: int = 18

@@ -102,6 +102,6 @@ by asking the model to behave.
 ## 8. Add your own document (2 minutes)
 
 As **fatima.finance → Sources → Upload**: drop a PDF, DOCX, PPTX, Markdown, HTML, text
-or e-mail file. The platform suggests a sensitivity label from its content (you can
+or e-mail file — or a scanned PDF or photo of a page, which is read by OCR. The platform suggests a sensitivity label from its content (you can
 override it), then shows each ingestion stage. When it finishes, ask a question about
 it; then check as Emma that a CONFIDENTIAL upload is invisible to her.
