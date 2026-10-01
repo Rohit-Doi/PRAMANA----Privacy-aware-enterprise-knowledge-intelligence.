@@ -48,6 +48,9 @@ dependencies = [
     "pyyaml>=6.0",
     # observability
     "prometheus-client>=0.20",
+    "email-validator>=2.2",
+    "psutil>=6.0",
+    "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
 ]
 
 [dependency-groups]
@@ -78,6 +81,9 @@ default-groups = ["ml", "data", "dev"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pramana"]
@@ -119,6 +125,8 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+pythonpath = ["."]
 testpaths = ["tests"]
 markers = [
     "integration: needs the Docker datastores",

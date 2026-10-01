@@ -40,6 +40,7 @@ def _generators() -> dict[str, str]:
         "JWT_SECRET": secrets.token_urlsafe(48),
         # 32 random bytes, urlsafe base64: the format Fernet expects.
         "ENCRYPTION_KEY": base64.urlsafe_b64encode(secrets.token_bytes(32)).decode(),
+        "DEMO_PASSWORD": "Demo-" + secrets.token_urlsafe(9) + "-7",
     }
 
 

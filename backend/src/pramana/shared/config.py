@@ -66,9 +66,11 @@ class Settings(BaseSettings):
     encryption_key: SecretStr = SecretStr("")
     access_token_ttl_seconds: int = 900
     refresh_token_ttl_days: int = 7
+    demo_password: SecretStr | None = None
     max_failed_logins: int = 5
     lockout_minutes: int = 15
     rate_limit_per_minute: int = 120
+    auth_rate_limit_per_minute: int = 20
 
     # ── Local models ─────────────────────────────────────────────────────
     embedding_model: str = "BAAI/bge-small-en-v1.5"
