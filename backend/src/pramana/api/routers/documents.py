@@ -224,7 +224,7 @@ async def list_documents(
 ) -> DocumentPage:
     scope = await runtime.policy.scope(principal)
     rank = int(_parse_sensitivity(sensitivity)) if sensitivity else None
-    items, total = await _service(db, runtime).list(
+    items, total = await _service(db, runtime).list_documents(
         scope,
         principal=principal,
         department=department,

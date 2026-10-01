@@ -14,14 +14,17 @@ _INJECTION_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     (
         "override instructions",
         re.compile(
-            r"\b(?:ignore|disregard|forget|override)\b.{0,40}\b(?:previous|prior|above|all|earlier|system)\b.{0,30}\b(?:instruction|prompt|rule|polic)",
+            r"\b(?:ignore|disregard|forget|override)\b.{0,40}"
+            r"\b(?:previous|prior|above|all|earlier|system)\b.{0,30}\b(?:instruction|prompt|rule|polic)",
             re.I,
         ),
     ),
     (
         "role reassignment",
         re.compile(
-            r"\byou are (?:now|no longer)\b|\bact as (?:an?|the)\b.{0,30}\b(?:admin|root|developer|system|executive)|\bpretend (?:to be|you)\b",
+            r"\byou are (?:now|no longer)\b"
+            r"|\bact as (?:an?|the)\b.{0,30}\b(?:admin|root|developer|system|executive)"
+            r"|\bpretend (?:to be|you)\b",
             re.I,
         ),
     ),
@@ -34,14 +37,17 @@ _INJECTION_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     (
         "privilege claim",
         re.compile(
-            r"\b(?:i am|i'm|as) (?:an? |the )?(?:admin|administrator|ceo|executive|root|superuser)\b|\bclearance level\s*[:=]?\s*\d|\bmy role is\b",
+            r"\b(?:i am|i'm|as) (?:an? |the )?(?:admin|administrator|ceo|executive|root|superuser)\b"
+            r"|\bclearance level\s*[:=]?\s*\d"
+            r"|\bmy role is\b",
             re.I,
         ),
     ),
     (
         "bypass controls",
         re.compile(
-            r"\b(?:bypass|circumvent|disable|turn off)\b.{0,30}\b(?:filter|polic|restriction|access control|redaction|security)",
+            r"\b(?:bypass|circumvent|disable|turn off)\b.{0,30}"
+            r"\b(?:filter|polic|restriction|access control|redaction|security)",
             re.I,
         ),
     ),

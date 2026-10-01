@@ -17,12 +17,18 @@ from pramana.privacy.risk import assess_risk
 from pramana.shared.types import Verdict
 
 MESSAGES = {
-    "no_access_scope": "Your account has no access scope under the current policy, so no sources can be consulted. Ask an administrator to check your role.",
+    "no_access_scope": (
+        "Your account has no access scope under the current policy, so no sources can be consulted. "
+        "Ask an administrator to check your role."
+    ),
     "missing_permission": "Your account is not permitted to ask questions.",
     "no_evidence": "I could not find anything about this in the sources you can access.",
     "insufficient_evidence": "The sources you can access do not contain enough information to answer this.",
     "unverified": "I found related sources, but could not verify an answer against them, so I am not giving one.",
-    "llm_unavailable": "The language model is unavailable right now and no sentence in the sources answers this directly. Please try again later.",
+    "llm_unavailable": (
+        "The language model is unavailable right now and no sentence in the sources answers this directly. "
+        "Please try again later."
+    ),
 }
 
 

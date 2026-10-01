@@ -64,18 +64,27 @@ def _stable_shuffle(items: list, seed: int) -> list:  # type: ignore[type-arg]
     return shuffled
 
 
-def load_ragtruth(path: Path, *, task_types: tuple[str, ...] = ("QA", "Summary"), limit: int | None = None) -> list[VerifierSample]:
+def load_ragtruth(
+    path: Path, *, task_types: tuple[str, ...] = ("QA", "Summary"), limit: int | None = None
+) -> list[VerifierSample]:
     samples: list[VerifierSample] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
         if row["task_type"] not in task_types or row.get("quality") != "good":
             continue
-        labels = json.loads(row["hallucination_labels"]) if isinstance(row["hallucination_labels"], str) else row["hallucination_labels"]
+        labels = (
+            json.loads(row["hallucination_labels"])
+            if isinstance(row["hallucination_labels"], str)
+            else row["hallucination_labels"]
+        )
         group = hashlib.sha256((row["query"] + row["context"]).encode()).hexdigest()[:16]
         samples.append(
             VerifierSample(
-                id=f"ragtruth-{row['id']}", source=f"ragtruth-{row['task_type'].lower()}", group=group,
-                question=row["query"], response=row["output"],
+                id=f"ragtruth-{row['id']}",
+                source=f"ragtruth-{row['task_type'].lower()}",
+                group=group,
+                question=row["query"],
+                response=row["output"],
                 evidence=_evidence_from_text(row["context"], group),
                 hallucinated_spans=[(int(label["start"]), int(label["end"])) for label in labels],
                 response_hallucinated=bool(labels),
@@ -92,7 +101,10 @@ def load_halueval(path: Path, *, limit: int | None = None) -> list[VerifierSampl
         group = hashlib.sha256(row["knowledge"].encode()).hexdigest()[:16]
         samples.append(
             VerifierSample(
-                id=f"halueval-{index}", source="halueval-qa", group=group, question=row["question"],
+                id=f"halueval-{index}",
+                source="halueval-qa",
+                group=group,
+                question=row["question"],
                 response=row["answer"],
                 evidence=[EvidenceItem("E1", row["knowledge"], uuid.uuid5(uuid.NAMESPACE_URL, group))],
                 response_hallucinated=str(row["hallucination"]).strip().lower() == "yes",
@@ -105,23 +117,49 @@ def load_halueval(path: Path, *, limit: int | None = None) -> list[VerifierSampl
 # ── Injected errors ─────────────────────────────────────────────────────────
 _NUMBER = re.compile(r"(?<![\w.])\d+(?:[.,]\d+)?")
 _FLIPS = (
-    (r"\bmust not\b", "must"), (r"\bmay not\b", "may"), (r"\bis mandatory\b", "is optional"),
-    (r"\bare required\b", "are not required"), (r"\bis required\b", "is not required"),
-    (r"\bis prohibited\b", "is permitted"), (r"\bare prohibited\b", "are permitted"),
-    (r"\bmust\b", "need not"), (r"\brequires?\b", "does not require"), (r"\bmay\b", "may not"),
-    (r"\bis not\b", "is"), (r"\bare not\b", "are"), (r"\bcannot\b", "can"), (r"\bwill\b", "will not"),
-    (r"\bshould\b", "should not"), (r"\bbefore\b", "after"), (r"\bat least\b", "at most"),
-    (r"\bup to\b", "at least"), (r"\bmore than\b", "less than"), (r"\ball\b", "no"),
+    (r"\bmust not\b", "must"),
+    (r"\bmay not\b", "may"),
+    (r"\bis mandatory\b", "is optional"),
+    (r"\bare required\b", "are not required"),
+    (r"\bis required\b", "is not required"),
+    (r"\bis prohibited\b", "is permitted"),
+    (r"\bare prohibited\b", "are permitted"),
+    (r"\bmust\b", "need not"),
+    (r"\brequires?\b", "does not require"),
+    (r"\bmay\b", "may not"),
+    (r"\bis not\b", "is"),
+    (r"\bare not\b", "are"),
+    (r"\bcannot\b", "can"),
+    (r"\bwill\b", "will not"),
+    (r"\bshould\b", "should not"),
+    (r"\bbefore\b", "after"),
+    (r"\bat least\b", "at most"),
+    (r"\bup to\b", "at least"),
+    (r"\bmore than\b", "less than"),
+    (r"\ball\b", "no"),
 )
 _ENTITY_SWAPS = (
-    ("Chief Financial Officer", "Chief Executive Officer"), ("Chief Executive Officer", "Chief People Officer"),
-    ("Chief Information Security Officer", "Chief Financial Officer"), ("department head", "team lead"),
-    ("Security department", "Finance department"), ("Finance department", "Legal department"),
-    ("People department", "Security department"), ("Legal department", "People department"),
-    ("EMEA", "APAC"), ("APAC", "AMER"), ("AMER", "EMEA"), ("manager", "director"),
-    ("employees", "contractors"), ("Employees", "Contractors"), ("customers", "vendors"),
-    ("weekly", "monthly"), ("monthly", "quarterly"), ("annual", "monthly"), ("GitLab", "GitHub"),
-    ("team members", "contractors"), ("Team members", "Contractors"),
+    ("Chief Financial Officer", "Chief Executive Officer"),
+    ("Chief Executive Officer", "Chief People Officer"),
+    ("Chief Information Security Officer", "Chief Financial Officer"),
+    ("department head", "team lead"),
+    ("Security department", "Finance department"),
+    ("Finance department", "Legal department"),
+    ("People department", "Security department"),
+    ("Legal department", "People department"),
+    ("EMEA", "APAC"),
+    ("APAC", "AMER"),
+    ("AMER", "EMEA"),
+    ("manager", "director"),
+    ("employees", "contractors"),
+    ("Employees", "Contractors"),
+    ("customers", "vendors"),
+    ("weekly", "monthly"),
+    ("monthly", "quarterly"),
+    ("annual", "monthly"),
+    ("GitLab", "GitHub"),
+    ("team members", "contractors"),
+    ("Team members", "Contractors"),
 )
 
 
@@ -136,7 +174,13 @@ def _corrupt_number(sentence: str, rng: random.Random) -> str | None:
     except ValueError:
         return None
     changed = value * rng.choice((2, 3, 0.5)) if value >= 10 else value + rng.choice((2, 3, 5))
-    text = f"{changed:,.1f}".rstrip("0").rstrip(".") if "." in raw else f"{round(changed):,}" if "," in raw else str(round(changed))
+    text = (
+        f"{changed:,.1f}".rstrip("0").rstrip(".")
+        if "." in raw
+        else f"{round(changed):,}"
+        if "," in raw
+        else str(round(changed))
+    )
     if text == raw:
         return None
     return sentence[: match.start()] + text + sentence[match.end() :]
@@ -177,10 +221,15 @@ def build_injected_samples(chunks: list[tuple[str, str, str]], *, seed: int = 13
     def add(index: int, kind: str, claim: str, hallucinated: bool, document_id: str, text: str) -> None:
         samples.append(
             VerifierSample(
-                id=f"injected-{index}-{kind}", source="injected", group=document_id, question="",
-                response=claim, evidence=[EvidenceItem("E1", text, uuid.UUID(document_id))],
+                id=f"injected-{index}-{kind}",
+                source="injected",
+                group=document_id,
+                question="",
+                response=claim,
+                evidence=[EvidenceItem("E1", text, uuid.UUID(document_id))],
                 hallucinated_spans=[(0, len(claim))] if hallucinated else [],
-                response_hallucinated=hallucinated, error_type=kind,
+                response_hallucinated=hallucinated,
+                error_type=kind,
             )
         )
 
@@ -197,7 +246,9 @@ def build_injected_samples(chunks: list[tuple[str, str, str]], *, seed: int = 13
     return samples
 
 
-def split_by_group(samples: list[VerifierSample], *, train_share: float = 0.5, seed: int = 3) -> tuple[list[VerifierSample], list[VerifierSample]]:
+def split_by_group(
+    samples: list[VerifierSample], *, train_share: float = 0.5, seed: int = 3
+) -> tuple[list[VerifierSample], list[VerifierSample]]:
     """Split so that samples built from the same source material stay on the same side."""
     groups = sorted({s.group for s in samples})
     random.Random(seed).shuffle(groups)  # noqa: S311

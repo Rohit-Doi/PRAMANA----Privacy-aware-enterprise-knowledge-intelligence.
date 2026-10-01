@@ -58,7 +58,19 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         structlog.contextvars.clear_contextvars()
         structlog.contextvars.bind_contextvars(request_id=request_id)
         started = time.perf_counter()
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        except Exception as exc:
+            # Handled here, inside the CORS layer, so that the browser can read the error response.
+            # Internal details are logged, never returned.
+            log.exception("app.unhandled", error=repr(exc))
+            response = problem(
+                500,
+                "internal_error",
+                "Internal error",
+                "An unexpected error occurred. Quote the request id when reporting it.",
+                request_id,
+            )
         elapsed = time.perf_counter() - started
 
         route = request.scope.get("route")

@@ -7,6 +7,7 @@ number of workers can run without a broker and without ever taking the same job 
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import os
 import socket
 import uuid
@@ -84,7 +85,7 @@ async def _report(job_id: uuid.UUID, stage: str, percent: int, message: str) -> 
         job.events = [*job.events, event][-50:]
 
 
-async def run_job(job_id: uuid.UUID, pipeline: IngestionPipeline) -> bool:
+async def run_job(job_id: uuid.UUID, pipeline: IngestionPipeline, *, build_graph: bool = True) -> bool:
     async with session_scope() as db:
         job = await db.get(IngestionJob, job_id)
         if job is None:
@@ -95,7 +96,7 @@ async def run_job(job_id: uuid.UUID, pipeline: IngestionPipeline) -> bool:
         await _report(job_id, stage, percent, message)
 
     try:
-        result = await pipeline.ingest(document_id, progress=progress)
+        result = await pipeline.ingest(document_id, progress=progress, build_graph=build_graph)
     except Exception as exc:
         log.warning("job.failed", job_id=str(job_id), document_id=str(document_id), error=repr(exc))
         async with session_scope() as db:
@@ -127,10 +128,8 @@ async def worker_loop(pipeline: IngestionPipeline, stop: asyncio.Event, *, poll_
             job_id = await claim_next(name)
             if job_id is None:
                 idle_cycles += 1
-                try:
+                with contextlib.suppress(TimeoutError):
                     await asyncio.wait_for(stop.wait(), timeout=poll_seconds)
-                except TimeoutError:
-                    pass
                 continue
             idle_cycles = 1
             await run_job(job_id, pipeline)

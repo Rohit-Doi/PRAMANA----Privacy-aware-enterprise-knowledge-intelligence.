@@ -52,7 +52,9 @@ class RetrievalModels:
                     log.info("model.load", kind="sparse", name=name)
                     # Load straight from the cached snapshot when it exists: the BM25 "model" is a set
                     # of stop-word lists, and this avoids a hub lookup that fails when offline.
-                    snapshots = self._settings.cache_dir / "fastembed" / f"models--{name.replace('/', '--')}" / "snapshots"
+                    snapshots = (
+                        self._settings.cache_dir / "fastembed" / f"models--{name.replace('/', '--')}" / "snapshots"
+                    )
                     cached = sorted(p for p in snapshots.glob("*") if p.is_dir()) if snapshots.is_dir() else []
                     if cached:
                         self._sparse = SparseTextEmbedding(name, specific_model_path=str(cached[-1]))

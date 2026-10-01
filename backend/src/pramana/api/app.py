@@ -25,8 +25,11 @@ from pramana.api.routers import (
     verify,
 )
 from pramana.knowledge.jobs import worker_loop
-from pramana.runtime import start_runtime, stop_runtime
+from pramana.runtime import Runtime, start_runtime, stop_runtime
 from pramana.shared.config import get_settings
+from pramana.shared.logging import get_logger
+
+log = get_logger(__name__)
 
 DESCRIPTION = """
 Privacy-aware enterprise knowledge platform.
@@ -47,11 +50,28 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         # One process is enough for a single machine: uploads are ingested by this background task.
         # For more throughput, set EMBEDDED_WORKER=false and run `python -m pramana.worker` separately.
         worker = asyncio.create_task(worker_loop(runtime.services.pipeline, stop))
+    warm_up: asyncio.Task[None] | None = None
+    if runtime.settings.warm_up_models:
+        # Load the local models in the background so the first question is not the slow one.
+        warm_up = asyncio.create_task(_warm_up(runtime))
     yield
     stop.set()
+    if warm_up is not None:
+        warm_up.cancel()
     if worker is not None:
         await worker
     await stop_runtime()
+
+
+async def _warm_up(runtime: Runtime) -> None:
+    try:
+        await runtime.services.models.warm_up()
+        await asyncio.to_thread(runtime.services.pii.analyze, "Warm up for Jane Doe")
+        await asyncio.to_thread(runtime.services.extractor.extract_fast, ["Warm up."])
+        await runtime.services.detectors.warm_up()
+        log.info("models.ready")
+    except Exception as exc:  # the models still load on first use
+        log.warning("models.warm_up_failed", error=repr(exc))
 
 
 def create_app() -> FastAPI:

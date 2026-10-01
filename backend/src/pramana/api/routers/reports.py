@@ -133,7 +133,7 @@ async def review_queue(
     if status != "all":
         query = query.where(ReviewItem.status == status)
     rows = (await db.execute(query)).all()
-    comments = {}
+    comments: dict[uuid.UUID, dict[str, Any]] = {}
     if rows:
         feedback = await db.execute(
             select(Feedback.run_id, Feedback.comment, Feedback.rating)
@@ -275,16 +275,19 @@ async def analytics(_: Analyst, db: DbSession, days: Days = 30) -> dict[str, Any
         .group_by(Department.name)
         .order_by(func.count().desc())
     )
+    # Expressions with bound values are labelled and grouped by label: repeating the expression
+    # in GROUP BY would bind the values a second time and Postgres would not see them as equal.
+    route = QueryRun.explanation["route"].astext.label("route")
     by_route = await db.execute(
-        select(QueryRun.explanation["route"].astext, func.count())
-        .where(*queries, QueryRun.outcome == "answered")
-        .group_by(QueryRun.explanation["route"].astext)
+        select(route, func.count()).where(*queries, QueryRun.outcome == "answered").group_by("route")
     )
-    bucket = case((QueryRun.trust_score >= 80, "high"), (QueryRun.trust_score >= 60, "medium"), else_="low")
-    trust_buckets = dict(
+    bucket = case((QueryRun.trust_score >= 80, "high"), (QueryRun.trust_score >= 60, "medium"), else_="low").label(
+        "bucket"
+    )
+    trust_buckets: dict[str, int] = dict(
         (
             await db.execute(
-                select(bucket, func.count()).where(*queries, QueryRun.trust_score.is_not(None)).group_by(bucket)
+                select(bucket, func.count()).where(*queries, QueryRun.trust_score.is_not(None)).group_by("bucket")
             )
         ).all()
     )

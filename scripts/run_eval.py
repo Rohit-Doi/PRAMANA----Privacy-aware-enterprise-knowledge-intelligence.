@@ -40,8 +40,12 @@ async def main() -> int:
             print(f"\n=== {name}", flush=True)
             result = await SUITES[name](runtime, limit=args.limit)
             await save_eval_run(
-                suite=result.suite, sample_count=result.sample_count, metrics=result.metrics,
-                gates=result.gates, notes=result.notes, started_at=started_at,
+                suite=result.suite,
+                sample_count=result.sample_count,
+                metrics=result.metrics,
+                gates=result.gates,
+                notes=result.notes,
+                started_at=started_at,
                 config={"limit": args.limit, "policy_version": runtime.policy.loaded_version},
             )
             stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -50,8 +54,12 @@ async def main() -> int:
                 encoding="utf-8",
             )
             for criterion in result.gates:
-                limit = f">= {criterion['minimum']}" if criterion["minimum"] is not None else f"<= {criterion['maximum']}"
-                print(f"  {'PASS' if criterion['passed'] else 'FAIL'}  {criterion['name']}: {criterion['value']} (target {limit})")
+                limit = (
+                    f">= {criterion['minimum']}" if criterion["minimum"] is not None else f"<= {criterion['maximum']}"
+                )
+                print(
+                    f"  {'PASS' if criterion['passed'] else 'FAIL'}  {criterion['name']}: {criterion['value']} (target {limit})"
+                )
             all_passed = all_passed and result.passed
     finally:
         await stop_runtime()

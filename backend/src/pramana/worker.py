@@ -7,6 +7,7 @@ should not share a process with request handling. Workers coordinate through the
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import signal
 
 from pramana.knowledge.jobs import worker_loop
@@ -18,10 +19,9 @@ async def main() -> None:
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
     for signum in (signal.SIGINT, signal.SIGTERM):
-        try:
+        # Windows has no loop signal handlers; Ctrl+C raises KeyboardInterrupt there instead.
+        with contextlib.suppress(NotImplementedError):
             loop.add_signal_handler(signum, stop.set)
-        except NotImplementedError:  # Windows: Ctrl+C raises KeyboardInterrupt instead
-            pass
     try:
         await worker_loop(runtime.services.pipeline, stop)
     finally:
@@ -29,7 +29,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    try:
+    with contextlib.suppress(KeyboardInterrupt):
         asyncio.run(main())
-    except KeyboardInterrupt:
-        pass

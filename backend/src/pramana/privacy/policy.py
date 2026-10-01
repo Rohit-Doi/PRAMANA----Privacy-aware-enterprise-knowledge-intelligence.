@@ -204,7 +204,8 @@ class PolicyStore:
     ) -> PolicyVersion:
         """Snapshot the roles table and config into a new active version."""
         previous = await self.active()
-        rego_text = rego or (previous.rego if previous else Path(REGO_PATH).read_text(encoding="utf-8"))
+        # The bundled policy file is a few kilobytes and is read once, when the first version is created.
+        rego_text = rego or (previous.rego if previous else Path(REGO_PATH).read_text(encoding="utf-8"))  # noqa: ASYNC240
         merged_config = {
             **DEFAULT_CONFIG,
             **((previous.data.get("config") or {}) if previous else {}),

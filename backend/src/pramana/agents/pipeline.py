@@ -124,9 +124,10 @@ class QueryPipeline:
                     await db.flush()
                     conversation_id = conversation.id
                 else:
-                    conversation = await db.get(Conversation, conversation_id)
-                    if conversation is None or conversation.user_id != principal.user_id:
+                    existing = await db.get(Conversation, conversation_id)
+                    if existing is None or existing.user_id != principal.user_id:
                         raise NotFound("Conversation not found")
+                    conversation = existing
                     previous_question = (
                         await db.execute(
                             select(Message.content)

@@ -10,6 +10,7 @@ from pramana.shared.text import split_sentences
 
 CITATION_GROUP = re.compile(r"\s*\[((?:E\d+)(?:\s*[,;]\s*E\d+)*)\]")
 _ONLY_CITATIONS = re.compile(r"^(?:\s*\[(?:E\d+)(?:\s*[,;]\s*E\d+)*\]\s*[.]?)+$")
+_LEADING_CITATIONS = re.compile(r"^(?:\s*\[(?:E\d+)(?:\s*[,;]\s*E\d+)*\])+\s*")
 _BULLET = re.compile(r"^\s*(?:[-*•]|\d{1,2}[.)])\s+")
 _HAS_WORD = re.compile(r"[A-Za-z]{2}")
 
@@ -57,6 +58,19 @@ def extract_claims(answer: str) -> list[ClaimDraft]:
                 previous.raw = answer[previous.start : end]
                 previous.end = end
             continue
+        leading = _LEADING_CITATIONS.match(raw)
+        if leading and claims:
+            # "… encrypted. [E2] Phones are …": the splitter put the marker at the head of the next
+            # sentence, but a marker never precedes the statement it supports.
+            previous = claims[-1]
+            for ref in citations_in(leading.group(0)):
+                if ref not in previous.cited:
+                    previous.cited.append(ref)
+            previous.end = start + leading.end()
+            previous.raw = answer[previous.start : previous.end].rstrip()
+            previous.end = previous.start + len(previous.raw)
+            start += leading.end()
+            raw = answer[start:end]
         text = strip_citations(_BULLET.sub("", raw))
         if not _HAS_WORD.search(text):
             continue

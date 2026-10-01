@@ -68,7 +68,7 @@ class Detectors:
 
                     name = self._settings.nli_model
                     log.info("model.load", kind="nli", name=name)
-                    tokenizer = AutoTokenizer.from_pretrained(name)
+                    tokenizer = AutoTokenizer.from_pretrained(name)  # type: ignore[no-untyped-call]
                     model = AutoModelForSequenceClassification.from_pretrained(name).eval()
                     labels = {label.lower(): index for index, label in model.config.id2label.items()}
                     self._nli = (tokenizer, model, labels)

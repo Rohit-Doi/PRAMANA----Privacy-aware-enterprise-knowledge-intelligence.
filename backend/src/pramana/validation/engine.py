@@ -185,13 +185,13 @@ class ValidationEngine:
         # "the H1 2026 calibration was chaired by …" draws on two places in the same passage.
         widened: set[int] = set()
         weak = [
-            d for d in checkable if max(grounding[(d.ordinal, r)] for r in candidates[d.ordinal]) < SUPPORTING_SOURCE_THRESHOLD
+            d
+            for d in checkable
+            if max(grounding[(d.ordinal, r)] for r in candidates[d.ordinal]) < SUPPORTING_SOURCE_THRESHOLD
         ]
         if weak:
             wide_keys = [(d.ordinal, ref) for d in weak for ref in candidates[d.ordinal][:WIDE_CONTEXT_PASSAGES]]
-            wide = {
-                key: natural_text(headers[key[1]] + by_ref[key[1]].text[:WIDE_CONTEXT_CHARS]) for key in wide_keys
-            }
+            wide = {key: natural_text(headers[key[1]] + by_ref[key[1]].text[:WIDE_CONTEXT_CHARS]) for key in wide_keys}
             wide_scores = await self._detectors.grounding([(wide[key], texts[key[0]]) for key in wide_keys])
             for key, score in zip(wide_keys, wide_scores, strict=True):
                 if score > grounding[key]:
@@ -461,13 +461,23 @@ def source_header(evidence: Any) -> str:
     if not title and not section:
         return ""
     if section and section != title and not section.startswith(title):
-        return f"From the document \"{title}\", section \"{section}\":\n" if title else f"Section \"{section}\":\n"
-    return f"From the document \"{section or title}\":\n"
+        return f'From the document "{title}", section "{section}":\n' if title else f'Section "{section}":\n'
+    return f'From the document "{section or title}":\n'
 
 
 _SURROGATE_NAMES = (
-    "Alex Morgan", "Jordan Blake", "Casey Rivera", "Taylor Quinn", "Morgan Ellis", "Riley Harper",
-    "Jamie Lawson", "Avery Collins", "Cameron Doyle", "Dana Whitfield", "Reese Calloway", "Skyler Bennett",
+    "Alex Morgan",
+    "Jordan Blake",
+    "Casey Rivera",
+    "Taylor Quinn",
+    "Morgan Ellis",
+    "Riley Harper",
+    "Jamie Lawson",
+    "Avery Collins",
+    "Cameron Doyle",
+    "Dana Whitfield",
+    "Reese Calloway",
+    "Skyler Bennett",
 )
 _PLACEHOLDER = re.compile(r"\[(?:(REDACTED):([A-Z_]+)|([A-Z_]+)_(\d+))\]")
 

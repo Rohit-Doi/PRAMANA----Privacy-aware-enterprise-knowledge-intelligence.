@@ -51,14 +51,18 @@ async def corpus_chunks(handbook_limit: int) -> list[tuple[str, str, str]]:
     """Passages used for injected-error samples: every Aurelia policy plus a handbook sample."""
     async with session_scope() as db:
         aurelia = await db.execute(
-            select(Chunk.id, Chunk.document_id, Chunk.text).join(Document, Document.id == Chunk.document_id)
-            .where(Document.collection == "aurelia", Document.status == "ready").order_by(Chunk.id)
+            select(Chunk.id, Chunk.document_id, Chunk.text)
+            .join(Document, Document.id == Chunk.document_id)
+            .where(Document.collection == "aurelia", Document.status == "ready")
+            .order_by(Chunk.id)
         )
         handbook = await db.execute(
-            select(Chunk.id, Chunk.document_id, Chunk.text).join(Document, Document.id == Chunk.document_id)
+            select(Chunk.id, Chunk.document_id, Chunk.text)
+            .join(Document, Document.id == Chunk.document_id)
             .where(Document.collection == "handbook", Document.status == "ready", Chunk.token_count >= 120)
             # A fixed pseudo-random order: the same passages are sampled on every run.
-            .order_by(func.md5(cast(Chunk.id, String))).limit(handbook_limit)
+            .order_by(func.md5(cast(Chunk.id, String)))
+            .limit(handbook_limit)
         )
         return [(str(c), str(d), t) for c, d, t in [*aurelia.all(), *handbook.all()]]
 
@@ -118,7 +122,9 @@ async def main() -> int:
         injected = build_injected_samples(await corpus_chunks(args.handbook_chunks))
         rng_order = sorted(injected, key=lambda s: s.id)
         injected = rng_order[:: max(1, len(rng_order) // args.injected)][: args.injected]
-        print(f"samples: {len(ragtruth)} RAGTruth responses, {len(injected)} injected sentences, {len(halueval)} HaluEval answers")
+        print(
+            f"samples: {len(ragtruth)} RAGTruth responses, {len(injected)} injected sentences, {len(halueval)} HaluEval answers"
+        )
 
         ragtruth_train, ragtruth_test = split_by_group(ragtruth)
         injected_train, injected_test = split_by_group(injected)
@@ -141,7 +147,12 @@ async def main() -> int:
     calibrator, source_counts = fit(train_rows)
     threshold, threshold_stats = choose_threshold(train_rows, calibrator)
     print(f"\nfitted on {len(train_rows)} sentences {source_counts}; threshold {threshold:.2f} {threshold_stats}")
-    print("coefficients:", {k: round(v, 3) for k, v in calibrator.coefficients.items()}, "intercept", round(calibrator.intercept, 3))
+    print(
+        "coefficients:",
+        {k: round(v, 3) for k, v in calibrator.coefficients.items()},
+        "intercept",
+        round(calibrator.intercept, 3),
+    )
 
     # ── Evaluate on held-out data ───────────────────────────────────────
     rescored = rescore(test_rows, calibrator, threshold)
@@ -153,8 +164,10 @@ async def main() -> int:
     overall = summarize([r for r in rescored if not r.source.startswith("halueval")])
 
     def line(name: str, block: dict) -> str:
-        return (f"{name:<15} catch {block['catch_rate']:.3f}  false alarm {block['false_alarm_rate']:.3f}  "
-                f"precision {block['precision']:.3f}  F1 {block['f1']:.3f}")
+        return (
+            f"{name:<15} catch {block['catch_rate']:.3f}  false alarm {block['false_alarm_rate']:.3f}  "
+            f"precision {block['precision']:.3f}  F1 {block['f1']:.3f}"
+        )
 
     for source, summary in results.items():
         print(f"\n== {source}: {summary['sentences']} sentences, {summary['responses']} responses (held out)")
@@ -167,10 +180,14 @@ async def main() -> int:
             print("  catch rate by error type:", json.dumps(summary["catch_rate_by_error_type"]))
 
     calibrator = Calibrator(
-        coefficients=calibrator.coefficients, intercept=calibrator.intercept, version=calibrator.version,
+        coefficients=calibrator.coefficients,
+        intercept=calibrator.intercept,
+        version=calibrator.version,
         threshold=threshold,
         metrics={
-            "trained_on_sentences": len(train_rows), "sources": source_counts, **threshold_stats,
+            "trained_on_sentences": len(train_rows),
+            "sources": source_counts,
+            **threshold_stats,
             "held_out": {
                 source: {
                     "sentences": s["sentences"],
@@ -187,35 +204,47 @@ async def main() -> int:
     print(f"\nsaved {MODEL_PATH}")
 
     # ── Record for the reports page ─────────────────────────────────────
-    config = {"calibrator": calibrator.version, "threshold": threshold, "models": {
-        "grounding": settings.grounding_model, "nli": settings.nli_model, "spans": settings.span_model}}
+    config = {
+        "calibrator": calibrator.version,
+        "threshold": threshold,
+        "models": {"grounding": settings.grounding_model, "nli": settings.nli_model, "spans": settings.span_model},
+    }
     if "injected" in results:
         cascade = results["injected"]["sentence_level"]["cascade"]
         await save_eval_run(
-            suite="verifier_injected", sample_count=results["injected"]["sentences"], metrics=results["injected"],
+            suite="verifier_injected",
+            sample_count=results["injected"]["sentences"],
+            metrics=results["injected"],
             gates=[
                 gate("catch rate on injected errors", cascade["catch_rate"], minimum=0.90),
                 gate("false alarm rate", cascade["false_alarm_rate"], maximum=0.10),
                 gate("calibration error", results["injected"]["calibration_error"], maximum=0.10),
             ],
-            config=config, started_at=started_at,
+            config=config,
+            started_at=started_at,
             notes="Sentences from this corpus, unchanged or corrupted (number, meaning, entity, unrelated). Held-out half.",
         )
     if "ragtruth" in results:
         await save_eval_run(
-            suite="verifier_ragtruth", sample_count=results["ragtruth"]["sentences"], metrics=results["ragtruth"],
+            suite="verifier_ragtruth",
+            sample_count=results["ragtruth"]["sentences"],
+            metrics=results["ragtruth"],
             gates=[
                 gate("response-level F1", results["ragtruth"]["response_level"]["cascade"]["f1"], minimum=0.70),
                 gate("AUROC", results["ragtruth"]["auroc"]["cascade"], minimum=0.80),
             ],
-            config=config, started_at=started_at,
+            config=config,
+            started_at=started_at,
             notes="RAGTruth test split (QA and summary), human-annotated spans. Held-out half, split by source document.",
         )
     if "halueval" in results:
         await save_eval_run(
-            suite="verifier_halueval", sample_count=results["halueval"]["responses"], metrics=results["halueval"],
+            suite="verifier_halueval",
+            sample_count=results["halueval"]["responses"],
+            metrics=results["halueval"],
             gates=[gate("response-level F1", results["halueval"]["response_level"]["cascade"]["f1"], minimum=0.70)],
-            config=config, started_at=started_at,
+            config=config,
+            started_at=started_at,
             notes="HaluEval QA samples. Not used for fitting.",
         )
     print("overall (RAGTruth + injected, held out):", json.dumps(overall["sentence_level"]["cascade"]))

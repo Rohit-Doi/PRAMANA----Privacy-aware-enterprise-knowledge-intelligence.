@@ -301,9 +301,9 @@ class HybridRetriever:
 
         started = time.perf_counter()
         passages = [
-            embedding_text(
-                title=rows[cid][1].title, section_path=rows[cid][0].section_path, text=rows[cid][0].text
-            )[: settings.rerank_max_chars]
+            embedding_text(title=rows[cid][1].title, section_path=rows[cid][0].section_path, text=rows[cid][0].text)[
+                : settings.rerank_max_chars
+            ]
             for cid, _ in fused
         ]
         if options.use_rerank:
@@ -408,7 +408,7 @@ class HybridRetriever:
         evidence: list[Evidence] = []
         for index, group in enumerate(groups, start=1):
             chunks: list[Chunk] = sorted(group["chunks"], key=lambda c: c.ordinal)
-            document: Document = group["document"]
+            document = group["document"]
             text = _merge_text(chunks)
             found_by = [name for name in rankings if any(c.id in rank_of[name] for c in chunks)]
             ranks = {name: min(rank_of[name][c.id] for c in chunks if c.id in rank_of[name]) for name in found_by}

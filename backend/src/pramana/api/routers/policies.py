@@ -55,7 +55,7 @@ class SimulateRequest(BaseModel):
     region: str = "global"
 
 
-LEVELS = [
+LEVELS: list[dict[str, Any]] = [
     {"rank": 0, "name": "PUBLIC", "description": "Approved for anyone."},
     {"rank": 1, "name": "INTERNAL", "description": "For all staff."},
     {"rank": 2, "name": "CONFIDENTIAL", "description": "Owning department, and roles with a cross-department need."},
@@ -139,7 +139,7 @@ async def simulate(
     scope = context.scope
 
     # How many documents of each sensitivity the user can see, of how many exist.
-    visible = dict(
+    visible: dict[int, int] = dict(
         (
             await db.execute(
                 select(Document.sensitivity_rank, func.count())
@@ -148,7 +148,7 @@ async def simulate(
             )
         ).all()
     )
-    total = dict(
+    total: dict[int, int] = dict(
         (
             await db.execute(
                 select(Document.sensitivity_rank, func.count())

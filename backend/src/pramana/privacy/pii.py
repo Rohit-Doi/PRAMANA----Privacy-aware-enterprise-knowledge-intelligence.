@@ -12,6 +12,7 @@ Two classes of personal data are treated differently:
 
 from __future__ import annotations
 
+import logging
 import re
 import threading
 from collections import Counter
@@ -126,6 +127,24 @@ def _custom_recognizers() -> list[PatternRecognizer]:
             context=["ssn", "social", "security"],
         ),
         PatternRecognizer(
+            # The stock recogniser only accepts public top-level domains, so addresses on internal
+            # or reserved ones (name@corp.internal, name@company.example) would slip through.
+            supported_entity="EMAIL_ADDRESS",
+            patterns=[Pattern("any mailbox", r"(?<![\w.+-])[\w.+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+(?![\w-])", 0.9)],
+        ),
+        PatternRecognizer(
+            # The stock recogniser validates against national numbering plans and scores low without
+            # context; a written number in international or bracketed form is recognised by shape.
+            supported_entity="PHONE_NUMBER",
+            patterns=[
+                Pattern("international", r"(?<![\w+])\+\d{1,3}(?:[\s.-]?(?:\(\d{2,4}\)|\d{2,4})){2,4}(?!\w)", 0.7),
+                Pattern("area code in brackets", r"(?<!\w)\(\d{3,4}\)\s?\d{3,4}[\s.-]\d{3,4}(?!\w)", 0.65),
+                # Three digit groups alone are weak evidence (they could be any figures in a table).
+                Pattern("national", r"(?<![\w.-])\d{3,5}[\s.-]\d{3,4}[\s.-]\d{3,4}(?![\w-])", 0.3),
+            ],
+            context=["phone", "telephone", "tel", "mobile", "cell", "call", "fax", "contact", "extension"],
+        ),
+        PatternRecognizer(
             supported_entity="IN_AADHAAR",
             patterns=[Pattern("aadhaar", r"\b[2-9]\d{3}\s\d{4}\s\d{4}\b", 0.7)],
             context=["aadhaar", "uidai"],
@@ -154,6 +173,8 @@ class PiiEngine:
         if self._analyzer is None:
             with self._lock:
                 if self._analyzer is None:
+                    # Presidio warns once per unsupported-language recogniser and unmapped NER label.
+                    logging.getLogger("presidio-analyzer").setLevel(logging.ERROR)
                     nlp = NlpEngineProvider(
                         nlp_configuration={
                             "nlp_engine_name": "spacy",

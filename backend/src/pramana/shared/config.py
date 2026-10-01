@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     frontend_origin: str = "http://localhost:3000"
     embedded_worker: bool = True
+    warm_up_models: bool = True
 
     # ── LLM providers ────────────────────────────────────────────────────
     google_api_key: SecretStr | None = None

@@ -5,7 +5,7 @@
     python scripts/ingest_corpus.py --limit 50 --no-graph
 
 Idempotent: a file already registered (same content, same department) is skipped, and only
-documents that are not yet "ready" are ingested.
+queued ingestion jobs are run. Stop the API server first, or its worker will share the queue.
 """
 
 from __future__ import annotations
@@ -15,11 +15,12 @@ import asyncio
 import sys
 import time
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from pramana.governance.models import AppSetting
 from pramana.knowledge.connectors import manifest_documents, sql_employee_documents
-from pramana.knowledge.models import Document
+from pramana.knowledge.jobs import run_job, worker_name
+from pramana.knowledge.models import Document, IngestionJob
 from pramana.knowledge.service import DocumentService, NewDocument
 from pramana.runtime import KNOWN_NAMES_SETTING, start_runtime, stop_runtime
 from pramana.shared.config import get_settings
@@ -81,35 +82,42 @@ def _fields(new: NewDocument) -> dict[str, object]:
 
 
 async def ingest_pending(collections: set[str] | None, limit: int | None, build_graph: bool) -> tuple[int, int]:
+    """Work through the queued ingestion jobs, in a sensible order, in this process."""
     runtime = await start_runtime()
     pipeline = runtime.services.pipeline
     async with session_scope() as db:
-        # "processing" rows are leftovers of an interrupted run: this script is the only writer.
-        query = select(Document.id, Document.collection, Document.title).where(
-            Document.status.in_(("pending", "failed", "processing"))
-        )
-        rows = (await db.execute(query)).all()
+        rows = (
+            await db.execute(
+                select(IngestionJob.id, Document.collection, Document.title)
+                .join(Document, Document.id == IngestionJob.document_id)
+                # "running" rows are leftovers of an interrupted run: this script is the only worker.
+                .where(IngestionJob.status.in_(("queued", "running")), Document.status != "deleted")
+            )
+        ).all()
     if collections:
         rows = [r for r in rows if r.collection in collections]
     rows.sort(key=lambda r: (ORDER.index(r.collection) if r.collection in ORDER else len(ORDER), r.title))
     if limit:
         rows = rows[:limit]
 
-    ok = failed = chunks = 0
+    ok = failed = 0
     started = time.perf_counter()
     for index, row in enumerate(rows, start=1):
-        try:
-            result = await pipeline.ingest(row.id, build_graph=build_graph)
+        async with session_scope() as db:
+            await db.execute(
+                update(IngestionJob)
+                .where(IngestionJob.id == row.id)
+                .values(status="running", locked_by=worker_name(), started_at=utcnow())
+            )
+        if await run_job(row.id, pipeline, build_graph=build_graph):
             ok += 1
-            chunks += result.chunk_count
-        except Exception as exc:
+        else:
             failed += 1
-            print(f"  FAILED {row.collection}: {row.title[:70]!r}: {exc}", flush=True)
+            print(f"  FAILED {row.collection}: {row.title[:70]!r}", flush=True)
         if index % 25 == 0 or index == len(rows):
             elapsed = time.perf_counter() - started
             print(
-                f"  {index}/{len(rows)} documents, {chunks} passages, {elapsed:.0f}s "
-                f"({elapsed / index:.2f}s per document), {failed} failed",
+                f"  {index}/{len(rows)} documents, {elapsed:.0f}s ({elapsed / index:.2f}s per document), {failed} failed",
                 flush=True,
             )
     return ok, failed

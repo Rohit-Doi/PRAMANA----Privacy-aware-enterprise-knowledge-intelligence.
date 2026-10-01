@@ -91,21 +91,23 @@ async def retrieval_suite(runtime: Runtime, *, limit: int | None = None) -> Suit
                 item["question"], principal=principal, scope=scope, options=options
             )
             latencies.append((time.perf_counter() - started) * 1000)
-            rank = next(
-                (i for i, e in enumerate(result.evidence, start=1) if satisfies(e.text, item["expect"])), None
-            )
+            rank = next((i for i, e in enumerate(result.evidence, start=1) if satisfies(e.text, item["expect"])), None)
             ranks.append(rank)
         table[name] = {
-            "recall@1": round(recall_at(ranks, 1), 4), "recall@3": round(recall_at(ranks, 3), 4),
-            "recall@5": round(recall_at(ranks, 5), 4), "recall@8": round(recall_at(ranks, 8), 4),
-            "mrr": round(mrr(ranks), 4), "ndcg@8": round(ndcg_at(ranks, 8), 4),
+            "recall@1": round(recall_at(ranks, 1), 4),
+            "recall@3": round(recall_at(ranks, 3), 4),
+            "recall@5": round(recall_at(ranks, 5), 4),
+            "recall@8": round(recall_at(ranks, 8), 4),
+            "mrr": round(mrr(ranks), 4),
+            "ndcg@8": round(ndcg_at(ranks, 8), 4),
             "latency_p50_ms": round(percentile(latencies, 0.5) or 0),
             "missed": [item["id"] for item, rank in zip(items, ranks, strict=True) if rank is None],
         }
         print(f"  retrieval [{name}] recall@8 {table[name]['recall@8']:.3f} mrr {table[name]['mrr']:.3f}", flush=True)
     full = table["full (with rerank)"]
     return SuiteResult(
-        suite="retrieval", sample_count=len(items),
+        suite="retrieval",
+        sample_count=len(items),
         metrics={"configurations": table, "corpus_passages": await runtime.services.vectors.count()},
         gates=[
             gate("recall@8 (full pipeline)", full["recall@8"], minimum=0.90),
@@ -132,7 +134,8 @@ async def access_suite(runtime: Runtime, *, limit: int | None = None) -> SuiteRe
         stats = per_role.setdefault(role, {"unauthorized": 0, "leaks": 0, "authorized": 0, "found": 0})
         for canary in canaries:
             may_read = scope.permits(
-                department=canary["department"], sensitivity_rank=int(Sensitivity.parse(canary["sensitivity"])),
+                department=canary["department"],
+                sensitivity_rank=int(Sensitivity.parse(canary["sensitivity"])),
                 region=canary["region"],
             )
             result = await runtime.services.retriever.retrieve(canary["question"], principal=principal, scope=scope)
@@ -140,8 +143,9 @@ async def access_suite(runtime: Runtime, *, limit: int | None = None) -> SuiteRe
             exposed = [value for value in canary["secret_values"] if value.lower() in text]
             # Independent of the canary: every returned passage must itself be inside the scope.
             for evidence in result.evidence:
-                if not scope.permits(department=evidence.department, sensitivity_rank=evidence.sensitivity_rank,
-                                     region=evidence.region):
+                if not scope.permits(
+                    department=evidence.department, sensitivity_rank=evidence.sensitivity_rank, region=evidence.region
+                ):
                     out_of_scope.append({"role": role, "canary": canary["id"], "document": evidence.title})
             if may_read:
                 authorized += 1
@@ -155,18 +159,27 @@ async def access_suite(runtime: Runtime, *, limit: int | None = None) -> SuiteRe
                 if exposed:
                     stats["leaks"] += 1
                     leaks.append({"role": role, "canary": canary["id"], "values": exposed})
-        print(f"  access [{role}] unauthorized {stats['unauthorized']} leaks {stats['leaks']} "
-              f"authorized {stats['authorized']} found {stats['found']}", flush=True)
+        print(
+            f"  access [{role}] unauthorized {stats['unauthorized']} leaks {stats['leaks']} "
+            f"authorized {stats['authorized']} found {stats['found']}",
+            flush=True,
+        )
 
     false_permit = len(leaks) / unauthorized if unauthorized else 0.0
     recall = authorized_found / authorized if authorized else 0.0
     return SuiteResult(
-        suite="access_control", sample_count=unauthorized + authorized,
+        suite="access_control",
+        sample_count=unauthorized + authorized,
         metrics={
-            "canaries": len(canaries), "roles": len(principals), "unauthorized_cases": unauthorized,
-            "leaks": leaks, "false_permit_rate": round(false_permit, 6),
-            "out_of_scope_passages": out_of_scope, "authorized_cases": authorized,
-            "authorized_recall": round(recall, 4), "per_role": per_role,
+            "canaries": len(canaries),
+            "roles": len(principals),
+            "unauthorized_cases": unauthorized,
+            "leaks": leaks,
+            "false_permit_rate": round(false_permit, 6),
+            "out_of_scope_passages": out_of_scope,
+            "authorized_cases": authorized,
+            "authorized_recall": round(recall, 4),
+            "per_role": per_role,
         },
         gates=[
             gate("false-permit rate (canary leaks)", false_permit, maximum=0.0),
@@ -247,21 +260,30 @@ async def end_to_end_suite(runtime: Runtime, *, limit: int | None = None, leak_c
     accuracy = correct / len(answerable) if answerable else 0.0
     abstention = correct_abstentions / len(unanswerable) if unanswerable else 0.0
     mean_supported = sum(supported) / len(supported) if supported else 0.0
-    documents = (await _document_count())
+    documents = await _document_count()
     return SuiteResult(
-        suite="end_to_end", sample_count=len(answerable) + len(unanswerable) + checked,
+        suite="end_to_end",
+        sample_count=len(answerable) + len(unanswerable) + checked,
         metrics={
-            "answerable": len(answerable), "answered": answered, "correct": correct,
-            "answer_accuracy": round(accuracy, 4), "wrongly_abstained": abstained_wrongly,
-            "unanswerable": len(unanswerable), "correct_abstentions": correct_abstentions,
+            "answerable": len(answerable),
+            "answered": answered,
+            "correct": correct,
+            "answer_accuracy": round(accuracy, 4),
+            "wrongly_abstained": abstained_wrongly,
+            "unanswerable": len(unanswerable),
+            "correct_abstentions": correct_abstentions,
             "abstention_accuracy": round(abstention, 4),
             "supported_claim_share": round(mean_supported, 4),
             "sentences_removed_by_verifier": removed_sentences,
             "mean_trust": round(sum(trust) / len(trust), 1) if trust else None,
             "latency_p50_ms": round(percentile(latencies, 0.5) or 0),
             "latency_p95_ms": round(percentile(latencies, 0.95) or 0),
-            "llm_calls": llm_calls, "routes": routes, "end_to_end_leak_checks": checked,
-            "end_to_end_leaks": leaked, "failures": wrong, "corpus_documents": documents,
+            "llm_calls": llm_calls,
+            "routes": routes,
+            "end_to_end_leak_checks": checked,
+            "end_to_end_leaks": leaked,
+            "failures": wrong,
+            "corpus_documents": documents,
         },
         gates=[
             gate("answer accuracy", accuracy, minimum=0.85),
@@ -279,4 +301,8 @@ async def _document_count() -> int:
     from sqlalchemy import func
 
     async with session_scope() as db:
-        return int((await db.execute(select(func.count()).select_from(Document).where(Document.status == "ready"))).scalar_one())
+        return int(
+            (
+                await db.execute(select(func.count()).select_from(Document).where(Document.status == "ready"))
+            ).scalar_one()
+        )

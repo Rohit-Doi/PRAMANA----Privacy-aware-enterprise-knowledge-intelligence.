@@ -125,7 +125,7 @@ class DocumentService:
         await self._graph.update_document_labels(str(older.id), {"is_current": False})
 
     # ── Read ────────────────────────────────────────────────────────────
-    async def list(
+    async def list_documents(
         self,
         scope: AccessScope,
         *,

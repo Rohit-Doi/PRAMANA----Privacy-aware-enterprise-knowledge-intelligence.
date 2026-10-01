@@ -11,6 +11,7 @@ import statistics
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import PurePath
+from typing import Any
 
 from bs4 import BeautifulSoup
 
@@ -231,7 +232,7 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
     import pymupdf
 
     try:
-        pdf = pymupdf.open(stream=data, filetype="pdf")
+        pdf: Any = pymupdf.open(stream=data, filetype="pdf")  # type: ignore[no-untyped-call]
     except Exception as exc:
         raise ValidationFailed(f"The PDF could not be opened: {exc}") from exc
 
@@ -328,10 +329,7 @@ def _join_pdf_lines(lines: list[str]) -> str:
     """Re-flow hard-wrapped lines, repairing words hyphenated across a line break."""
     out = lines[0]
     for line in lines[1:]:
-        if out.endswith("-") and line[:1].islower():
-            out = out[:-1] + line
-        else:
-            out = out + " " + line
+        out = out[:-1] + line if out.endswith("-") and line[:1].islower() else out + " " + line
     return out
 
 

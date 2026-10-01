@@ -75,11 +75,16 @@ async def score_samples(
                 hallucinated = bool(sample.response_hallucinated)
             rows.append(
                 ClaimRow(
-                    sample_id=sample.id, source=sample.source, group=sample.group, error_type=sample.error_type,
-                    claim=claim.text, hallucinated=hallucinated,
+                    sample_id=sample.id,
+                    source=sample.source,
+                    group=sample.group,
+                    error_type=sample.error_type,
+                    claim=claim.text,
+                    hallucinated=hallucinated,
                     signals={name: float(claim.signals.get(name, 0.0)) for name in FEATURES},
                     probability=float(claim.signals.get("probability", claim.confidence)),
-                    verdict=str(claim.verdict), v1_score=v1_overlap_score(claim.text, all_evidence),
+                    verdict=str(claim.verdict),
+                    v1_score=v1_overlap_score(claim.text, all_evidence),
                 )
             )
         if index % progress_every == 0 or index == len(samples):
@@ -96,8 +101,11 @@ def rescore(rows: list[ClaimRow], calibrator: Calibrator, threshold: float) -> l
         supported = probability >= threshold and row.signals["numbers_ok"] == 1.0
         out.append(
             ClaimRow(
-                **{**asdict(row), "probability": probability,
-                   "verdict": str(Verdict.SUPPORTED if supported else Verdict.UNSUPPORTED)}
+                **{
+                    **asdict(row),
+                    "probability": probability,
+                    "verdict": str(Verdict.SUPPORTED if supported else Verdict.UNSUPPORTED),
+                }
             )
         )
     return out
@@ -121,7 +129,9 @@ def summarize(rows: list[ClaimRow]) -> dict[str, Any]:
             "grounding_only": auroc([1 - r.signals["grounding"] for r in rows], truth),
             "v1_overlap": auroc([100 - r.v1_score for r in rows], truth),
         },
-        "calibration_error": round(expected_calibration_error([r.probability for r in rows], [not t for t in truth]), 4),
+        "calibration_error": round(
+            expected_calibration_error([r.probability for r in rows], [not t for t in truth]), 4
+        ),
     }
     by_sample: dict[str, list[int]] = {}
     for index, row in enumerate(rows):
@@ -129,7 +139,9 @@ def summarize(rows: list[ClaimRow]) -> dict[str, Any]:
     response_truth = [any(truth[i] for i in indexes) for indexes in by_sample.values()]
     result["responses"] = len(by_sample)
     result["response_level"] = {
-        name: detection_metrics(response_truth, [any(flags[i] for i in indexes) for indexes in by_sample.values()]).as_dict()
+        name: detection_metrics(
+            response_truth, [any(flags[i] for i in indexes) for indexes in by_sample.values()]
+        ).as_dict()
         for name, flags in methods.items()
     }
     kinds = sorted({r.error_type for r in rows if r.error_type and r.error_type != "original"})
