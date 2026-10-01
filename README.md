@@ -204,5 +204,7 @@ cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 * English only: the local models are English models.
 * The free LLM tier limits throughput to a few questions per minute.
 * Answers from restricted material are a quoted sentence: they do not combine passages, and questions whose answer sits in a restricted table are declined.
-* Built and measured on one laptop; not load-tested, and the container images and CI
-  workflow have not yet been run.
+* Built and measured on one laptop; not load-tested. Both container images build and
+  start (web image 293 MB, backend image 3.9 GB with CPU-only PyTorch), but the full
+  `--profile app` stack and the CI workflow have not been run: the development machine
+  had no memory left for the former and the repository has no remote for the latter.
