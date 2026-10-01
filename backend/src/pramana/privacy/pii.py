@@ -26,8 +26,15 @@ from pramana.shared.types import Sensitivity
 
 HIGH_RISK = frozenset(
     {
-        "US_SSN", "CREDIT_CARD", "IBAN_CODE", "US_BANK_NUMBER", "US_PASSPORT",
-        "US_DRIVER_LICENSE", "IN_AADHAAR", "IN_PAN", "BANK_ACCOUNT",
+        "US_SSN",
+        "CREDIT_CARD",
+        "IBAN_CODE",
+        "US_BANK_NUMBER",
+        "US_PASSPORT",
+        "US_DRIVER_LICENSE",
+        "IN_AADHAAR",
+        "IN_PAN",
+        "BANK_ACCOUNT",
     }
 )
 CONTACT = frozenset({"PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "EMPLOYEE_ID", "IP_ADDRESS"})
@@ -36,10 +43,42 @@ ALL_ENTITIES = sorted(HIGH_RISK | CONTACT)
 # Capitalised phrases that statistical NER regularly mistakes for people in policy text.
 _NOT_A_PERSON = frozenset(
     {
-        "policy", "act", "regulation", "framework", "standard", "committee", "board", "team",
-        "department", "group", "program", "plan", "agreement", "procedure", "guideline",
-        "gitlab", "slack", "okta", "google", "zoom", "workday", "vpn", "mfa", "sso", "hipaa",
-        "gdpr", "nist", "soc", "iso", "saas", "ceo", "cfo", "cto", "ciso", "hr", "it",
+        "policy",
+        "act",
+        "regulation",
+        "framework",
+        "standard",
+        "committee",
+        "board",
+        "team",
+        "department",
+        "group",
+        "program",
+        "plan",
+        "agreement",
+        "procedure",
+        "guideline",
+        "gitlab",
+        "slack",
+        "okta",
+        "google",
+        "zoom",
+        "workday",
+        "vpn",
+        "mfa",
+        "sso",
+        "hipaa",
+        "gdpr",
+        "nist",
+        "soc",
+        "iso",
+        "saas",
+        "ceo",
+        "cfo",
+        "cto",
+        "ciso",
+        "hr",
+        "it",
     }
 )
 _TOKEN = re.compile(r"\[(PERSON|EMAIL_ADDRESS|PHONE_NUMBER|EMPLOYEE_ID|IP_ADDRESS)_(\d+)\]")

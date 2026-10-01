@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -10,7 +11,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from pramana import __version__
 from pramana.api.middleware import RateLimitMiddleware, RequestContextMiddleware, install_error_handlers
-from pramana.api.routers import auth, health, users
+from pramana.api.routers import (
+    audit,
+    auth,
+    chat,
+    documents,
+    graph,
+    health,
+    monitoring,
+    policies,
+    reports,
+    users,
+    verify,
+)
+from pramana.knowledge.jobs import worker_loop
 from pramana.runtime import start_runtime, stop_runtime
 from pramana.shared.config import get_settings
 
@@ -25,8 +39,18 @@ Privacy-aware enterprise knowledge platform.
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    app.state.runtime = await start_runtime()
+    runtime = await start_runtime()
+    app.state.runtime = runtime
+    stop = asyncio.Event()
+    worker: asyncio.Task[None] | None = None
+    if runtime.settings.embedded_worker:
+        # One process is enough for a single machine: uploads are ingested by this background task.
+        # For more throughput, set EMBEDDED_WORKER=false and run `python -m pramana.worker` separately.
+        worker = asyncio.create_task(worker_loop(runtime.services.pipeline, stop))
     yield
+    stop.set()
+    if worker is not None:
+        await worker
     await stop_runtime()
 
 
@@ -64,6 +88,6 @@ def create_app() -> FastAPI:
 
 
 # The whole versioned API surface, in one place.
-API_MODULES = (auth, users)
+API_MODULES = (auth, users, chat, verify, documents, graph, policies, audit, monitoring, reports)
 
 app = create_app()

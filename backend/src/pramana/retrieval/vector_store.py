@@ -95,8 +95,12 @@ class VectorStore:
 
     async def search_dense(self, vector: list[float], *, query_filter: qm.Filter, limit: int) -> list[VectorHit]:
         result = await self._client.query_points(
-            self._collection, query=vector, using=DENSE, query_filter=query_filter,
-            limit=limit, with_payload=True,
+            self._collection,
+            query=vector,
+            using=DENSE,
+            query_filter=query_filter,
+            limit=limit,
+            with_payload=True,
         )
         return [_hit(p) for p in result.points]
 
@@ -106,7 +110,10 @@ class VectorStore:
         result = await self._client.query_points(
             self._collection,
             query=qm.SparseVector(indices=vector.indices, values=vector.values),
-            using=SPARSE, query_filter=query_filter, limit=limit, with_payload=True,
+            using=SPARSE,
+            query_filter=query_filter,
+            limit=limit,
+            with_payload=True,
         )
         return [_hit(p) for p in result.points]
 

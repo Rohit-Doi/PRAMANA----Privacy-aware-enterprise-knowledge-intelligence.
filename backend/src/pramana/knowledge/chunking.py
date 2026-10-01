@@ -97,8 +97,12 @@ def chunk_document(
         start, end = current[0].start, current[-1].end
         chunks.append(
             ChunkDraft(
-                ordinal=len(chunks), text=canonical[start:end], section_path=fresh[0].section_path,
-                page=fresh[0].page, char_start=start, char_end=end,
+                ordinal=len(chunks),
+                text=canonical[start:end],
+                section_path=fresh[0].section_path,
+                page=fresh[0].page,
+                char_start=start,
+                char_end=end,
                 token_count=estimate_tokens(canonical[start:end]),
             )
         )
@@ -157,9 +161,7 @@ def _section_path(stack: list[tuple[int, str]]) -> str:
     return SECTION_SEPARATOR.join(text[:120] for _, text in stack[-4:])
 
 
-def _split_oversized(
-    canonical: str, start: int, end: int, path: str, page: int | None, max_tokens: int
-) -> list[_Unit]:
+def _split_oversized(canonical: str, start: int, end: int, path: str, page: int | None, max_tokens: int) -> list[_Unit]:
     tokens = estimate_tokens(canonical[start:end])
     if tokens <= max_tokens:
         return [_Unit(start, end, tokens, path, page)]
@@ -180,9 +182,7 @@ def _split_oversized(
     return pieces
 
 
-def _split_table(
-    canonical: str, start: int, end: int, path: str, page: int | None, max_tokens: int
-) -> list[_Unit]:
+def _split_table(canonical: str, start: int, end: int, path: str, page: int | None, max_tokens: int) -> list[_Unit]:
     tokens = estimate_tokens(canonical[start:end])
     if tokens <= max_tokens:
         return [_Unit(start, end, tokens, path, page)]

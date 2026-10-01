@@ -57,10 +57,14 @@ async def requeue_stale() -> int:
     cutoff = utcnow() - STALE_AFTER
     async with session_scope() as db:
         rows = (
-            await db.execute(
-                select(IngestionJob).where(IngestionJob.status == "running", IngestionJob.started_at < cutoff)
+            (
+                await db.execute(
+                    select(IngestionJob).where(IngestionJob.status == "running", IngestionJob.started_at < cutoff)
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         for job in rows:
             if job.attempts >= MAX_ATTEMPTS:
                 job.status, job.error, job.finished_at = "failed", "Worker stopped responding", utcnow()
@@ -96,14 +100,16 @@ async def run_job(job_id: uuid.UUID, pipeline: IngestionPipeline) -> bool:
         log.warning("job.failed", job_id=str(job_id), document_id=str(document_id), error=repr(exc))
         async with session_scope() as db:
             await db.execute(
-                update(IngestionJob).where(IngestionJob.id == job_id)
+                update(IngestionJob)
+                .where(IngestionJob.id == job_id)
                 .values(status="failed", error=str(exc)[:1000], finished_at=utcnow(), stage="failed")
             )
         return False
     await _report(job_id, "done", 100, f"{result.chunk_count} passages, {result.entity_count} entities")
     async with session_scope() as db:
         await db.execute(
-            update(IngestionJob).where(IngestionJob.id == job_id)
+            update(IngestionJob)
+            .where(IngestionJob.id == job_id)
             .values(status="succeeded", finished_at=utcnow(), stage="done", progress=100)
         )
     log.info("job.succeeded", job_id=str(job_id), chunks=result.chunk_count, timings=result.timings_ms)

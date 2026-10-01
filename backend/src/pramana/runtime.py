@@ -12,6 +12,8 @@ from qdrant_client import AsyncQdrantClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pramana.agents.pipeline import QueryPipeline
+from pramana.agents.state import AgentDeps
 from pramana.auth.models import User
 from pramana.governance.models import AppSetting
 from pramana.graph.builder import GraphBuilder
@@ -20,6 +22,7 @@ from pramana.graph.extraction import GraphExtractor, get_graph_extractor
 from pramana.graph.store import GraphStore
 from pramana.knowledge.ingestion import IngestionPipeline
 from pramana.knowledge.storage import LocalBlobStore
+from pramana.llm.gateway import LLMGateway
 from pramana.privacy.pii import PiiEngine, get_pii_engine
 from pramana.privacy.policy import PolicyEngine, PolicyStore
 from pramana.retrieval.local_models import RetrievalModels, get_retrieval_models
@@ -28,6 +31,8 @@ from pramana.retrieval.vector_store import VectorStore
 from pramana.shared.config import Settings, get_settings
 from pramana.shared.db import dispose_engine, session_scope
 from pramana.shared.logging import configure_logging, get_logger
+from pramana.validation.detectors import Detectors, get_detectors
+from pramana.validation.engine import ValidationEngine
 
 log = get_logger(__name__)
 
@@ -48,6 +53,10 @@ class Services:
     graph_store: GraphStore
     retriever: HybridRetriever
     pipeline: IngestionPipeline
+    llm: LLMGateway
+    detectors: Detectors
+    validation: ValidationEngine
+    query: QueryPipeline
 
 
 @dataclass(slots=True)
@@ -61,6 +70,7 @@ class Runtime:
     extras: dict[str, Any] = field(default_factory=dict)
 
     async def close(self) -> None:
+        await self.services.llm.close()
         await self.policy.close()
         await self.neo4j.close()
         await self.qdrant.close()
@@ -94,13 +104,14 @@ async def start_runtime() -> Runtime:
         settings.neo4j_uri, auth=(settings.neo4j_user, settings.neo4j_password.get_secret_value())
     )
     policy = PolicyEngine(settings.opa_url)
+    redis = aioredis.from_url(settings.redis_url, decode_responses=True)
     runtime = Runtime(
         settings=settings,
-        redis=aioredis.from_url(settings.redis_url, decode_responses=True),
+        redis=redis,
         qdrant=qdrant,
         neo4j=neo4j,
         policy=policy,
-        services=_build_services(settings, qdrant, neo4j, policy),
+        services=_build_services(settings, qdrant, neo4j, policy, redis),
     )
     await runtime.services.vectors.ensure_collection()
     await runtime.services.entity_index.ensure_collection()
@@ -114,7 +125,7 @@ async def start_runtime() -> Runtime:
 
 
 def _build_services(
-    settings: Settings, qdrant: AsyncQdrantClient, neo4j: AsyncDriver, policy: PolicyEngine
+    settings: Settings, qdrant: AsyncQdrantClient, neo4j: AsyncDriver, policy: PolicyEngine, redis: aioredis.Redis
 ) -> Services:
     models = get_retrieval_models()
     pii = get_pii_engine()
@@ -126,9 +137,36 @@ def _build_services(
     graph_store = GraphStore(neo4j, entity_index, extractor)
     retriever = HybridRetriever(models=models, vectors=vectors, graph=graph_store, policy=policy)
     pipeline = IngestionPipeline(models=models, vector_store=vectors, blob_store=blobs, pii=pii, graph=graph)
+    llm = LLMGateway(settings, redis)
+    detectors = get_detectors()
+    validation = ValidationEngine(detectors, llm=llm)
+    query = QueryPipeline(
+        AgentDeps(
+            settings=settings,
+            policy=policy,
+            retriever=retriever,
+            models=models,
+            pii=pii,
+            llm=llm,
+            validation=validation,
+            redis=redis,
+        )
+    )
     return Services(
-        models=models, pii=pii, blobs=blobs, vectors=vectors, entity_index=entity_index,
-        extractor=extractor, graph=graph, graph_store=graph_store, retriever=retriever, pipeline=pipeline,
+        models=models,
+        pii=pii,
+        blobs=blobs,
+        vectors=vectors,
+        entity_index=entity_index,
+        extractor=extractor,
+        graph=graph,
+        graph_store=graph_store,
+        retriever=retriever,
+        pipeline=pipeline,
+        llm=llm,
+        detectors=detectors,
+        validation=validation,
+        query=query,
     )
 
 

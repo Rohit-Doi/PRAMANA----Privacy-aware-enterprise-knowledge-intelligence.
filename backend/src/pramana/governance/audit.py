@@ -108,14 +108,29 @@ class AuditTrail:
             ts = utcnow()
             db.add(
                 AuditLog(
-                    id=entry_id, ts=ts, actor_id=actor_id, actor_email=email, actor_role=role,
-                    action=action, resource_type=resource_type, resource_id=resource_id,
-                    decision=decision, details=clean_details, prev_hash=prev_hash,
+                    id=entry_id,
+                    ts=ts,
+                    actor_id=actor_id,
+                    actor_email=email,
+                    actor_role=role,
+                    action=action,
+                    resource_type=resource_type,
+                    resource_id=resource_id,
+                    decision=decision,
+                    details=clean_details,
+                    prev_hash=prev_hash,
                     entry_hash=compute_entry_hash(
-                        prev_hash=prev_hash, entry_id=entry_id, ts=ts, actor_id=actor_id,
-                        actor_email=email, actor_role=role, action=action,
-                        resource_type=resource_type, resource_id=resource_id,
-                        decision=decision, details=clean_details,
+                        prev_hash=prev_hash,
+                        entry_id=entry_id,
+                        ts=ts,
+                        actor_id=actor_id,
+                        actor_email=email,
+                        actor_role=role,
+                        action=action,
+                        resource_type=resource_type,
+                        resource_id=resource_id,
+                        decision=decision,
+                        details=clean_details,
                     ),
                 )
             )
@@ -129,23 +144,36 @@ class AuditTrail:
         async with session_scope() as db:
             while True:
                 rows = (
-                    await db.execute(
-                        select(AuditLog).where(AuditLog.seq > last_seq).order_by(AuditLog.seq).limit(1000)
+                    (
+                        await db.execute(
+                            select(AuditLog).where(AuditLog.seq > last_seq).order_by(AuditLog.seq).limit(1000)
+                        )
                     )
-                ).scalars().all()
+                    .scalars()
+                    .all()
+                )
                 if not rows:
                     break
                 for row in rows:
                     if row.prev_hash != expected_prev:
                         return ChainReport(False, checked, row.seq, "previous-hash link is broken", expected_prev)
                     recomputed = compute_entry_hash(
-                        prev_hash=row.prev_hash, entry_id=row.id, ts=row.ts, actor_id=row.actor_id,
-                        actor_email=row.actor_email, actor_role=row.actor_role, action=row.action,
-                        resource_type=row.resource_type, resource_id=row.resource_id,
-                        decision=row.decision, details=row.details,
+                        prev_hash=row.prev_hash,
+                        entry_id=row.id,
+                        ts=row.ts,
+                        actor_id=row.actor_id,
+                        actor_email=row.actor_email,
+                        actor_role=row.actor_role,
+                        action=row.action,
+                        resource_type=row.resource_type,
+                        resource_id=row.resource_id,
+                        decision=row.decision,
+                        details=row.details,
                     )
                     if recomputed != row.entry_hash:
-                        return ChainReport(False, checked, row.seq, "entry content does not match its hash", expected_prev)
+                        return ChainReport(
+                            False, checked, row.seq, "entry content does not match its hash", expected_prev
+                        )
                     expected_prev = row.entry_hash
                     checked += 1
                     last_seq = row.seq

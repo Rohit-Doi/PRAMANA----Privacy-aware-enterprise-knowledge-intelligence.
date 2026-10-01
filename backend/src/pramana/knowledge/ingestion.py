@@ -125,9 +125,7 @@ class IngestionPipeline:
             # ── embed ───────────────────────────────────────────────────
             started = time.perf_counter()
             await progress("embed", 55, "Computing embeddings")
-            texts = [
-                embedding_text(title=snapshot.title, section_path=d.section_path, text=d.text) for d in drafts
-            ]
+            texts = [embedding_text(title=snapshot.title, section_path=d.section_path, text=d.text) for d in drafts]
             dense, sparse = await asyncio.gather(
                 self._models.embed_documents(texts), self._models.sparse_documents(texts)
             )
@@ -155,8 +153,11 @@ class IngestionPipeline:
                 document.token_count = result.token_count
                 document.pii_summary = {"counts": result.pii_counts, "suggestion_reasons": list(suggestion.reasons)}
                 document.suggested_sensitivity_rank = int(suggestion.rank)
-                document.meta = {**document.meta, **{k: v for k, v in parsed.meta.items() if _jsonable(v)},
-                                 "graph_status": "pending" if build_graph else "skipped"}
+                document.meta = {
+                    **document.meta,
+                    **{k: v for k, v in parsed.meta.items() if _jsonable(v)},
+                    "graph_status": "pending" if build_graph else "skipped",
+                }
 
             # ── graph ───────────────────────────────────────────────────
             if build_graph:
@@ -206,9 +207,14 @@ class IngestionPipeline:
                 await db.flush()
             for chunk_id, draft, pii in zip(chunk_ids, drafts, pii_per_chunk, strict=True):
                 values: dict[str, Any] = {
-                    "ordinal": draft.ordinal, "text": draft.text, "section_path": draft.section_path[:1024],
-                    "page": draft.page, "char_start": draft.char_start, "char_end": draft.char_end,
-                    "token_count": draft.token_count, "pii_types": sorted(pii),
+                    "ordinal": draft.ordinal,
+                    "text": draft.text,
+                    "section_path": draft.section_path[:1024],
+                    "page": draft.page,
+                    "char_start": draft.char_start,
+                    "char_end": draft.char_end,
+                    "token_count": draft.token_count,
+                    "pii_types": sorted(pii),
                 }
                 row = existing.get(chunk_id)
                 if row is None:
@@ -237,25 +243,42 @@ class _DocumentSnapshot:
     @classmethod
     def of(cls, document: Document) -> _DocumentSnapshot:
         return cls(
-            id=document.id, title=document.title,
+            id=document.id,
+            title=document.title,
             filename=str(document.meta.get("filename") or document.storage_key.rsplit("/", 1)[-1]),
-            mime_type=document.mime_type, storage_key=document.storage_key, department=document.department,
-            sensitivity_rank=document.sensitivity_rank, region=document.region,
-            collection=document.collection, source_type=document.source_type, is_current=document.is_current,
+            mime_type=document.mime_type,
+            storage_key=document.storage_key,
+            department=document.department,
+            sensitivity_rank=document.sensitivity_rank,
+            region=document.region,
+            collection=document.collection,
+            source_type=document.source_type,
+            is_current=document.is_current,
         )
 
     def payload(self, chunk_id: uuid.UUID, ordinal: int) -> dict[str, Any]:
         return {
-            "chunk_id": str(chunk_id), "document_id": str(self.id), "ordinal": ordinal,
-            "department": self.department, "sensitivity_rank": self.sensitivity_rank, "region": self.region,
-            "collection": self.collection, "source_type": self.source_type, "is_current": self.is_current,
+            "chunk_id": str(chunk_id),
+            "document_id": str(self.id),
+            "ordinal": ordinal,
+            "department": self.department,
+            "sensitivity_rank": self.sensitivity_rank,
+            "region": self.region,
+            "collection": self.collection,
+            "source_type": self.source_type,
+            "is_current": self.is_current,
         }
 
     def graph_document(self) -> dict[str, Any]:
         return {
-            "id": str(self.id), "title": self.title, "department": self.department,
-            "sensitivity_rank": self.sensitivity_rank, "region": self.region,
-            "collection": self.collection, "source_type": self.source_type, "is_current": self.is_current,
+            "id": str(self.id),
+            "title": self.title,
+            "department": self.department,
+            "sensitivity_rank": self.sensitivity_rank,
+            "region": self.region,
+            "collection": self.collection,
+            "source_type": self.source_type,
+            "is_current": self.is_current,
         }
 
 

@@ -78,10 +78,36 @@ HANDBOOK_SECTIONS: dict[str, tuple[str, str, int]] = {
     "communication": ("company", "PUBLIC", 12),
 }
 POLICY_HINTS = (
-    "policy", "policies", "procedure", "standard", "guideline", "process", "compliance",
-    "security", "access", "incident", "expense", "leave", "benefit", "onboarding", "offboarding",
-    "privacy", "data", "risk", "audit", "travel", "remote", "password", "approval", "contract",
-    "retention", "classification", "vulnerability", "code-of-conduct", "handbook", "training",
+    "policy",
+    "policies",
+    "procedure",
+    "standard",
+    "guideline",
+    "process",
+    "compliance",
+    "security",
+    "access",
+    "incident",
+    "expense",
+    "leave",
+    "benefit",
+    "onboarding",
+    "offboarding",
+    "privacy",
+    "data",
+    "risk",
+    "audit",
+    "travel",
+    "remote",
+    "password",
+    "approval",
+    "contract",
+    "retention",
+    "classification",
+    "vulnerability",
+    "code-of-conduct",
+    "handbook",
+    "training",
 )
 FRONT_MATTER = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.DOTALL)
 TITLE_LINE = re.compile(r"^title:\s*[\"']?(.+?)[\"']?\s*$", re.MULTILINE)
@@ -105,9 +131,12 @@ def fetch_handbook(rows: list[ManifestRow]) -> None:
             ["git", "sparse-checkout", "set", *[f"content/handbook/{s}" for s in HANDBOOK_SECTIONS]],
             cwd=repo,
         )
-    commit = subprocess.run(  # noqa: S603
+    commit = subprocess.run(
         ["git", "rev-parse", "--short", "HEAD"],  # noqa: S607
-        cwd=repo, check=True, capture_output=True, text=True,
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
     ).stdout.strip()
 
     kept = 0
@@ -161,27 +190,55 @@ def fetch_handbook(rows: list[ManifestRow]) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 REGULATIONS = [
     # file name, title, url, effective date, licence note
-    ("gdpr-regulation-eu-2016-679.pdf", "General Data Protection Regulation (EU) 2016/679",
-     "http://publications.europa.eu/resource/cellar/3e485e15-11bd-11e6-ba9a-01aa75ed71a1.0006.01/DOC_1",
-     "2018-05-25", "EU law; reuse permitted (Commission Decision 2011/833/EU)"),
-    ("hipaa-45-cfr-part-164.pdf", "HIPAA Security and Privacy Rules (45 CFR Part 164)",
-     "https://www.govinfo.gov/content/pkg/CFR-2023-title45-vol2/pdf/CFR-2023-title45-vol2-part164.pdf",
-     "2023-10-01", "US federal regulation; public domain"),
-    ("sarbanes-oxley-act-2002.pdf", "Sarbanes-Oxley Act of 2002 (Public Law 107-204)",
-     "https://www.govinfo.gov/content/pkg/PLAW-107publ204/pdf/PLAW-107publ204.pdf",
-     "2002-07-30", "US public law; public domain"),
-    ("nist-csf-2.0.pdf", "NIST Cybersecurity Framework 2.0",
-     "https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.29.pdf",
-     "2024-02-26", "NIST publication; public domain"),
-    ("nist-ai-rmf-1.0.pdf", "NIST AI Risk Management Framework 1.0",
-     "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf",
-     "2023-01-26", "NIST publication; public domain"),
-    ("nist-sp-800-171r3.pdf", "NIST SP 800-171 Rev. 3: Protecting Controlled Unclassified Information",
-     "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-171r3.pdf",
-     "2024-05-14", "NIST publication; public domain"),
-    ("india-dpdp-act-2023.pdf", "Digital Personal Data Protection Act, 2023 (India)",
-     "https://prsindia.org/files/bills_acts/acts_parliament/2023/Digital_Personal_Data_Protection_Act,_2023.pdf",
-     "2023-08-11", "Indian Act of Parliament; government publication"),
+    (
+        "gdpr-regulation-eu-2016-679.pdf",
+        "General Data Protection Regulation (EU) 2016/679",
+        "http://publications.europa.eu/resource/cellar/3e485e15-11bd-11e6-ba9a-01aa75ed71a1.0006.01/DOC_1",
+        "2018-05-25",
+        "EU law; reuse permitted (Commission Decision 2011/833/EU)",
+    ),
+    (
+        "hipaa-45-cfr-part-164.pdf",
+        "HIPAA Security and Privacy Rules (45 CFR Part 164)",
+        "https://www.govinfo.gov/content/pkg/CFR-2023-title45-vol2/pdf/CFR-2023-title45-vol2-part164.pdf",
+        "2023-10-01",
+        "US federal regulation; public domain",
+    ),
+    (
+        "sarbanes-oxley-act-2002.pdf",
+        "Sarbanes-Oxley Act of 2002 (Public Law 107-204)",
+        "https://www.govinfo.gov/content/pkg/PLAW-107publ204/pdf/PLAW-107publ204.pdf",
+        "2002-07-30",
+        "US public law; public domain",
+    ),
+    (
+        "nist-csf-2.0.pdf",
+        "NIST Cybersecurity Framework 2.0",
+        "https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.29.pdf",
+        "2024-02-26",
+        "NIST publication; public domain",
+    ),
+    (
+        "nist-ai-rmf-1.0.pdf",
+        "NIST AI Risk Management Framework 1.0",
+        "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf",
+        "2023-01-26",
+        "NIST publication; public domain",
+    ),
+    (
+        "nist-sp-800-171r3.pdf",
+        "NIST SP 800-171 Rev. 3: Protecting Controlled Unclassified Information",
+        "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-171r3.pdf",
+        "2024-05-14",
+        "NIST publication; public domain",
+    ),
+    (
+        "india-dpdp-act-2023.pdf",
+        "Digital Personal Data Protection Act, 2023 (India)",
+        "https://prsindia.org/files/bills_acts/acts_parliament/2023/Digital_Personal_Data_Protection_Act,_2023.pdf",
+        "2023-08-11",
+        "Indian Act of Parliament; government publication",
+    ),
 ]
 
 
@@ -204,9 +261,14 @@ def fetch_regulations(rows: list[ManifestRow]) -> None:
             rows.append(
                 ManifestRow(
                     path=str(target.relative_to(ROOT / "data")).replace("\\", "/"),
-                    title=title, source_type="regulation", collection="regulations",
-                    department="compliance", sensitivity="PUBLIC", effective_date=effective,
-                    source_uri=url, license=licence,
+                    title=title,
+                    source_type="regulation",
+                    collection="regulations",
+                    department="compliance",
+                    sensitivity="PUBLIC",
+                    effective_date=effective,
+                    source_uri=url,
+                    license=licence,
                 )
             )
             print(f"regulations: ok {filename} ({target.stat().st_size // 1024} KB)")
@@ -218,7 +280,9 @@ def fetch_regulations(rows: list[ManifestRow]) -> None:
 def _parquet_urls(dataset: str) -> dict[str, dict[str, list[str]]]:
     response = httpx.get(
         f"https://huggingface.co/api/datasets/{dataset}/parquet",
-        timeout=60, follow_redirects=True, headers={"User-Agent": USER_AGENT},
+        timeout=60,
+        follow_redirects=True,
+        headers={"User-Agent": USER_AGENT},
     )
     response.raise_for_status()
     return response.json()  # type: ignore[no-any-return]
@@ -251,8 +315,11 @@ def fetch_contracts(rows: list[ManifestRow], limit: int = 50) -> None:
         rows.append(
             ManifestRow(
                 path=str(target.relative_to(ROOT / "data")).replace("\\", "/"),
-                title=f"Contract: {pretty}", source_type="contract", collection="contracts",
-                department="legal", sensitivity="CONFIDENTIAL",
+                title=f"Contract: {pretty}",
+                source_type="contract",
+                collection="contracts",
+                department="legal",
+                sensitivity="CONFIDENTIAL",
                 source_uri="https://huggingface.co/datasets/theatticusproject/cuad",
                 license="CUAD v1, CC BY 4.0, The Atticus Project",
             )
@@ -313,8 +380,11 @@ def fetch_emails(rows: list[ManifestRow], limit: int = 1_200) -> None:
         rows.append(
             ManifestRow(
                 path=str(target.relative_to(ROOT / "data")).replace("\\", "/"),
-                title="", source_type="email", collection="emails",
-                department="operations", sensitivity="CONFIDENTIAL",
+                title="",
+                source_type="email",
+                collection="emails",
+                department="operations",
+                sensitivity="CONFIDENTIAL",
                 source_uri="https://huggingface.co/datasets/corbt/enron-emails",
                 license="Enron corpus, public record (FERC release)",
             )
@@ -376,8 +446,10 @@ def main() -> int:
     collected: dict[str, list[ManifestRow]] = {}
     failures = 0
     runners = {
-        "handbook": fetch_handbook, "regulations": fetch_regulations,
-        "contracts": fetch_contracts, "emails": fetch_emails,
+        "handbook": fetch_handbook,
+        "regulations": fetch_regulations,
+        "contracts": fetch_contracts,
+        "emails": fetch_emails,
     }
     for step in args.only:
         try:
@@ -397,9 +469,7 @@ def main() -> int:
             merged.extend(asdict(row) for row in collected[collection])
         else:
             merged.extend(previous.get(collection, []))
-    manifest_path.write_text(
-        "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in merged), encoding="utf-8"
-    )
+    manifest_path.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in merged), encoding="utf-8")
     print(f"manifest: {len(merged)} documents -> {manifest_path}")
     return 1 if failures else 0
 

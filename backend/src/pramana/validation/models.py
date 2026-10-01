@@ -17,9 +17,7 @@ class Claim(Base, UUIDPrimaryKey):
     __tablename__ = "claims"
     __table_args__ = (Index("ix_claims_run", "run_id", "round", "ordinal"),)
 
-    run_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("query_runs.id", ondelete="CASCADE"), nullable=False
-    )
+    run_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("query_runs.id", ondelete="CASCADE"), nullable=False)
     round: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
@@ -36,9 +34,7 @@ class Claim(Base, UUIDPrimaryKey):
 class Citation(Base, UUIDPrimaryKey):
     __tablename__ = "citations"
 
-    claim_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("claims.id", ondelete="CASCADE"), index=True, nullable=False
-    )
+    claim_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("claims.id", ondelete="CASCADE"), index=True, nullable=False)
     evidence_ref: Mapped[str] = mapped_column(String(16), nullable=False)
     chunk_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("chunks.id", ondelete="SET NULL"))
     document_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("documents.id", ondelete="SET NULL"))

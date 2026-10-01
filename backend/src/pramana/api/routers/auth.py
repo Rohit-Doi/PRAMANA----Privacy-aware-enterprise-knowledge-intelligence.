@@ -118,12 +118,16 @@ async def login(body: LoginRequest, request: Request, response: Response, db: Db
     audit = AuditTrail()
     try:
         result = await AuthService(db).login(
-            email=body.email, password=body.password, ip=client_ip(request),
+            email=body.email,
+            password=body.password,
+            ip=client_ip(request),
             user_agent=request.headers.get("user-agent", ""),
         )
     except NotAuthenticated:
         await audit.record(
-            action="auth.login", decision="DENIED", actor_email=body.email.lower(),
+            action="auth.login",
+            decision="DENIED",
+            actor_email=body.email.lower(),
             details={"ip": client_ip(request)},
         )
         raise
@@ -132,8 +136,11 @@ async def login(body: LoginRequest, request: Request, response: Response, db: Db
     assert result.tokens is not None
     _set_refresh_cookie(response, result.tokens)
     await audit.record(
-        action="auth.login", decision="GRANTED", actor_email=body.email.lower(),
-        resource_type="session", resource_id=str(result.tokens.session_id),
+        action="auth.login",
+        decision="GRANTED",
+        actor_email=body.email.lower(),
+        resource_type="session",
+        resource_id=str(result.tokens.session_id),
         details={"ip": client_ip(request), "mfa": False},
     )
     return _token_response(result.tokens)
@@ -142,13 +149,18 @@ async def login(body: LoginRequest, request: Request, response: Response, db: Db
 @router.post("/mfa/verify", response_model=TokenResponse, summary="Complete sign-in with a one-time code")
 async def mfa_verify(body: MfaVerifyRequest, request: Request, response: Response, db: DbSession) -> TokenResponse:
     tokens = await AuthService(db).complete_mfa(
-        mfa_token=body.mfa_token, code=body.code, ip=client_ip(request),
+        mfa_token=body.mfa_token,
+        code=body.code,
+        ip=client_ip(request),
         user_agent=request.headers.get("user-agent", ""),
     )
     _set_refresh_cookie(response, tokens)
     await AuditTrail().record(
-        action="auth.login", decision="GRANTED", resource_type="session",
-        resource_id=str(tokens.session_id), details={"ip": client_ip(request), "mfa": True},
+        action="auth.login",
+        decision="GRANTED",
+        resource_type="session",
+        resource_id=str(tokens.session_id),
+        details={"ip": client_ip(request), "mfa": True},
     )
     return _token_response(tokens)
 
@@ -185,11 +197,17 @@ async def logout(
 @router.get("/me", response_model=PrincipalResponse, summary="The signed-in user and their permissions")
 async def me(principal: CurrentPrincipal) -> PrincipalResponse:
     return PrincipalResponse(
-        user_id=principal.user_id, email=principal.email, full_name=principal.full_name,
-        role=principal.role, department=principal.department,
-        extra_departments=list(principal.extra_departments), region=principal.region,
-        max_rank_own_dept=principal.max_rank_own_dept, max_rank_other_dept=principal.max_rank_other_dept,
-        permissions=sorted(principal.permissions), mfa_verified=principal.mfa_verified,
+        user_id=principal.user_id,
+        email=principal.email,
+        full_name=principal.full_name,
+        role=principal.role,
+        department=principal.department,
+        extra_departments=list(principal.extra_departments),
+        region=principal.region,
+        max_rank_own_dept=principal.max_rank_own_dept,
+        max_rank_other_dept=principal.max_rank_other_dept,
+        permissions=sorted(principal.permissions),
+        mfa_verified=principal.mfa_verified,
     )
 
 
@@ -198,8 +216,12 @@ async def sessions(principal: CurrentPrincipal, db: DbSession) -> list[SessionRe
     rows = await AuthService(db).list_sessions(principal.user_id)
     return [
         SessionResponse(
-            id=s.id, user_agent=s.user_agent, ip_address=s.ip_address, created_at=s.created_at,
-            last_used_at=s.last_used_at, current=s.id == principal.session_id,
+            id=s.id,
+            user_agent=s.user_agent,
+            ip_address=s.ip_address,
+            created_at=s.created_at,
+            last_used_at=s.last_used_at,
+            current=s.id == principal.session_id,
         )
         for s in rows
     ]
@@ -209,8 +231,11 @@ async def sessions(principal: CurrentPrincipal, db: DbSession) -> list[SessionRe
 async def revoke_session(session_id: uuid.UUID, principal: CurrentPrincipal, db: DbSession) -> None:
     await AuthService(db).revoke_session(user_id=principal.user_id, session_id=session_id)
     await AuditTrail().record(
-        action="auth.session.revoke", decision="GRANTED", principal=principal,
-        resource_type="session", resource_id=str(session_id),
+        action="auth.session.revoke",
+        decision="GRANTED",
+        principal=principal,
+        resource_type="session",
+        resource_id=str(session_id),
     )
 
 

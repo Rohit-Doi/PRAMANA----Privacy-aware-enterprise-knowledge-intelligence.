@@ -114,9 +114,7 @@ class PolicyEngine:
         if not isinstance(scope_doc, dict):
             # Unknown role or missing data: no scope, therefore no access.
             log.warning("policy.no_scope", role=principal.role, user_id=str(principal.user_id))
-            return AccessContext(
-                scope=EMPTY_SCOPE, egress=EgressPolicy(max_rank=-1), show_withheld_count=False
-            )
+            return AccessContext(scope=EMPTY_SCOPE, egress=EgressPolicy(max_rank=-1), show_withheld_count=False)
         egress_doc = result.get("egress") or {}
         return AccessContext(
             scope=AccessScope.from_policy(scope_doc, policy_version=self.loaded_version),

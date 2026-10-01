@@ -16,9 +16,7 @@ from pramana.shared.db import Base, Timestamps, UUIDPrimaryKey
 class Conversation(Base, UUIDPrimaryKey, Timestamps):
     __tablename__ = "conversations"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
-    )
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
     title: Mapped[str] = mapped_column(String(256), default="New conversation", nullable=False)
 
 
@@ -41,12 +39,8 @@ class QueryRun(Base, UUIDPrimaryKey):
     __tablename__ = "query_runs"
     __table_args__ = (Index("ix_query_runs_user_started", "user_id", "started_at"),)
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
-    conversation_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("conversations.id", ondelete="SET NULL")
-    )
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    conversation_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("conversations.id", ondelete="SET NULL"))
     kind: Mapped[str] = mapped_column(String(16), default="query", nullable=False)
     channel: Mapped[str] = mapped_column(String(16), default="web", nullable=False)
     mode: Mapped[str] = mapped_column(String(16), default="strict", nullable=False)
@@ -80,9 +74,7 @@ class AgentStep(Base, UUIDPrimaryKey):
     __tablename__ = "agent_steps"
     __table_args__ = (Index("ix_agent_steps_run", "run_id", "started_at"),)
 
-    run_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("query_runs.id", ondelete="CASCADE"), nullable=False
-    )
+    run_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("query_runs.id", ondelete="CASCADE"), nullable=False)
     agent: Mapped[str] = mapped_column(String(48), nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

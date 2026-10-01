@@ -52,7 +52,8 @@ class EntityIndex:
             self._collection,
             points=[
                 qm.PointStruct(
-                    id=_point_id(str(e["key"])), vector=v,
+                    id=_point_id(str(e["key"])),
+                    vector=v,
                     payload={"key": e["key"], "name": e["name"], "type": e["type"]},
                 )
                 for e, v in zip(entities, vectors, strict=True)

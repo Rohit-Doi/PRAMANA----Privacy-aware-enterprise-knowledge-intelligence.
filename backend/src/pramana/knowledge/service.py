@@ -46,9 +46,7 @@ class NewDocument:
 
 
 class DocumentService:
-    def __init__(
-        self, db: AsyncSession, *, blobs: BlobStore, vectors: VectorStore, graph: GraphBuilder
-    ) -> None:
+    def __init__(self, db: AsyncSession, *, blobs: BlobStore, vectors: VectorStore, graph: GraphBuilder) -> None:
         self._db = db
         self._blobs = blobs
         self._vectors = vectors
@@ -71,7 +69,8 @@ class DocumentService:
         duplicate = (
             await self._db.execute(
                 select(Document.id).where(
-                    Document.content_hash == content_hash, Document.department == new.department,
+                    Document.content_hash == content_hash,
+                    Document.department == new.department,
                     Document.status != "deleted",
                 )
             )
@@ -85,12 +84,22 @@ class DocumentService:
         await self._blobs.put(storage_key, new.data)
 
         document = Document(
-            id=document_id, title=new.title.strip()[:512] or PurePath(new.filename).stem,
-            source_type=new.source_type, source_uri=new.source_uri[:1024], collection=new.collection,
-            department=new.department, sensitivity_rank=int(new.sensitivity), region=new.region,
-            owner_id=owner.user_id if owner else None, effective_date=new.effective_date,
-            version=new.version, supersedes_id=new.supersedes_id, mime_type=mime,
-            storage_key=storage_key, content_hash=content_hash, status="pending",
+            id=document_id,
+            title=new.title.strip()[:512] or PurePath(new.filename).stem,
+            source_type=new.source_type,
+            source_uri=new.source_uri[:1024],
+            collection=new.collection,
+            department=new.department,
+            sensitivity_rank=int(new.sensitivity),
+            region=new.region,
+            owner_id=owner.user_id if owner else None,
+            effective_date=new.effective_date,
+            version=new.version,
+            supersedes_id=new.supersedes_id,
+            mime_type=mime,
+            storage_key=storage_key,
+            content_hash=content_hash,
+            status="pending",
             meta={"filename": PurePath(new.filename).name, "size_bytes": len(new.data), **(new.meta or {})},
         )
         self._db.add(document)
@@ -143,8 +152,11 @@ class DocumentService:
             conditions.append(Document.title.ilike(f"%{search.strip()}%"))
         total = (await self._db.execute(select(func.count()).select_from(Document).where(*conditions))).scalar_one()
         rows = await self._db.execute(
-            select(Document).where(*conditions).order_by(Document.updated_at.desc(), Document.id)
-            .limit(min(limit, 200)).offset(offset)
+            select(Document)
+            .where(*conditions)
+            .order_by(Document.updated_at.desc(), Document.id)
+            .limit(min(limit, 200))
+            .offset(offset)
         )
         return list(rows.scalars()), total
 
@@ -163,8 +175,11 @@ class DocumentService:
 
     async def chunks(self, document_id: uuid.UUID, *, limit: int = 100, offset: int = 0) -> list[Chunk]:
         rows = await self._db.execute(
-            select(Chunk).where(Chunk.document_id == document_id).order_by(Chunk.ordinal)
-            .limit(min(limit, 500)).offset(offset)
+            select(Chunk)
+            .where(Chunk.document_id == document_id)
+            .order_by(Chunk.ordinal)
+            .limit(min(limit, 500))
+            .offset(offset)
         )
         return list(rows.scalars())
 
@@ -173,8 +188,10 @@ class DocumentService:
         base = [visible, Document.status != "deleted"]
         out: dict[str, dict[str, int]] = {}
         for name, column in (
-            ("department", Document.department), ("sensitivity_rank", Document.sensitivity_rank),
-            ("status", Document.status), ("collection", Document.collection),
+            ("department", Document.department),
+            ("sensitivity_rank", Document.sensitivity_rank),
+            ("status", Document.status),
+            ("collection", Document.collection),
         ):
             rows = await self._db.execute(select(column, func.count()).where(*base).group_by(column))
             out[name] = {str(key): count for key, count in rows.all()}

@@ -23,32 +23,45 @@ from pramana.shared.logging import get_logger
 log = get_logger(__name__)
 
 ENTITY_TYPES = [
-    "policy", "regulation", "department", "job role", "person", "organization",
-    "software system", "process",
+    "policy",
+    "regulation",
+    "department",
+    "job role",
+    "person",
+    "organization",
+    "software system",
+    "process",
 ]
 RELATION_TYPES = [
-    "requires", "applies_to", "owned_by", "reports_to", "part_of", "responsible_for", "approved_by",
+    "requires",
+    "applies_to",
+    "owned_by",
+    "reports_to",
+    "part_of",
+    "responsible_for",
+    "approved_by",
 ]
 _TYPE_ALIASES = {"job role": "role", "software system": "system"}
 _SPACY_TYPES = {
-    "PERSON": "person", "ORG": "organization", "GPE": "location", "LOC": "location",
-    "LAW": "regulation", "PRODUCT": "system", "NORP": "organization", "FAC": "location",
-    "EVENT": "event", "WORK_OF_ART": "document",
+    "PERSON": "person",
+    "ORG": "organization",
+    "GPE": "location",
+    "LOC": "location",
+    "LAW": "regulation",
+    "PRODUCT": "system",
+    "NORP": "organization",
+    "FAC": "location",
+    "EVENT": "event",
+    "WORK_OF_ART": "document",
 }
 
 # Words too generic to be useful graph nodes: they would connect everything to everything.
 _GENERIC = frozenset(
-    """
-    policy policies employee employees company companies team teams manager managers user users
-    customer customers document documents information data process processes system systems
-    organization organisation people person staff member members time day days week weeks month
-    months year years way ways thing things part parts case cases example examples section
-    sections page pages request requests requirement requirements change changes work use
-    order addition purpose purposes result results issue issues question questions number
-    following above below other others party parties agreement
-    """.split()
+    ["policy", "policies", "employee", "employees", "company", "companies", "team", "teams", "manager", "managers", "user", "users", "customer", "customers", "document", "documents", "information", "data", "process", "processes", "system", "systems", "organization", "organisation", "people", "person", "staff", "member", "members", "time", "day", "days", "week", "weeks", "month", "months", "year", "years", "way", "ways", "thing", "things", "part", "parts", "case", "cases", "example", "examples", "section", "sections", "page", "pages", "request", "requests", "requirement", "requirements", "change", "changes", "work", "use", "order", "addition", "purpose", "purposes", "result", "results", "issue", "issues", "question", "questions", "number", "following", "above", "below", "other", "others", "party", "parties", "agreement"]
 )
-_LEADING_DETERMINER = re.compile(r"^(?:the|a|an|this|that|these|those|our|your|their|its|any|all|each|every|such)\s+", re.I)
+_LEADING_DETERMINER = re.compile(
+    r"^(?:the|a|an|this|that|these|those|our|your|their|its|any|all|each|every|such)\s+", re.I
+)
 _NON_WORD = re.compile(r"[^\w\s\-&/.']")
 _SPACES = re.compile(r"\s+")
 _LIST_MARKER = re.compile(r"^(?:\(?[0-9a-zA-Z]{1,2}[.)]\s+)+")
@@ -112,7 +125,9 @@ def is_useful(name: str) -> bool:
 
 def _looks_like_person(name: str) -> bool:
     words = name.split()
-    return 2 <= len(words) <= 4 and all(w[:1].isupper() and w.replace("-", "").replace("'", "").replace(".", "").isalpha() for w in words)
+    return 2 <= len(words) <= 4 and all(
+        w[:1].isupper() and w.replace("-", "").replace("'", "").replace(".", "").isalpha() for w in words
+    )
 
 
 class GraphExtractor:

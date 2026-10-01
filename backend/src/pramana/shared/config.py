@@ -32,6 +32,7 @@ class Settings(BaseSettings):
 
     app_env: Literal["development", "test", "production"] = "development"
     frontend_origin: str = "http://localhost:3000"
+    embedded_worker: bool = True
 
     # ── LLM providers ────────────────────────────────────────────────────
     google_api_key: SecretStr | None = None
@@ -79,9 +80,13 @@ class Settings(BaseSettings):
     reranker_model: str = "Xenova/ms-marco-MiniLM-L-12-v2"
     extraction_model: str = "fastino/gliner2-base-v1"
     grounding_model: str = "vectara/hallucination_evaluation_model"
+    # This model ships its own classification code, so its exact revision is pinned.
+    grounding_model_revision: str = "8e4a2e6e96c708cc76c2344f7e4757df2515292c"
     nli_model: str = "cross-encoder/nli-deberta-v3-base"
     span_model: str = "KRLabsOrg/lettucedect-base-modernbert-en-v1"
     spacy_model: str = "en_core_web_sm"
+    # Models are fetched once by scripts/download_models.py; at run time nothing is downloaded.
+    models_offline: bool = True
 
     # ── Retrieval ────────────────────────────────────────────────────────
     qdrant_collection: str = "pramana_chunks"
@@ -92,7 +97,7 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 8
     rrf_k: int = 60
     min_evidence_score: float = Field(
-        default=0.0, description="Reranker logit below which evidence counts as irrelevant."
+        default=-2.5, description="Reranker logit of the best passage below which the system does not answer."
     )
 
     # ── Validation ───────────────────────────────────────────────────────
@@ -135,9 +140,7 @@ class Settings(BaseSettings):
         if not self.neo4j_password.get_secret_value():
             problems.append("NEO4J_PASSWORD is missing")
         if problems:
-            raise RuntimeError(
-                "Invalid configuration: " + "; ".join(problems) + ". Run scripts/init_env.py."
-            )
+            raise RuntimeError("Invalid configuration: " + "; ".join(problems) + ". Run scripts/init_env.py.")
 
 
 @lru_cache(maxsize=1)
@@ -149,4 +152,7 @@ def get_settings() -> Settings:
     os.environ.setdefault("FASTEMBED_CACHE_PATH", str(settings.cache_dir / "fastembed"))
     os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
     os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+    if settings.models_offline:
+        os.environ.setdefault("HF_HUB_OFFLINE", "1")
+        os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
     return settings

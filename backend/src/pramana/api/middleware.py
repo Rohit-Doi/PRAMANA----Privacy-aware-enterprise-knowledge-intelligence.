@@ -39,8 +39,15 @@ _UNLIMITED_PATHS = ("/healthz", "/readyz", "/metrics")
 
 def problem(status: int, code: str, title: str, detail: str, request_id: str, **extra: object) -> JSONResponse:
     """RFC 9457 problem document."""
-    body = {"type": f"urn:pramana:error:{code}", "title": title, "status": status, "detail": detail,
-            "code": code, "request_id": request_id, **extra}
+    body = {
+        "type": f"urn:pramana:error:{code}",
+        "title": title,
+        "status": status,
+        "detail": detail,
+        "code": code,
+        "request_id": request_id,
+        **extra,
+    }
     return JSONResponse(body, status_code=status, media_type="application/problem+json")
 
 
@@ -63,8 +70,13 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         for header, value in SECURITY_HEADERS.items():
             response.headers.setdefault(header, value)
         if route_path not in _UNLIMITED_PATHS:
-            log.info("http.request", method=request.method, path=request.url.path,
-                     status=response.status_code, ms=round(elapsed * 1000))
+            log.info(
+                "http.request",
+                method=request.method,
+                path=request.url.path,
+                status=response.status_code,
+                ms=round(elapsed * 1000),
+            )
         return response
 
 
@@ -98,8 +110,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         if count > limit:
             request_id = getattr(request.state, "request_id", "")
-            response = problem(429, "rate_limited", "Too many requests",
-                               "Request rate limit exceeded; retry in a minute.", request_id)
+            response = problem(
+                429, "rate_limited", "Too many requests", "Request rate limit exceeded; retry in a minute.", request_id
+            )
             response.headers["Retry-After"] = "60"
             return response
         return await call_next(request)
@@ -120,13 +133,19 @@ def install_error_handlers(app: FastAPI) -> None:
     async def validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
         request_id = getattr(request.state, "request_id", "")
         errors = [{"field": ".".join(str(p) for p in e["loc"][1:]), "message": e["msg"]} for e in exc.errors()]
-        return problem(422, "validation_failed", "Validation failed",
-                       "The request is not valid.", request_id, errors=errors)
+        return problem(
+            422, "validation_failed", "Validation failed", "The request is not valid.", request_id, errors=errors
+        )
 
     @app.exception_handler(Exception)
     async def unhandled(request: Request, exc: Exception) -> JSONResponse:
         request_id = getattr(request.state, "request_id", "")
         log.exception("app.unhandled", error=repr(exc))
         # Internal details are logged, never returned.
-        return problem(500, "internal_error", "Internal error",
-                       "An unexpected error occurred. Quote the request id when reporting it.", request_id)
+        return problem(
+            500,
+            "internal_error",
+            "Internal error",
+            "An unexpected error occurred. Quote the request id when reporting it.",
+            request_id,
+        )

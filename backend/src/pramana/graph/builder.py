@@ -93,23 +93,34 @@ class GraphBuilder:
                 known = entities.get(entity.key)
                 if known is None or entity.confidence > known["confidence"]:
                     entities[entity.key] = {
-                        "key": entity.key, "name": entity.name, "type": entity.type,
+                        "key": entity.key,
+                        "name": entity.name,
+                        "type": entity.type,
                         "confidence": entity.confidence,
                     }
                 mentions.append({"chunk_id": str(chunk_id), "key": entity.key, "confidence": entity.confidence})
             for relation in extraction.relations:
                 relations.append(
                     {
-                        "head": entity_key(relation.head), "tail": entity_key(relation.tail),
-                        "type": relation.type, "confidence": relation.confidence, "chunk_id": str(chunk_id),
+                        "head": entity_key(relation.head),
+                        "tail": entity_key(relation.tail),
+                        "type": relation.type,
+                        "confidence": relation.confidence,
+                        "chunk_id": str(chunk_id),
                     }
                 )
 
         document_id = str(document["id"])
         async with self._driver.session() as session:
             orphaned = await session.execute_write(
-                _write_document, document, document_id, access, chunk_rows,
-                list(entities.values()), mentions, relations,
+                _write_document,
+                document,
+                document_id,
+                access,
+                chunk_rows,
+                list(entities.values()),
+                mentions,
+                relations,
             )
         if self._entity_index is not None:
             # Only typed entities are embedded; generic noun phrases are found by keyword.
@@ -120,7 +131,9 @@ class GraphBuilder:
 
     async def update_document_labels(self, document_id: str, changes: dict[str, Any]) -> None:
         """Propagate a relabel to the document node, its chunks and the relations drawn from it."""
-        allowed = {k: v for k, v in changes.items() if k in ("department", "sensitivity_rank", "region", "is_current", "title")}
+        allowed = {
+            k: v for k, v in changes.items() if k in ("department", "sensitivity_rank", "region", "is_current", "title")
+        }
         if not allowed:
             return
         edge_changes = {k: v for k, v in allowed.items() if k != "title"}
@@ -210,8 +223,11 @@ async def _write_document(
         MERGE (d:Document {id: $id})
         SET d.title = $title, d.collection = $collection, d.source_type = $source_type, d += $access
         """,
-        id=document_id, title=document.get("title", ""), collection=document.get("collection", ""),
-        source_type=document.get("source_type", ""), access=access,
+        id=document_id,
+        title=document.get("title", ""),
+        collection=document.get("collection", ""),
+        source_type=document.get("source_type", ""),
+        access=access,
     )
     await tx.run(
         """
@@ -221,7 +237,9 @@ async def _write_document(
         SET c += $access
         CREATE (d)-[:HAS_CHUNK]->(c)
         """,
-        id=document_id, chunks=chunk_rows, access=access,
+        id=document_id,
+        chunks=chunk_rows,
+        access=access,
     )
     if entities:
         await tx.run(
@@ -255,6 +273,8 @@ async def _write_document(
                                confidence: row.confidence}]->(t)
             SET r += $access
             """,
-            relations=relations, id=document_id, access=access,
+            relations=relations,
+            id=document_id,
+            access=access,
         )
     return await _drop_orphans(tx, previous_keys)

@@ -38,11 +38,16 @@ class ParsedDocument:
 
 
 SUPPORTED_EXTENSIONS = {
-    ".md": "text/markdown", ".markdown": "text/markdown", ".txt": "text/plain",
+    ".md": "text/markdown",
+    ".markdown": "text/markdown",
+    ".txt": "text/plain",
     ".pdf": "application/pdf",
     ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    ".html": "text/html", ".htm": "text/html", ".eml": "message/rfc822", ".csv": "text/csv",
+    ".html": "text/html",
+    ".htm": "text/html",
+    ".eml": "message/rfc822",
+    ".csv": "text/csv",
 }
 
 
@@ -267,7 +272,8 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
     # Running headers and footers repeat on most pages: drop them.
     shape_counts = Counter(re.sub(r"\d+", "#", text) for _, _, text in all_lines)
     repeated = {
-        shape for shape, n in shape_counts.items()
+        shape
+        for shape, n in shape_counts.items()
         if page_count >= 4 and n >= max(3, page_count * 0.5) and len(shape) < 90
     }
     body_size = statistics.median(size for size, _, _ in all_lines)
@@ -276,7 +282,8 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
     blocks: list[Block] = []
     for page_index, block_lines in layout:
         kept = [
-            (size, bold, text) for size, bold, text in block_lines
+            (size, bold, text)
+            for size, bold, text in block_lines
             if re.sub(r"\d+", "#", text) not in repeated and not page_number.fullmatch(text)
         ]
         if not kept:
@@ -288,8 +295,11 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
         # A heading is a short block set larger than body text, or a short bold block.
         larger = size >= body_size * 1.12
         is_heading = (
-            len(kept) <= 2 and words <= 14 and not text.endswith((".", ",", ";", ":", "-"))
-            and (larger or (bold and words <= 10)) and re.search(r"[A-Za-z]{3}", text) is not None
+            len(kept) <= 2
+            and words <= 14
+            and not text.endswith((".", ",", ";", ":", "-"))
+            and (larger or (bold and words <= 10))
+            and re.search(r"[A-Za-z]{3}", text) is not None
         )
         previous = blocks[-1] if blocks else None
         if is_heading:
@@ -298,7 +308,9 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
             if not title and level == 1:
                 title = text
         elif (
-            previous is not None and previous.kind == "text" and text[:1].islower()
+            previous is not None
+            and previous.kind == "text"
+            and text[:1].islower()
             and not previous.text.endswith((".", ":", ";", "?", "!"))
         ):
             # A paragraph continued in the next layout block (line group, column or page).
@@ -306,7 +318,8 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
         else:
             blocks.append(Block("text", text, page=page_index))
     return ParsedDocument(
-        title=title.strip(), blocks=blocks,
+        title=title.strip(),
+        blocks=blocks,
         meta={"pages": page_count, "pages_without_text": pages_without_text},
     )
 
@@ -370,7 +383,11 @@ def _parse_pptx(data: bytes) -> ParsedDocument:
     blocks: list[Block] = []
     title = (presentation.core_properties.title or "").strip()
     for index, slide in enumerate(presentation.slides, start=1):
-        slide_title = slide.shapes.title.text.strip() if slide.shapes.title is not None and slide.shapes.title.has_text_frame else ""
+        slide_title = (
+            slide.shapes.title.text.strip()
+            if slide.shapes.title is not None and slide.shapes.title.has_text_frame
+            else ""
+        )
         blocks.append(Block("heading", slide_title or f"Slide {index}", level=2, page=index))
         title = title or slide_title
         for shape in slide.shapes:
@@ -396,7 +413,10 @@ def _parse_html(text: str) -> ParsedDocument:
     blocks: list[Block] = []
     for element in root.find_all(["h1", "h2", "h3", "h4", "h5", "h6", "p", "li", "table", "pre"]):
         if element.name == "table":
-            rows = [" | ".join(c.get_text(" ", strip=True) for c in row.find_all(["th", "td"])) for row in element.find_all("tr")]
+            rows = [
+                " | ".join(c.get_text(" ", strip=True) for c in row.find_all(["th", "td"]))
+                for row in element.find_all("tr")
+            ]
             blocks.append(Block("table", "\n".join(f"| {r} |" for r in rows if r.strip())))
         elif element.find_parent("table") is not None:
             continue

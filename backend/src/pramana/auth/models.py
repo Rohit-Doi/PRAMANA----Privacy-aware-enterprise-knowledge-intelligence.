@@ -49,9 +49,7 @@ class User(Base, UUIDPrimaryKey, Timestamps):
     full_name: Mapped[str] = mapped_column(String(128), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("roles.id", ondelete="RESTRICT"), nullable=False)
-    department_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("departments.id", ondelete="RESTRICT"), nullable=False
-    )
+    department_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("departments.id", ondelete="RESTRICT"), nullable=False)
     region: Mapped[str] = mapped_column(String(32), default="global", nullable=False)
     # Departments, besides their own, for which the user is treated as an insider.
     extra_departments: Mapped[list[str]] = mapped_column(ARRAY(String(64)), default=list, nullable=False)

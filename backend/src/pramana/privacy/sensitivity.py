@@ -14,14 +14,40 @@ from pramana.privacy.pii import HIGH_RISK
 from pramana.shared.types import Sensitivity
 
 _RESTRICTED_TERMS = (
-    "acquisition", "merger", "board of directors", "board minutes", "material non-public",
-    "unreleased earnings", "executive compensation", "national id", "social security number",
-    "bank account", "incident report", "data breach", "codename", "term sheet", "severance",
+    "acquisition",
+    "merger",
+    "board of directors",
+    "board minutes",
+    "material non-public",
+    "unreleased earnings",
+    "executive compensation",
+    "national id",
+    "social security number",
+    "bank account",
+    "incident report",
+    "data breach",
+    "codename",
+    "term sheet",
+    "severance",
 )
 _CONFIDENTIAL_TERMS = (
-    "confidential", "salary band", "compensation", "payroll", "forecast", "penetration test",
-    "vulnerability", "litigation", "privileged", "performance review", "calibration",
-    "non-disclosure", "contract", "agreement", "indemnif", "pricing", "customer list",
+    "confidential",
+    "salary band",
+    "compensation",
+    "payroll",
+    "forecast",
+    "penetration test",
+    "vulnerability",
+    "litigation",
+    "privileged",
+    "performance review",
+    "calibration",
+    "non-disclosure",
+    "contract",
+    "agreement",
+    "indemnif",
+    "pricing",
+    "customer list",
 )
 _MARKER = re.compile(r"classification:\s*(public|internal|confidential|restricted)", re.I)
 

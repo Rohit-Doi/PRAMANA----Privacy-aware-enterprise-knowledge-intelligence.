@@ -40,34 +40,61 @@ class RoleSpec:
 
 ROLES: dict[str, RoleSpec] = {
     "employee": RoleSpec(
-        "Employee", "Reads PUBLIC and INTERNAL documents.", S.INTERNAL, S.INTERNAL, [*_BASIC],
+        "Employee",
+        "Reads PUBLIC and INTERNAL documents.",
+        S.INTERNAL,
+        S.INTERNAL,
+        [*_BASIC],
     ),
     "manager": RoleSpec(
-        "Manager", "Adds CONFIDENTIAL documents of their own department.",
-        S.CONFIDENTIAL, S.INTERNAL, [*_BASIC, P.DOCUMENTS_WRITE, P.REPORTS_READ],
+        "Manager",
+        "Adds CONFIDENTIAL documents of their own department.",
+        S.CONFIDENTIAL,
+        S.INTERNAL,
+        [*_BASIC, P.DOCUMENTS_WRITE, P.REPORTS_READ],
     ),
     "analyst": RoleSpec(
-        "Analyst", "Reads CONFIDENTIAL documents across departments.",
-        S.CONFIDENTIAL, S.CONFIDENTIAL, [*_BASIC, P.REPORTS_READ, P.MONITORING_READ, P.ANALYTICS_READ],
+        "Analyst",
+        "Reads CONFIDENTIAL documents across departments.",
+        S.CONFIDENTIAL,
+        S.CONFIDENTIAL,
+        [*_BASIC, P.REPORTS_READ, P.MONITORING_READ, P.ANALYTICS_READ],
     ),
     "compliance_officer": RoleSpec(
-        "Compliance Officer", "Analyst access plus audit log, policy view and answer review.",
-        S.CONFIDENTIAL, S.CONFIDENTIAL,
-        [*_BASIC, P.AUDIT_READ, P.POLICY_READ, P.REPORTS_READ, P.REVIEW_WRITE, P.MONITORING_READ,
-         P.ANALYTICS_READ],
+        "Compliance Officer",
+        "Analyst access plus audit log, policy view and answer review.",
+        S.CONFIDENTIAL,
+        S.CONFIDENTIAL,
+        [*_BASIC, P.AUDIT_READ, P.POLICY_READ, P.REPORTS_READ, P.REVIEW_WRITE, P.MONITORING_READ, P.ANALYTICS_READ],
     ),
     "executive": RoleSpec(
-        "Executive", "Reads everything including RESTRICTED, in every region, with personal data.",
-        S.RESTRICTED, S.RESTRICTED,
+        "Executive",
+        "Reads everything including RESTRICTED, in every region, with personal data.",
+        S.RESTRICTED,
+        S.RESTRICTED,
         [*_BASIC, P.PII_READ, P.REGION_ALL, P.REPORTS_READ, P.ANALYTICS_READ],
     ),
     # Separation of duties: administrators run the platform but get no elevated content access.
     "admin": RoleSpec(
-        "Administrator", "Manages users, policies and sources. No elevated access to content.",
-        S.INTERNAL, S.INTERNAL,
-        [*_BASIC, P.DOCUMENTS_WRITE, P.USERS_MANAGE, P.POLICY_READ, P.POLICY_WRITE, P.AUDIT_READ,
-         P.MONITORING_READ, P.REPORTS_READ, P.REVIEW_WRITE, P.ANALYTICS_READ, P.SETTINGS_WRITE,
-         P.SIMULATE_USER, P.REGION_ALL],
+        "Administrator",
+        "Manages users, policies and sources. No elevated access to content.",
+        S.INTERNAL,
+        S.INTERNAL,
+        [
+            *_BASIC,
+            P.DOCUMENTS_WRITE,
+            P.USERS_MANAGE,
+            P.POLICY_READ,
+            P.POLICY_WRITE,
+            P.AUDIT_READ,
+            P.MONITORING_READ,
+            P.REPORTS_READ,
+            P.REVIEW_WRITE,
+            P.ANALYTICS_READ,
+            P.SETTINGS_WRITE,
+            P.SIMULATE_USER,
+            P.REGION_ALL,
+        ],
     ),
 }
 
@@ -90,8 +117,14 @@ PERSONAS = [
     Persona("clara.compliance@aurelia-systems.example", "Clara Jensen", "compliance_officer", "compliance", "emea"),
     Persona("elena.executive@aurelia-systems.example", "Elena Vasquez", "executive", "company", "amer"),
     Persona("adam.admin@aurelia-systems.example", "Adam Novak", "admin", "it", "amer"),
-    Persona("assistant.bot@aurelia-systems.example", "Helpdesk Assistant (bot)", "employee", "it", "global",
-            is_service_account=True),
+    Persona(
+        "assistant.bot@aurelia-systems.example",
+        "Helpdesk Assistant (bot)",
+        "employee",
+        "it",
+        "global",
+        is_service_account=True,
+    ),
 ]
 
 
@@ -106,8 +139,11 @@ async def seed_reference_data(db: AsyncSession) -> None:
         if key not in existing_roles:
             db.add(
                 Role(
-                    key=key, name=spec.name, description=spec.description,
-                    max_rank_own_dept=int(spec.own), max_rank_other_dept=int(spec.other),
+                    key=key,
+                    name=spec.name,
+                    description=spec.description,
+                    max_rank_own_dept=int(spec.own),
+                    max_rank_other_dept=int(spec.other),
                     permissions=sorted(str(p) for p in spec.permissions),
                 )
             )
@@ -126,9 +162,13 @@ async def seed_personas(db: AsyncSession, password: str) -> list[str]:
             continue
         db.add(
             User(
-                email=persona.email, full_name=persona.full_name, password_hash=password_hash,
-                role_id=roles[persona.role].id, department_id=departments[persona.department].id,
-                region=persona.region, is_service_account=persona.is_service_account,
+                email=persona.email,
+                full_name=persona.full_name,
+                password_hash=password_hash,
+                role_id=roles[persona.role].id,
+                department_id=departments[persona.department].id,
+                region=persona.region,
+                is_service_account=persona.is_service_account,
             )
         )
         created.append(persona.email)

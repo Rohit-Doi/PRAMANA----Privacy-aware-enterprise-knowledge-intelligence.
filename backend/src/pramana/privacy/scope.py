@@ -69,9 +69,7 @@ class AccessScope:
 
     # ── Qdrant ──────────────────────────────────────────────────────────
     def qdrant_filter(self, *extra: qm.Condition) -> qm.Filter:
-        any_department = qm.FieldCondition(
-            key="sensitivity_rank", range=qm.Range(lte=self.max_rank_other_dept)
-        )
+        any_department = qm.FieldCondition(key="sensitivity_rank", range=qm.Range(lte=self.max_rank_other_dept))
         own_department = qm.Filter(
             must=[
                 qm.FieldCondition(key="department", match=qm.MatchAny(any=list(self.departments))),

@@ -50,8 +50,11 @@ async def readyz(runtime: RuntimeDep, response: Response) -> dict[str, Any]:
     ready = all(v == "ok" for v in results.values())
     if not ready:
         response.status_code = 503
-    return {"status": "ready" if ready else "degraded", "checks": results,
-            "policy_version": runtime.policy.loaded_version}
+    return {
+        "status": "ready" if ready else "degraded",
+        "checks": results,
+        "policy_version": runtime.policy.loaded_version,
+    }
 
 
 @router.get("/metrics", include_in_schema=False)

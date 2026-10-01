@@ -16,12 +16,7 @@ from pramana.privacy.scope import AccessScope
 _WORD = re.compile(r"[A-Za-z0-9][A-Za-z0-9\-]{2,}")
 _LUCENE_SPECIAL = re.compile(r'([+\-&|!(){}\[\]^"~*?:\\/])')
 _STOPWORDS = frozenset(
-    """
-    the and for are but not you all any can had her was one our out has have what when where which
-    who whom whose why how many much does did from into with about this that these those their
-    there then than them they will would should could shall may might must been being were your
-    its also such per between within without under over after before during against each other
-    """.split()
+    ["the", "and", "for", "are", "but", "not", "you", "all", "any", "can", "had", "her", "was", "one", "our", "out", "has", "have", "what", "when", "where", "which", "who", "whom", "whose", "why", "how", "many", "much", "does", "did", "from", "into", "with", "about", "this", "that", "these", "those", "their", "there", "then", "than", "them", "they", "will", "would", "should", "could", "shall", "may", "might", "must", "been", "being", "were", "your", "its", "also", "such", "per", "between", "within", "without", "under", "over", "after", "before", "during", "against", "each", "other"]
 )
 MAX_SEEDS = 8
 
@@ -114,10 +109,11 @@ class GraphStore:
                 f"""
                 UNWIND $keys AS key
                 MATCH (e:Entity {{key: key}})<-[:MENTIONS]-(c:Chunk)
-                WHERE {scope.cypher_predicate('c')}
+                WHERE {scope.cypher_predicate("c")}
                 RETURN e.key AS key, e.name AS name, e.type AS type, count(c) AS visible
                 """,
-                keys=list(candidates), **scope.cypher_params(),
+                keys=list(candidates),
+                **scope.cypher_params(),
             )
             visible = [r async for r in result]
         linked = [
@@ -141,11 +137,12 @@ class GraphStore:
             result = await session.run(
                 f"""
                 MATCH (e:Entity)<-[:MENTIONS]-(c:Chunk)
-                WHERE e.key IN $seeds AND {scope.cypher_predicate('c')}
+                WHERE e.key IN $seeds AND {scope.cypher_predicate("c")}
                 RETURN e.key AS key, c.id AS chunk_id
                 LIMIT 500
                 """,
-                seeds=seed_keys, **params,
+                seeds=seed_keys,
+                **params,
             )
             seed_mentions = [(r["key"], uuid.UUID(r["chunk_id"])) async for r in result]
             graph.mentions.extend(seed_mentions)
@@ -164,7 +161,8 @@ class GraphStore:
                     LIMIT 40
                     RETURN o.key AS key, o.name AS name, o.type AS type
                     """,
-                    chunk_ids=chunk_ids, seeds=seed_keys,
+                    chunk_ids=chunk_ids,
+                    seeds=seed_keys,
                 )
                 neighbours = [r async for r in result]
                 for row in neighbours:
@@ -173,11 +171,12 @@ class GraphStore:
                     result = await session.run(
                         f"""
                         MATCH (o:Entity)<-[:MENTIONS]-(c:Chunk)
-                        WHERE o.key IN $keys AND {scope.cypher_predicate('c')}
+                        WHERE o.key IN $keys AND {scope.cypher_predicate("c")}
                         RETURN o.key AS key, c.id AS chunk_id
                         LIMIT 1500
                         """,
-                        keys=[r["key"] for r in neighbours], **params,
+                        keys=[r["key"] for r in neighbours],
+                        **params,
                     )
                     graph.mentions.extend([(r["key"], uuid.UUID(r["chunk_id"])) async for r in result])
 
@@ -185,23 +184,29 @@ class GraphStore:
             result = await session.run(
                 f"""
                 MATCH (h:Entity)-[r:REL]->(t:Entity)
-                WHERE (h.key IN $seeds OR t.key IN $seeds) AND {scope.cypher_predicate('r')}
+                WHERE (h.key IN $seeds OR t.key IN $seeds) AND {scope.cypher_predicate("r")}
                 RETURN h.key AS head_key, h.name AS head, h.type AS head_type, r.type AS relation,
                        t.key AS tail_key, t.name AS tail, t.type AS tail_type,
                        r.chunk_id AS chunk_id, r.document_id AS document_id, r.confidence AS confidence
                 ORDER BY r.confidence DESC
                 LIMIT 120
                 """,
-                seeds=seed_keys, **params,
+                seeds=seed_keys,
+                **params,
             )
             async for row in result:
                 graph.names.setdefault(row["head_key"], (row["head"], row["head_type"]))
                 graph.names.setdefault(row["tail_key"], (row["tail"], row["tail_type"]))
                 graph.facts.append(
                     GraphFact(
-                        head=row["head"], head_key=row["head_key"], relation=row["relation"],
-                        tail=row["tail"], tail_key=row["tail_key"], chunk_id=uuid.UUID(row["chunk_id"]),
-                        document_id=uuid.UUID(row["document_id"]), confidence=float(row["confidence"] or 0.0),
+                        head=row["head"],
+                        head_key=row["head_key"],
+                        relation=row["relation"],
+                        tail=row["tail"],
+                        tail_key=row["tail_key"],
+                        chunk_id=uuid.UUID(row["chunk_id"]),
+                        document_id=uuid.UUID(row["document_id"]),
+                        confidence=float(row["confidence"] or 0.0),
                     )
                 )
         return graph
@@ -217,13 +222,15 @@ class GraphStore:
                 f"""
                 CALL db.index.fulltext.queryNodes('entity_name', $q, {{limit: 80}}) YIELD node, score
                 MATCH (node)<-[:MENTIONS]-(c:Chunk)
-                WHERE {scope.cypher_predicate('c')}
+                WHERE {scope.cypher_predicate("c")}
                 WITH node, score, count(c) AS mentions
                 RETURN node.key AS key, node.name AS name, node.type AS type, mentions
                 ORDER BY score DESC, mentions DESC
                 LIMIT $limit
                 """,
-                q=lucene, limit=limit, **scope.cypher_params(),
+                q=lucene,
+                limit=limit,
+                **scope.cypher_params(),
             )
             return [dict(r) async for r in result]
 
@@ -234,11 +241,12 @@ class GraphStore:
             result = await session.run(
                 f"""
                 MATCH (e:Entity {{key: $key}})<-[:MENTIONS]-(c:Chunk)
-                WHERE {scope.cypher_predicate('c')}
+                WHERE {scope.cypher_predicate("c")}
                 RETURN e.key AS key, e.name AS name, e.type AS type,
                        collect(DISTINCT c.id)[..25] AS chunk_ids, count(c) AS mentions
                 """,
-                key=key, **params,
+                key=key,
+                **params,
             )
             center = await result.single()
             if center is None:
@@ -246,25 +254,29 @@ class GraphStore:
             result = await session.run(
                 f"""
                 MATCH (e:Entity {{key: $key}})-[r:REL]-(n:Entity)
-                WHERE {scope.cypher_predicate('r')}
+                WHERE {scope.cypher_predicate("r")}
                 RETURN startNode(r).key AS source, endNode(r).key AS target, r.type AS relation,
                        r.chunk_id AS chunk_id, r.confidence AS confidence,
                        n.key AS key, n.name AS name, n.type AS type
                 LIMIT $limit
                 """,
-                key=key, limit=limit, **params,
+                key=key,
+                limit=limit,
+                **params,
             )
             relations = [dict(r) async for r in result]
             result = await session.run(
                 f"""
                 MATCH (e:Entity {{key: $key}})<-[:MENTIONS]-(c:Chunk)-[:MENTIONS]->(n:Entity)
-                WHERE {scope.cypher_predicate('c')} AND n.key <> $key
+                WHERE {scope.cypher_predicate("c")} AND n.key <> $key
                 WITH n, count(DISTINCT c) AS shared
                 ORDER BY shared DESC
                 LIMIT $limit
                 RETURN n.key AS key, n.name AS name, n.type AS type, shared
                 """,
-                key=key, limit=limit, **params,
+                key=key,
+                limit=limit,
+                **params,
             )
             related = [dict(r) async for r in result]
         return {"entity": dict(center), "relations": relations, "co_mentioned": related}

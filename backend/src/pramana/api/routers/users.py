@@ -90,19 +90,30 @@ class DepartmentResponse(BaseModel):
 
 def _user(user: User) -> UserResponse:
     return UserResponse(
-        id=user.id, email=user.email, full_name=user.full_name, role=user.role.key,
-        role_name=user.role.name, department=user.department.key, region=user.region,
+        id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+        role=user.role.key,
+        role_name=user.role.name,
+        department=user.department.key,
+        region=user.region,
         extra_departments=list(user.extra_departments or []),
-        extra_permissions=list(user.extra_permissions or []), is_active=user.is_active,
-        is_service_account=user.is_service_account, mfa_enabled=user.mfa_enabled,
-        last_login_at=user.last_login_at, created_at=user.created_at,
+        extra_permissions=list(user.extra_permissions or []),
+        is_active=user.is_active,
+        is_service_account=user.is_service_account,
+        mfa_enabled=user.mfa_enabled,
+        last_login_at=user.last_login_at,
+        created_at=user.created_at,
     )
 
 
 def _role(role: Role) -> RoleResponse:
     return RoleResponse(
-        key=role.key, name=role.name, description=role.description,
-        max_rank_own_dept=role.max_rank_own_dept, max_rank_other_dept=role.max_rank_other_dept,
+        key=role.key,
+        name=role.name,
+        description=role.description,
+        max_rank_own_dept=role.max_rank_own_dept,
+        max_rank_other_dept=role.max_rank_other_dept,
         permissions=sorted(role.permissions),
     )
 
@@ -128,13 +139,23 @@ async def create_user(body: UserCreate, admin: UserAdmin, db: DbSession) -> User
     _check_permissions(body.extra_permissions)
     _check_region(body.region)
     user = await UserAdminService(db).create_user(
-        email=body.email, full_name=body.full_name, password=body.password, role_key=body.role,
-        department_key=body.department, region=body.region, extra_departments=body.extra_departments,
-        extra_permissions=body.extra_permissions, is_service_account=body.is_service_account,
+        email=body.email,
+        full_name=body.full_name,
+        password=body.password,
+        role_key=body.role,
+        department_key=body.department,
+        region=body.region,
+        extra_departments=body.extra_departments,
+        extra_permissions=body.extra_permissions,
+        is_service_account=body.is_service_account,
     )
     await AuditTrail().record(
-        action="user.create", decision="GRANTED", principal=admin, resource_type="user",
-        resource_id=str(user.id), details={"email": user.email, "role": body.role, "department": body.department},
+        action="user.create",
+        decision="GRANTED",
+        principal=admin,
+        resource_type="user",
+        resource_id=str(user.id),
+        details={"email": user.email, "role": body.role, "department": body.department},
     )
     return _user(user)
 
@@ -155,8 +176,12 @@ async def update_user(user_id: uuid.UUID, body: UserUpdate, admin: UserAdmin, db
         user_id, role_key=changes.pop("role", None), department_key=changes.pop("department", None), **changes
     )
     await AuditTrail().record(
-        action="user.update", decision="GRANTED", principal=admin, resource_type="user",
-        resource_id=str(user_id), details={"changes": body.model_dump(exclude_unset=True)},
+        action="user.update",
+        decision="GRANTED",
+        principal=admin,
+        resource_type="user",
+        resource_id=str(user_id),
+        details={"changes": body.model_dump(exclude_unset=True)},
     )
     return _user(user)
 
@@ -165,8 +190,11 @@ async def update_user(user_id: uuid.UUID, body: UserUpdate, admin: UserAdmin, db
 async def reset_password(user_id: uuid.UUID, body: PasswordReset, admin: UserAdmin, db: DbSession) -> None:
     await UserAdminService(db).reset_password(user_id, body.new_password)
     await AuditTrail().record(
-        action="user.password.reset", decision="GRANTED", principal=admin,
-        resource_type="user", resource_id=str(user_id),
+        action="user.password.reset",
+        decision="GRANTED",
+        principal=admin,
+        resource_type="user",
+        resource_id=str(user_id),
     )
 
 
@@ -178,7 +206,8 @@ async def list_roles(
 
 
 @router.patch(
-    "/roles/{role_key}", response_model=RoleResponse,
+    "/roles/{role_key}",
+    response_model=RoleResponse,
     summary="Change a role's limits or permissions (publishes a new policy version)",
 )
 async def update_role(
@@ -206,9 +235,12 @@ async def update_role(
         note=body.note or f"Role '{role_key}' updated", created_by=admin.user_id
     )
     await AuditTrail().record(
-        action="policy.role.update", decision="GRANTED", principal=admin, resource_type="role",
-        resource_id=role_key, details={"before": before, "after": _role(role).model_dump(),
-                                       "policy_version": version.version},
+        action="policy.role.update",
+        decision="GRANTED",
+        principal=admin,
+        resource_type="role",
+        resource_id=role_key,
+        details={"before": before, "after": _role(role).model_dump(), "policy_version": version.version},
     )
     return _role(role)
 

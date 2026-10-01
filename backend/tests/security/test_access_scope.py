@@ -32,9 +32,16 @@ RESOURCES = [
 def make_principal(role: str, department: str, region: str, *, extra: tuple[str, ...] = ()) -> Principal:
     spec = ROLES[role]
     return Principal(
-        user_id=uuid.uuid4(), email=f"{role}@test", full_name=role, role=role, department=department,
-        region=region, max_rank_own_dept=int(spec.own), max_rank_other_dept=int(spec.other),
-        extra_departments=extra, permissions=frozenset(str(p) for p in spec.permissions),
+        user_id=uuid.uuid4(),
+        email=f"{role}@test",
+        full_name=role,
+        role=role,
+        department=department,
+        region=region,
+        max_rank_own_dept=int(spec.own),
+        max_rank_other_dept=int(spec.other),
+        extra_departments=extra,
+        permissions=frozenset(str(p) for p in spec.permissions),
     )
 
 
@@ -62,11 +69,18 @@ async def test_python_reference_agrees_with_rego_for_every_combination(runtime: 
 async def test_sql_filter_agrees_with_rego(runtime: Runtime) -> None:
     async with session_scope() as db:
         for resource in RESOURCES:
-            db.add(Document(
-                title=resource.id, source_type="test", collection="scope-test", department=resource.department,
-                sensitivity_rank=resource.sensitivity_rank, region=resource.region,
-                content_hash=uuid.uuid4().hex, status="ready",
-            ))
+            db.add(
+                Document(
+                    title=resource.id,
+                    source_type="test",
+                    collection="scope-test",
+                    department=resource.department,
+                    sensitivity_rank=resource.sensitivity_rank,
+                    region=resource.region,
+                    content_hash=uuid.uuid4().hex,
+                    status="ready",
+                )
+            )
     try:
         for principal in PRINCIPALS:
             scope = await runtime.policy.scope(principal)
@@ -89,13 +103,23 @@ async def test_qdrant_filter_agrees_with_rego(runtime: Runtime) -> None:
         await client.delete_collection(name)
     await client.create_collection(name, vectors_config=qm.VectorParams(size=4, distance=qm.Distance.COSINE))
     try:
-        await client.upsert(name, points=[
-            qm.PointStruct(
-                id=str(uuid.uuid5(uuid.NAMESPACE_URL, r.id)), vector=[0.1, 0.2, 0.3, 0.4],
-                payload={"rid": r.id, "department": r.department, "sensitivity_rank": r.sensitivity_rank, "region": r.region},
-            )
-            for r in RESOURCES
-        ], wait=True)
+        await client.upsert(
+            name,
+            points=[
+                qm.PointStruct(
+                    id=str(uuid.uuid5(uuid.NAMESPACE_URL, r.id)),
+                    vector=[0.1, 0.2, 0.3, 0.4],
+                    payload={
+                        "rid": r.id,
+                        "department": r.department,
+                        "sensitivity_rank": r.sensitivity_rank,
+                        "region": r.region,
+                    },
+                )
+                for r in RESOURCES
+            ],
+            wait=True,
+        )
         for principal in PRINCIPALS:
             scope = await runtime.policy.scope(principal)
             allowed = await runtime.policy.allowed_ids(principal, RESOURCES)
@@ -111,8 +135,10 @@ async def test_neo4j_predicate_agrees_with_rego(runtime: Runtime) -> None:
         await session.run(f"MATCH (n:{label}) DETACH DELETE n")
         await session.run(
             f"UNWIND $rows AS row CREATE (n:{label}) SET n = row",
-            rows=[{"rid": r.id, "department": r.department, "sensitivity_rank": r.sensitivity_rank, "region": r.region}
-                  for r in RESOURCES],
+            rows=[
+                {"rid": r.id, "department": r.department, "sensitivity_rank": r.sensitivity_rank, "region": r.region}
+                for r in RESOURCES
+            ],
         )
         try:
             for principal in PRINCIPALS:
@@ -129,8 +155,15 @@ async def test_neo4j_predicate_agrees_with_rego(runtime: Runtime) -> None:
 
 async def test_unknown_role_gets_empty_scope_everywhere(runtime: Runtime) -> None:
     ghost = Principal(
-        user_id=uuid.uuid4(), email="ghost@test", full_name="ghost", role="does_not_exist", department="hr",
-        region="emea", max_rank_own_dept=3, max_rank_other_dept=3, permissions=frozenset({"region:all"}),
+        user_id=uuid.uuid4(),
+        email="ghost@test",
+        full_name="ghost",
+        role="does_not_exist",
+        department="hr",
+        region="emea",
+        max_rank_own_dept=3,
+        max_rank_other_dept=3,
+        permissions=frozenset({"region:all"}),
     )
     scope = await runtime.policy.scope(ghost)
     assert scope == EMPTY_SCOPE

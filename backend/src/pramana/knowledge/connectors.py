@@ -37,12 +37,17 @@ def manifest_documents(data_dir: Path, manifest: Path) -> Iterator[tuple[NewDocu
         effective = row.get("effective_date")
         yield (
             NewDocument(
-                data=data, filename=path.name, title=title or path.stem,
-                department=row["department"], sensitivity=Sensitivity.parse(row["sensitivity"]),
-                region=row.get("region", "global"), source_type=row.get("source_type", "file"),
+                data=data,
+                filename=path.name,
+                title=title or path.stem,
+                department=row["department"],
+                sensitivity=Sensitivity.parse(row["sensitivity"]),
+                region=row.get("region", "global"),
+                source_type=row.get("source_type", "file"),
                 collection=row.get("collection", "default"),
                 effective_date=date.fromisoformat(effective) if effective else None,
-                version=str(row.get("version", "1")), source_uri=row.get("source_uri", ""),
+                version=str(row.get("version", "1")),
+                source_uri=row.get("source_uri", ""),
                 meta={"license": row.get("license", ""), "manifest_path": row["path"]},
             ),
             row,
@@ -92,10 +97,14 @@ def sql_employee_documents(database_url: str, *, source_name: str = "hr") -> Ite
         manager = names.get(row["manager_id"], "none (reports to the board)")
         body = EMPLOYEE_TEMPLATE.format(**row, manager=manager, region_upper=str(row["region"]).upper())
         yield NewDocument(
-            data=body.encode("utf-8"), filename=f"employee-{row['employee_id']}.md",
+            data=body.encode("utf-8"),
+            filename=f"employee-{row['employee_id']}.md",
             title=f"Employee record: {row['full_name']} ({row['employee_id']})",
-            department="hr", sensitivity=Sensitivity.RESTRICTED, region="global",
-            source_type="sql", collection="hr-directory",
+            department="hr",
+            sensitivity=Sensitivity.RESTRICTED,
+            region="global",
+            source_type="sql",
+            collection="hr-directory",
             source_uri=f"sql://{source_name}/employees/{row['employee_id']}",
             meta={"employee_id": row["employee_id"], "full_name": row["full_name"]},
         )

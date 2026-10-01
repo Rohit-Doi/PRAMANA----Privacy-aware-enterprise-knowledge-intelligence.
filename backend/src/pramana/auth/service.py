@@ -341,9 +341,7 @@ class UserAdminService:
         await self._revoke_all_sessions(user.id)
 
     async def _revoke_all_sessions(self, user_id: uuid.UUID) -> None:
-        rows = await self._db.execute(
-            select(Session).where(Session.user_id == user_id, Session.revoked_at.is_(None))
-        )
+        rows = await self._db.execute(select(Session).where(Session.user_id == user_id, Session.revoked_at.is_(None)))
         now = utcnow()
         for session in rows.scalars():
             session.revoked_at = now

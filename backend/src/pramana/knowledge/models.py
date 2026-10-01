@@ -28,9 +28,7 @@ class Document(Base, UUIDPrimaryKey, Timestamps):
     __tablename__ = "documents"
     __table_args__ = (
         CheckConstraint("sensitivity_rank BETWEEN 0 AND 3", name="sensitivity_range"),
-        CheckConstraint(
-            "status IN ('pending','processing','ready','failed','deleted')", name="status_valid"
-        ),
+        CheckConstraint("status IN ('pending','processing','ready','failed','deleted')", name="status_valid"),
         Index("ix_documents_scope", "department", "sensitivity_rank", "region"),
         Index("ix_documents_content_hash", "content_hash"),
     )
@@ -46,9 +44,7 @@ class Document(Base, UUIDPrimaryKey, Timestamps):
     owner_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     effective_date: Mapped[date | None] = mapped_column(Date)
     version: Mapped[str] = mapped_column(String(32), default="1", nullable=False)
-    supersedes_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("documents.id", ondelete="SET NULL")
-    )
+    supersedes_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("documents.id", ondelete="SET NULL"))
     is_current: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     mime_type: Mapped[str] = mapped_column(String(128), default="", nullable=False)
     storage_key: Mapped[str] = mapped_column(String(512), default="", nullable=False)
@@ -93,9 +89,7 @@ class IngestionJob(Base, UUIDPrimaryKey, Timestamps):
 
     __tablename__ = "ingestion_jobs"
     __table_args__ = (
-        CheckConstraint(
-            "status IN ('queued','running','succeeded','failed','cancelled')", name="status_valid"
-        ),
+        CheckConstraint("status IN ('queued','running','succeeded','failed','cancelled')", name="status_valid"),
         Index("ix_ingestion_jobs_claim", "status", "created_at"),
     )
 

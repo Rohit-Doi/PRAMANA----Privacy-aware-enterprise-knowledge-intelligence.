@@ -1,14 +1,14 @@
 """Hybrid GraphRAG retrieval.
 
-    question
-      ├─ dense vector search   ┐
-      ├─ BM25 keyword search   ├─ each restricted to the caller's access scope
-      └─ graph (PageRank)      ┘
-            ↓ weighted Reciprocal Rank Fusion (all three rank the same thing: passages)
-            ↓ policy re-check on every candidate (defence in depth)
-            ↓ cross-encoder rerank
-            ↓ context expansion (adjacent passages of the best hits)
-          evidence pack [E1] … [En]  +  graph facts
+question
+  ├─ dense vector search   ┐
+  ├─ BM25 keyword search   ├─ each restricted to the caller's access scope
+  └─ graph (PageRank)      ┘
+        ↓ weighted Reciprocal Rank Fusion (all three rank the same thing: passages)
+        ↓ policy re-check on every candidate (defence in depth)
+        ↓ cross-encoder rerank
+        ↓ context expansion (adjacent passages of the best hits)
+      evidence pack [E1] … [En]  +  graph facts
 """
 
 from __future__ import annotations
@@ -73,13 +73,27 @@ class Evidence:
 
     def as_dict(self) -> dict[str, Any]:
         return {
-            "ref": self.ref, "chunk_ids": [str(c) for c in self.chunk_ids], "document_id": str(self.document_id),
-            "title": self.title, "section_path": self.section_path, "page": self.page, "text": self.text,
-            "char_start": self.char_start, "char_end": self.char_end, "department": self.department,
-            "sensitivity_rank": self.sensitivity_rank, "region": self.region, "source_type": self.source_type,
-            "collection": self.collection, "version": self.version, "effective_date": self.effective_date,
-            "is_current": self.is_current, "rerank_score": round(self.rerank_score, 4),
-            "fused_score": round(self.fused_score, 6), "found_by": self.found_by, "ranks": self.ranks,
+            "ref": self.ref,
+            "chunk_ids": [str(c) for c in self.chunk_ids],
+            "document_id": str(self.document_id),
+            "title": self.title,
+            "section_path": self.section_path,
+            "page": self.page,
+            "text": self.text,
+            "char_start": self.char_start,
+            "char_end": self.char_end,
+            "department": self.department,
+            "sensitivity_rank": self.sensitivity_rank,
+            "region": self.region,
+            "source_type": self.source_type,
+            "collection": self.collection,
+            "version": self.version,
+            "effective_date": self.effective_date,
+            "is_current": self.is_current,
+            "rerank_score": round(self.rerank_score, 4),
+            "fused_score": round(self.fused_score, 6),
+            "found_by": self.found_by,
+            "ranks": self.ranks,
         }
 
 
@@ -93,6 +107,28 @@ class RetrievalResult:
     candidates_considered: int
     timings_ms: dict[str, int]
     entity_scores: dict[str, float] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class VectorCandidates:
+    """Output of the passage search: ranked passage ids from the two vector retrievers."""
+
+    semantic: list[uuid.UUID] = field(default_factory=list)
+    keyword: list[uuid.UUID] = field(default_factory=list)
+    withheld_count: int = 0
+    withheld_max_rank: int | None = None
+    timings_ms: dict[str, int] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class GraphCandidates:
+    """Output of the graph search: passages ranked by PageRank, plus the facts and entities used."""
+
+    chunks: list[uuid.UUID] = field(default_factory=list)
+    facts: list[GraphFact] = field(default_factory=list)
+    linked_entities: list[LinkedEntity] = field(default_factory=list)
+    entity_scores: dict[str, float] = field(default_factory=dict)
+    timings_ms: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -136,60 +172,119 @@ class HybridRetriever:
         scope: AccessScope,
         options: RetrievalOptions | None = None,
     ) -> RetrievalResult:
+        """All stages in one call. The agent workflow runs the same stages as separate steps."""
         options = options or RetrievalOptions()
-        settings = self._settings
-        candidates = options.candidates or settings.retrieval_candidates
-        top_k = options.top_k or settings.retrieval_top_k
-        timings: dict[str, int] = {}
+        vector_task = self.search_passages(question, scope, options=options)
+        graph_task = self.search_graph(question, scope, options=options)
+        vector_candidates, graph_candidates = await asyncio.gather(vector_task, graph_task)
+        return await self.build_evidence(
+            question, principal=principal, vectors=vector_candidates, graph=graph_candidates, options=options
+        )
 
+    # ── Stage 1a: passage search (Retrieval Agent) ──────────────────────
+    async def search_passages(
+        self, question: str, scope: AccessScope, *, options: RetrievalOptions | None = None
+    ) -> VectorCandidates:
+        options = options or RetrievalOptions()
+        limit = options.candidates or self._settings.retrieval_candidates
         started = time.perf_counter()
         dense_vector, sparse_vector = await asyncio.gather(
             self._models.embed_query(question), self._models.sparse_query(question)
         )
-        timings["embed"] = _ms(started)
+        embed_ms = _ms(started)
 
-        # ── Three retrievers, each inside the access scope ─────────────
         scope_filter = scope.qdrant_filter()
         started = time.perf_counter()
 
         async def none() -> list[VectorHit]:
             return []
 
-        async def no_graph() -> tuple[GraphRanking | None, list[LinkedEntity]]:
-            return None, []
+        semantic_hits, keyword_hits, (withheld, withheld_rank) = await asyncio.gather(
+            self._vectors.search_dense(dense_vector, query_filter=scope_filter, limit=limit)
+            if options.use_semantic
+            else none(),
+            self._vectors.search_sparse(sparse_vector, query_filter=scope_filter, limit=limit)
+            if options.use_keyword
+            else none(),
+            self._withheld(dense_vector, scope),
+        )
+        return VectorCandidates(
+            semantic=[h.chunk_id for h in semantic_hits],
+            keyword=[h.chunk_id for h in keyword_hits],
+            withheld_count=withheld,
+            withheld_max_rank=withheld_rank,
+            timings_ms={"embed": embed_ms, "search": _ms(started)},
+        )
 
-        semantic_task = (
-            self._vectors.search_dense(dense_vector, query_filter=scope_filter, limit=candidates)
-            if options.use_semantic else none()
+    # ── Stage 1b: graph search (Graph Reasoning Agent) ──────────────────
+    async def search_graph(
+        self, question: str, scope: AccessScope, *, options: RetrievalOptions | None = None
+    ) -> GraphCandidates:
+        options = options or RetrievalOptions()
+        if not options.use_graph:
+            return GraphCandidates()
+        started = time.perf_counter()
+        limit = options.candidates or self._settings.retrieval_candidates
+        vector = await self._models.embed_query(question)
+        ranking, linked = await self._graph_ranking(question, vector, scope, limit)
+        return GraphCandidates(
+            chunks=[chunk_id for chunk_id, _ in ranking.chunks] if ranking else [],
+            facts=ranking.facts if ranking else [],
+            linked_entities=linked,
+            entity_scores=ranking.entity_scores if ranking else {},
+            timings_ms={"graph": _ms(started)},
         )
-        keyword_task = (
-            self._vectors.search_sparse(sparse_vector, query_filter=scope_filter, limit=candidates)
-            if options.use_keyword else none()
-        )
-        graph_task = self._graph_ranking(question, dense_vector, scope, candidates) if options.use_graph else no_graph()
-        withheld_task = self._withheld(dense_vector, scope)
-        semantic_hits, keyword_hits, (graph_ranking, linked), (withheld, withheld_rank) = await asyncio.gather(
-            semantic_task, keyword_task, graph_task, withheld_task
-        )
-        timings["search"] = _ms(started)
+
+    # ── Stage 2: fuse, re-check policy, rerank, expand ──────────────────
+    async def build_evidence(
+        self,
+        question: str,
+        *,
+        principal: Principal,
+        vectors: VectorCandidates,
+        graph: GraphCandidates,
+        options: RetrievalOptions | None = None,
+    ) -> RetrievalResult:
+        options = options or RetrievalOptions()
+        settings = self._settings
+        candidates = options.candidates or settings.retrieval_candidates
+        top_k = options.top_k or settings.retrieval_top_k
+        timings: dict[str, int] = {**vectors.timings_ms, **graph.timings_ms}
 
         rankings: dict[str, list[uuid.UUID]] = {
-            "semantic": [h.chunk_id for h in semantic_hits],
-            "keyword": [h.chunk_id for h in keyword_hits],
-            "graph": [chunk_id for chunk_id, _ in graph_ranking.chunks] if graph_ranking else [],
+            "semantic": vectors.semantic,
+            "keyword": vectors.keyword,
+            "graph": graph.chunks,
         }
         fused = reciprocal_rank_fusion(rankings, k=settings.rrf_k, weights=RETRIEVER_WEIGHTS)[:candidates]
-        if not fused:
-            return RetrievalResult([], [], linked, withheld, withheld_rank, 0, timings)
 
-        # ── Load passages; re-check each one against the policy engine ──
+        def result(evidence: list[Evidence], considered: int) -> RetrievalResult:
+            return RetrievalResult(
+                evidence=evidence,
+                graph_facts=graph.facts,
+                linked_entities=graph.linked_entities,
+                withheld_count=vectors.withheld_count,
+                withheld_max_rank=vectors.withheld_max_rank,
+                candidates_considered=considered,
+                timings_ms=timings,
+                entity_scores=graph.entity_scores,
+            )
+
+        if not fused:
+            return result([], 0)
+
+        # Load passages; re-check each one against the policy engine (defence in depth).
         started = time.perf_counter()
         rows = await self._load_chunks([chunk_id for chunk_id, _ in fused])
         allowed = await self._policy.allowed_ids(
             principal,
             [
-                ResourceRef(id=str(chunk.id), department=doc.department,
-                            sensitivity_rank=doc.sensitivity_rank, region=doc.region)
+                ResourceRef(
+                    id=str(chunk.id),
+                    department=doc.department,
+                    sensitivity_rank=doc.sensitivity_rank,
+                    region=doc.region,
+                )
                 for chunk, doc in rows.values()
             ],
         )
@@ -199,8 +294,9 @@ class HybridRetriever:
             log.error("retrieval.policy_recheck_dropped", count=len(dropped), user_id=str(principal.user_id))
         fused = [(cid, score) for cid, score in fused if cid in rows and str(cid) in allowed]
         timings["load"] = _ms(started)
+        if not fused:
+            return result([], 0)
 
-        # ── Rerank ──────────────────────────────────────────────────────
         started = time.perf_counter()
         passages = [
             embedding_text(title=rows[cid][1].title, section_path=rows[cid][0].section_path, text=rows[cid][0].text)
@@ -217,23 +313,11 @@ class HybridRetriever:
             adjusted = rerank_score - (0.0 if rows[cid][1].is_current else STALE_PENALTY)
             scored.append((cid, adjusted, fused_score))
         scored.sort(key=lambda item: -item[1])
-        top = scored[:top_k]
 
-        # ── Assemble evidence ───────────────────────────────────────────
         started = time.perf_counter()
-        evidence = await self._assemble(top, rows, rankings, expand=options.expand_context)
+        evidence = await self._assemble(scored[:top_k], rows, rankings, expand=options.expand_context)
         timings["assemble"] = _ms(started)
-
-        return RetrievalResult(
-            evidence=evidence,
-            graph_facts=graph_ranking.facts if graph_ranking else [],
-            linked_entities=linked,
-            withheld_count=withheld,
-            withheld_max_rank=withheld_rank,
-            candidates_considered=len(fused),
-            timings_ms=timings,
-            entity_scores=graph_ranking.entity_scores if graph_ranking else {},
-        )
+        return result(evidence, len(fused))
 
     async def _graph_ranking(
         self, question: str, vector: list[float], scope: AccessScope, limit: int
@@ -257,7 +341,8 @@ class HybridRetriever:
         # Close to the question in absolute terms, and close to the best match overall.
         threshold = max(WITHHELD_MIN_SIMILARITY, hits[0].score - WITHHELD_MARGIN)
         outside = [
-            h for h in hits
+            h
+            for h in hits
             if h.score >= threshold
             and not scope.permits(
                 department=str(h.payload.get("department", "")),
@@ -294,7 +379,9 @@ class HybridRetriever:
             chunk, document = rows[cid]
             placed = False
             for group in groups:
-                if group["document"].id == document.id and any(abs(chunk.ordinal - c.ordinal) == 1 for c in group["chunks"]):
+                if group["document"].id == document.id and any(
+                    abs(chunk.ordinal - c.ordinal) == 1 for c in group["chunks"]
+                ):
                     group["chunks"].append(chunk)
                     placed = True
                     break
@@ -320,21 +407,30 @@ class HybridRetriever:
             document: Document = group["document"]
             text = _merge_text(chunks)
             found_by = [name for name in rankings if any(c.id in rank_of[name] for c in chunks)]
-            ranks = {
-                name: min(rank_of[name][c.id] for c in chunks if c.id in rank_of[name])
-                for name in found_by
-            }
+            ranks = {name: min(rank_of[name][c.id] for c in chunks if c.id in rank_of[name]) for name in found_by}
             evidence.append(
                 Evidence(
-                    ref=f"E{index}", chunk_ids=[c.id for c in chunks], document_id=document.id,
-                    title=document.title, section_path=chunks[0].section_path, page=chunks[0].page,
-                    text=text, char_start=chunks[0].char_start, char_end=chunks[-1].char_end,
-                    department=document.department, sensitivity_rank=document.sensitivity_rank,
-                    region=document.region, source_type=document.source_type, collection=document.collection,
+                    ref=f"E{index}",
+                    chunk_ids=[c.id for c in chunks],
+                    document_id=document.id,
+                    title=document.title,
+                    section_path=chunks[0].section_path,
+                    page=chunks[0].page,
+                    text=text,
+                    char_start=chunks[0].char_start,
+                    char_end=chunks[-1].char_end,
+                    department=document.department,
+                    sensitivity_rank=document.sensitivity_rank,
+                    region=document.region,
+                    source_type=document.source_type,
+                    collection=document.collection,
                     version=document.version,
                     effective_date=document.effective_date.isoformat() if document.effective_date else None,
-                    is_current=document.is_current, rerank_score=group["rerank"], fused_score=group["fused"],
-                    found_by=found_by, ranks=ranks,
+                    is_current=document.is_current,
+                    rerank_score=group["rerank"],
+                    fused_score=group["fused"],
+                    found_by=found_by,
+                    ranks=ranks,
                 )
             )
         return evidence

@@ -17,32 +17,37 @@ os.environ["QDRANT_ENTITY_COLLECTION"] = "test_pramana_entities"
 os.environ["RATE_LIMIT_PER_MINUTE"] = "1000000"
 os.environ["AUTH_RATE_LIMIT_PER_MINUTE"] = "1000000"
 
-from collections.abc import AsyncIterator  # noqa: E402
-from pathlib import Path  # noqa: E402
+from collections.abc import AsyncIterator
+from pathlib import Path
 
-import asyncpg  # noqa: E402
-import httpx  # noqa: E402
-import pytest  # noqa: E402
-from alembic import command  # noqa: E402
-from alembic.config import Config  # noqa: E402
+import asyncpg
+import httpx
+import pytest
+from alembic import command
+from alembic.config import Config
 
-from pramana.auth.seed import PERSONAS, seed_personas, seed_reference_data  # noqa: E402
-from pramana.runtime import Runtime, start_runtime, stop_runtime  # noqa: E402
-from pramana.shared.config import get_settings  # noqa: E402
-from pramana.shared.db import session_scope  # noqa: E402
+from pramana.auth.seed import PERSONAS, seed_personas, seed_reference_data
+from pramana.runtime import Runtime, start_runtime, stop_runtime
+from pramana.shared.config import get_settings
+from pramana.shared.db import session_scope
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 TEST_PASSWORD = "Test-password-123456"
 CSRF = {"X-Requested-With": "pramana-web"}
-EMAIL = {p.role if p.department not in ("finance", "it") or p.role == "admin" else f"{p.role}_{p.department}": p.email
-         for p in PERSONAS}
+EMAIL = {
+    p.role if p.department not in ("finance", "it") or p.role == "admin" else f"{p.role}_{p.department}": p.email
+    for p in PERSONAS
+}
 
 
 async def _rebuild_database() -> None:
     settings = get_settings()
     connection = await asyncpg.connect(
-        host=settings.postgres_host, port=settings.postgres_port, user=settings.postgres_user,
-        password=settings.postgres_password.get_secret_value(), database="postgres",
+        host=settings.postgres_host,
+        port=settings.postgres_port,
+        user=settings.postgres_user,
+        password=settings.postgres_password.get_secret_value(),
+        database="postgres",
     )
     try:
         await connection.execute(f'DROP DATABASE IF EXISTS "{settings.postgres_db}" WITH (FORCE)')
