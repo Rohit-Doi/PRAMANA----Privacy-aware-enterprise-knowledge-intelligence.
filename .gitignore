@@ -1,0 +1,34 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.coverage
+htmlcov/
+
+# node
+node_modules/
+.next/
+out/
+
+# data, models, runtime state
+data/raw/
+data/synthetic/
+data/eval/
+data/storage/
+.cache/
+*.log
+
+# editors / os
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

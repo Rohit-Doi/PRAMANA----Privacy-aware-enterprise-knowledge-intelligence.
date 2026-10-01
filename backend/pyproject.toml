@@ -1,0 +1,127 @@
+[project]
+name = "pramana"
+version = "2.0.0"
+description = "PRAMĀṆA — Privacy-Aware Enterprise Knowledge Intelligence Platform"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    # web / api
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.8",
+    "pydantic-settings>=2.4",
+    "python-multipart>=0.0.9",
+    "sse-starlette>=2.1",
+    "httpx>=0.27",
+    "orjson>=3.10",
+    "structlog>=24.1",
+    "tenacity>=9.0",
+    # persistence
+    "sqlalchemy[asyncio]>=2.0.30",
+    "asyncpg>=0.29",
+    "alembic>=1.13",
+    "redis>=5.0",
+    "qdrant-client>=1.12",
+    "neo4j>=5.24",
+    # security
+    "pyjwt>=2.9",
+    "argon2-cffi>=23.1",
+    "pyotp>=2.9",
+    "cryptography>=43",
+    # orchestration / llm
+    "langgraph>=1.0",
+    "openai>=1.50",
+    # retrieval / nlp (local models)
+    "fastembed>=0.4",
+    "presidio-analyzer>=2.2.355",
+    "presidio-anonymizer>=2.2.355",
+    "spacy>=3.7",
+    "networkx>=3.3",
+    "scikit-learn>=1.5",
+    "numpy>=1.26",
+    # document parsing
+    "pymupdf>=1.24",
+    "python-docx>=1.1",
+    "python-pptx>=1.0",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.2",
+    "markdown-it-py>=3.0",
+    "pyyaml>=6.0",
+    # observability
+    "prometheus-client>=0.20",
+]
+
+[dependency-groups]
+# Local ML models that need PyTorch: entity/relation extraction and hallucination detectors.
+ml = [
+    "torch>=2.4",
+    "transformers>=4.48",
+    "gliner2[local]",
+    "lettucedetect",
+    "sentencepiece",
+]
+data = [
+    "datasets>=3.0",
+    "faker>=30.0",
+]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "types-pyyaml",
+]
+
+[tool.uv]
+default-groups = ["ml", "data", "dev"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pramana"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC", "S", "RUF"]
+ignore = [
+    "S101",   # assert is fine in tests and for invariants
+    "B008",   # FastAPI Depends() in defaults is idiomatic
+    "RUF001", # the product name contains non-ASCII letters on purpose
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S311"]
+"../scripts/**" = ["S311"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+mypy_path = "src"
+packages = ["pramana"]
+
+[[tool.mypy.overrides]]
+module = [
+    "fastembed.*", "presidio_analyzer.*", "presidio_anonymizer.*", "gliner2.*",
+    "lettucedetect.*", "networkx.*", "sklearn.*", "fitz.*", "pymupdf.*", "docx.*",
+    "pptx.*", "pyotp.*", "spacy.*", "transformers.*", "neo4j.*", "datasets.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+testpaths = ["tests"]
+markers = [
+    "integration: needs the Docker datastores",
+    "models: loads local ML models (slow)",
+    "llm: calls the external LLM (uses quota)",
+]

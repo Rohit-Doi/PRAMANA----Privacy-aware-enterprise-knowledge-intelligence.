@@ -1,0 +1,85 @@
+# PRAMĀṆA v2 — local datastores.
+# Default profile is the minimum the platform needs (about 2 GB RAM).
+# Ports bind to 127.0.0.1 only. Credentials come from .env (see scripts/init_env.py).
+name: pramana2
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pramana2-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pramana}
+      POSTGRES_USER: ${POSTGRES_USER:-pramana}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run scripts/init_env.py first}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pramana} -d ${POSTGRES_DB:-pramana}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 384m
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: pramana2-redis
+    command: ["redis-server", "--maxmemory", "96mb", "--maxmemory-policy", "allkeys-lru", "--save", ""]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 128m
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: pramana2-qdrant
+    ports:
+      - "127.0.0.1:${QDRANT_PORT:-6333}:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    mem_limit: 640m
+    restart: unless-stopped
+
+  neo4j:
+    image: neo4j:5-community
+    container_name: pramana2-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?run scripts/init_env.py first}
+      NEO4J_server_memory_heap_initial__size: 384m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 192m
+    ports:
+      - "127.0.0.1:${NEO4J_HTTP_PORT:-7474}:7474"
+      - "127.0.0.1:${NEO4J_BOLT_PORT:-7687}:7687"
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    mem_limit: 1100m
+    restart: unless-stopped
+
+  opa:
+    image: openpolicyagent/opa:latest
+    container_name: pramana2-opa
+    # Policies and data are pushed by the backend at startup (see pramana.privacy.policy),
+    # so every decision can be tied to a stored policy version.
+    command: ["run", "--server", "--addr=0.0.0.0:8181", "--log-format=json", "--log-level=error"]
+    ports:
+      - "127.0.0.1:${OPA_PORT:-8181}:8181"
+    mem_limit: 128m
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  neo4j_data:
