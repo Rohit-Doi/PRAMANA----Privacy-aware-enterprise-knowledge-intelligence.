@@ -202,9 +202,9 @@ cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 
 * Scanned pages are read by a small OCR model. It has been tested only on clean printed pages; tables in scans lose their structure.
 * English only: the local models are English models.
-* The free LLM tier limits throughput to a few questions per minute.
+* The free LLM tier is rate-limited; its exact quota was not measured. The longest run here made 50 calls in about ten minutes without being throttled.
 * Answers from restricted material are a quoted sentence: they do not combine passages, and questions whose answer sits in a restricted table are declined.
-* Built and measured on one laptop; not load-tested. Both container images build and
-  start (web image 293 MB, backend image 3.9 GB with CPU-only PyTorch), but the full
+* Built and measured on one laptop; not load-tested. Both container images build
+  (web 293 MB, serves pages; backend 3.9 GB with CPU-only PyTorch, imports the application), but the full
   `--profile app` stack and the CI workflow have not been run: the development machine
   had no memory left for the former and the repository has no remote for the latter.
