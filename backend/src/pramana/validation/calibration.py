@@ -35,6 +35,8 @@ class Calibrator:
     intercept: float
     version: str = "default-v1"
     metrics: dict[str, Any] = field(default_factory=dict)
+    # Probability at or above which a claim counts as supported; chosen during training.
+    threshold: float | None = None
 
     def probability(self, signals: dict[str, float]) -> float:
         z = self.intercept + sum(self.coefficients[name] * float(signals.get(name, 0.0)) for name in FEATURES)
@@ -47,6 +49,7 @@ class Calibrator:
                 "features": list(FEATURES),
                 "coefficients": self.coefficients,
                 "intercept": self.intercept,
+                "threshold": self.threshold,
                 "metrics": self.metrics,
             },
             indent=2,
@@ -64,6 +67,7 @@ class Calibrator:
             float(payload["intercept"]),
             str(payload.get("version", "trained")),
             dict(payload.get("metrics", {})),
+            float(payload["threshold"]) if payload.get("threshold") is not None else None,
         )
 
 

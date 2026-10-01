@@ -95,7 +95,7 @@ class ChunkExtraction:
 
 
 def clean_name(name: str) -> str:
-    name = _SPACES.sub(" ", name.replace("\n", " ")).strip(" \t.,;:!?\"'()[]{}*_-")
+    name = _SPACES.sub(" ", name.replace("\n", " ")).strip(" \t.,;:!?\"'()[]{}*_-|#>=+/\\")
     name = _LIST_MARKER.sub("", name)  # "1) The salary" -> "The salary"
     return _LEADING_DETERMINER.sub("", name).strip()
 

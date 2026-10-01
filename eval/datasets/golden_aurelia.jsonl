@@ -1,0 +1,65 @@
+{"id": "g01", "question": "How many days per week may full-time employees work remotely?", "expect": [["3 days"]], "document": "remote-work-and-security-policy-2026"}
+{"id": "g02", "question": "How many remote days per week are contractors allowed?", "expect": [["1 day"]], "document": "remote-work-and-security-policy-2026"}
+{"id": "g03", "question": "Is multi-factor authentication required for VPN connections?", "expect": [["mandatory", "required"]], "document": "remote-work-and-security-policy-2026"}
+{"id": "g04", "question": "Within what time must a lost device or suspected breach be reported?", "expect": [["1 hour"]], "document": "remote-work-and-security-policy-2026"}
+{"id": "g05", "question": "What is the minimum password length under the current policy?", "expect": [["16 characters"]], "document": "remote-work-and-security-policy-2026"}
+{"id": "g06", "question": "Who must approve exceptions to the remote work and security policy?", "expect": [["Chief Information Security Officer"]], "document": "remote-work-and-security-policy-2026"}
+{"id": "g07", "question": "How quickly does the on-call incident responder acknowledge reports?", "expect": [["15 minutes"]], "document": "remote-work-and-security-policy-2026"}
+{"id": "g08", "question": "May personal devices be used to access company data?", "expect": [["must not", "not be used", "company-managed", "prohibited"]], "document": "remote-work-and-security-policy-2026"}
+{"id": "g09", "question": "What is the nightly hotel limit in high-cost cities?", "expect": [["$350"]], "document": "travel-and-expense-policy"}
+{"id": "g10", "question": "What is the daily meal allowance while travelling?", "expect": [["$75"]], "document": "travel-and-expense-policy"}
+{"id": "g11", "question": "Within how many days must expenses be submitted?", "expect": [["30 days"]], "document": "travel-and-expense-policy"}
+{"id": "g12", "question": "Who must approve trips expected to cost more than $5,000?", "expect": [["Chief Financial Officer"]], "document": "travel-and-expense-policy"}
+{"id": "g13", "question": "For which flights may premium economy be booked?", "expect": [["8 hours"]], "document": "travel-and-expense-policy"}
+{"id": "g14", "question": "How much may an employee claim per year for home-office equipment?", "expect": [["$600"]], "document": "travel-and-expense-policy"}
+{"id": "g15", "question": "How often must an employee travel to be issued a company card?", "expect": [["4 times"]], "document": "travel-and-expense-policy"}
+{"id": "g16", "question": "What are the four data classification labels?", "expect": [["PUBLIC"], ["INTERNAL"], ["CONFIDENTIAL"], ["RESTRICTED"]], "document": "data-classification-standard"}
+{"id": "g17", "question": "Who may read RESTRICTED material?", "expect": [["executives"]], "document": "data-classification-standard"}
+{"id": "g18", "question": "May RESTRICTED data be sent to external AI services?", "expect": [["must not", "not be sent", "may not"]], "document": "data-classification-standard"}
+{"id": "g19", "question": "Within how many business days must suspected mislabelling be reported?", "expect": [["2 business days"]], "document": "data-classification-standard"}
+{"id": "g20", "question": "How many days of paid annual leave do employees in the EMEA region receive?", "expect": [["28"]], "document": "leave-policy-emea-2026"}
+{"id": "g21", "question": "How many weeks of parental leave are employees in the APAC region entitled to?", "expect": [["18 weeks"]], "document": "leave-policy-apac-2026"}
+{"id": "g22", "question": "How many days of paid sick leave do employees in the AMER region receive per year?", "expect": [["16"]], "document": "leave-policy-amer-2026"}
+{"id": "g23", "question": "How many unused annual leave days can EMEA employees carry over to the next year?", "expect": [["15"]], "document": "leave-policy-emea-2026"}
+{"id": "g24", "question": "What is the maximum base salary for level L3?", "expect": [["$161,000"]], "document": "salary-bands-fy2026"}
+{"id": "g25", "question": "What is the FY2026 merit increase budget?", "expect": [["4.2%"]], "document": "salary-bands-fy2026"}
+{"id": "g26", "question": "What is the bonus target for level L4?", "expect": [["15%"]], "document": "salary-bands-fy2026"}
+{"id": "g27", "question": "By what factor are salary bands multiplied in APAC?", "expect": [["0.85"]], "document": "salary-bands-fy2026"}
+{"id": "g28", "question": "What merit increase are employees rated Exceeds eligible for?", "expect": [["7%"]], "document": "salary-bands-fy2026"}
+{"id": "g29", "question": "What is the cap on promotion nominations for the H1 2026 cycle?", "expect": [["9%"]], "document": "performance-calibration-notes-h1-2026"}
+{"id": "g30", "question": "What share of employees were rated Exceeds in the H1 2026 calibration?", "expect": [["31%"]], "document": "performance-calibration-notes-h1-2026"}
+{"id": "g31", "question": "When do compensation changes from the H1 2026 calibration take effect?", "expect": [["1 September 2026"]], "document": "performance-calibration-notes-h1-2026"}
+{"id": "g32", "question": "What is the value of the Chief Executive Officer's equity grant?", "expect": [["$1,845,000"]], "document": "executive-compensation-fy2026"}
+{"id": "g33", "question": "How many months of base salary do executives receive if terminated without cause?", "expect": [["12 months"]], "document": "executive-compensation-fy2026"}
+{"id": "g34", "question": "Which company does Aurelia Systems propose to acquire?", "expect": [["Brightwater"]], "document": "project-halcyon-acquisition-memo"}
+{"id": "g35", "question": "What is the proposed purchase price for Brightwater Analytics?", "expect": [["$412.5 million"]], "document": "project-halcyon-acquisition-memo"}
+{"id": "g36", "question": "What is the internal codename for the Brightwater transaction?", "expect": [["HALCYON"]], "document": "project-halcyon-acquisition-memo"}
+{"id": "g37", "question": "When is signing targeted for the Brightwater acquisition?", "expect": [["14 November 2026"]], "document": "project-halcyon-acquisition-memo"}
+{"id": "g38", "question": "How large is the retention pool included in the Brightwater purchase price?", "expect": [["$18 million"]], "document": "project-halcyon-acquisition-memo"}
+{"id": "g39", "question": "What was revenue for the first half of FY2026 according to the board minutes?", "expect": [["$61.4 million"]], "document": "board-minutes-2026-06-18"}
+{"id": "g40", "question": "How large is the share repurchase authorisation approved by the board?", "expect": [["$25 million"]], "document": "board-minutes-2026-06-18"}
+{"id": "g41", "question": "How many net new roles did the board approve for the second half of FY2026?", "expect": [["28"]], "document": "board-minutes-2026-06-18"}
+{"id": "g42", "question": "How many customer contact records were exposed in incident INC-2026-0417?", "expect": [["312"]], "document": "incident-report-inc-2026-0417"}
+{"id": "g43", "question": "What was the root cause of incident INC-2026-0417?", "expect": [["Terraform", "public access", "peer review"]], "document": "incident-report-inc-2026-0417"}
+{"id": "g44", "question": "How much was the bounty paid to the researcher who reported the storage bucket exposure?", "expect": [["$7,500"]], "document": "incident-report-inc-2026-0417"}
+{"id": "g45", "question": "How many findings did the Q2 2026 penetration test produce?", "expect": [["14"]], "document": "penetration-test-summary-q2-2026"}
+{"id": "g46", "question": "Within how many days must critical penetration test findings be fixed?", "expect": [["7 days"]], "document": "penetration-test-summary-q2-2026"}
+{"id": "g47", "question": "What is the revenue forecast for the third quarter of FY2026?", "expect": [["$33.8 million"]], "document": "q3-fy2026-forecast"}
+{"id": "g48", "question": "What is the forecast gross margin for Q3 FY2026?", "expect": [["78.5%"]], "document": "q3-fy2026-forecast"}
+{"id": "g49", "question": "What was net income in the second quarter of FY2026?", "expect": [["$2.7 million"]], "document": "unreleased-earnings-draft-q2-fy2026"}
+{"id": "g50", "question": "What is the full-year FY2026 revenue guidance?", "expect": [["$128 million"], ["$131 million"]], "document": "unreleased-earnings-draft-q2-fy2026"}
+{"id": "g51", "question": "What are the standard vendor payment terms?", "expect": [["net 45"]], "document": "vendor-payment-terms"}
+{"id": "g52", "question": "Above what purchase amount is approval from the Chief Executive Officer required?", "expect": [["$750,000"]], "document": "vendor-payment-terms"}
+{"id": "g53", "question": "What is the estimated exposure in the Corvane Logistics litigation?", "expect": [["$4.1 million"]], "document": "litigation-hold-notice-24-cv-01873"}
+{"id": "g54", "question": "When is the mediation session scheduled in case 24-cv-01873?", "expect": [["21 October 2026"]], "document": "litigation-hold-notice-24-cv-01873"}
+{"id": "g55", "question": "For how many custodians is automatic deletion suspended in the Corvane litigation hold?", "expect": [["23"]], "document": "litigation-hold-notice-24-cv-01873"}
+{"id": "u01", "question": "How many vacation days do Aurelia Systems employees in the LATAM region receive?", "answerable": false}
+{"id": "u02", "question": "What is the stock ticker symbol of Aurelia Systems?", "answerable": false}
+{"id": "u03", "question": "What is the name of the Chief Executive Officer's spouse?", "answerable": false}
+{"id": "u04", "question": "What is the Wi-Fi password at the Aurelia Systems headquarters?", "answerable": false}
+{"id": "u05", "question": "How much does Aurelia Systems spend on office catering per quarter?", "answerable": false}
+{"id": "u06", "question": "What is the fine in dollars for submitting an expense report late at Aurelia Systems?", "answerable": false}
+{"id": "u07", "question": "What is the purchase price of the Corvane Logistics acquisition?", "answerable": false}
+{"id": "u08", "question": "Which accounting firm audits Aurelia Systems?", "answerable": false}
+{"id": "u09", "question": "What is the monthly parking fee at the Aurelia Systems Zurich office?", "answerable": false}
+{"id": "u10", "question": "Which team won the 2022 FIFA World Cup?", "answerable": false}

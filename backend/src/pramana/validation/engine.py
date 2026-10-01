@@ -36,6 +36,8 @@ CONFLICT_THRESHOLD = 0.85
 CONFLICT_MIN_OVERLAP = 0.5
 SUPPORTING_SOURCE_THRESHOLD = 0.5
 EXTRA_SOURCES_PER_CLAIM = 2
+WIDE_CONTEXT_PASSAGES = 2
+WIDE_CONTEXT_CHARS = 2400
 PARTIAL_THRESHOLD = 0.40
 
 
@@ -125,6 +127,11 @@ class ValidationEngine:
     def calibrator(self) -> Calibrator:
         return self._calibrator or get_calibrator()
 
+    @property
+    def support_threshold(self) -> float:
+        """The trained calibrator carries its own decision threshold; the setting is the fallback."""
+        return self.calibrator.threshold or self._settings.support_threshold
+
     async def verify(
         self,
         *,
@@ -164,9 +171,32 @@ class ValidationEngine:
         # ── Grounding for each (claim, candidate passage) ───────────────
         started = time.perf_counter()
         pair_keys = [(d.ordinal, ref) for d in checkable for ref in candidates[d.ordinal]]
-        texts = {d.ordinal: d.text for d in checkable}
-        grounding_scores = await self._detectors.grounding([(windows[key].text, texts[key[0]]) for key in pair_keys])
+        # The models read natural text: privacy placeholders are swapped for neutral stand-ins,
+        # the same on both sides, so a masked name still matches itself.
+        texts = {d.ordinal: natural_text(d.text) for d in checkable}
+        # A passage is read together with where it comes from (document title and section), exactly
+        # as the generator saw it: "the 2026 policy" is a fact carried by the title, not the body.
+        headers = {e.ref: source_header(e) for e in evidence}
+        premises = {key: natural_text(headers[key[1]] + windows[key].text) for key in windows}
+        grounding_scores = await self._detectors.grounding([(premises[key], texts[key[0]]) for key in pair_keys])
         grounding = dict(zip(pair_keys, grounding_scores, strict=True))
+
+        # Second look for claims no short window supports: read the whole passage. A sentence such as
+        # "the H1 2026 calibration was chaired by …" draws on two places in the same passage.
+        widened: set[int] = set()
+        weak = [
+            d for d in checkable if max(grounding[(d.ordinal, r)] for r in candidates[d.ordinal]) < SUPPORTING_SOURCE_THRESHOLD
+        ]
+        if weak:
+            wide_keys = [(d.ordinal, ref) for d in weak for ref in candidates[d.ordinal][:WIDE_CONTEXT_PASSAGES]]
+            wide = {
+                key: natural_text(headers[key[1]] + by_ref[key[1]].text[:WIDE_CONTEXT_CHARS]) for key in wide_keys
+            }
+            wide_scores = await self._detectors.grounding([(wide[key], texts[key[0]]) for key in wide_keys])
+            for key, score in zip(wide_keys, wide_scores, strict=True):
+                if score > grounding[key]:
+                    grounding[key], premises[key] = score, wide[key]
+                    widened.add(key[0])
         report.timings_ms["grounding"] = _ms(started)
 
         # The primary passage is the cited one that supports the claim best; if no cited
@@ -195,16 +225,16 @@ class ValidationEngine:
             and by_ref[ref].document_id != by_ref[primary[d.ordinal]].document_id
             and windows[(d.ordinal, ref)].overlap >= CONFLICT_MIN_OVERLAP
         ]
-        nli_results = await self._detectors.nli(
-            [(windows[key].text, texts[key[0]]) for key in nli_keys + conflict_keys]
-        )
+        nli_results = await self._detectors.nli([(premises[key], texts[key[0]]) for key in nli_keys + conflict_keys])
         nli = dict(zip(nli_keys + conflict_keys, nli_results, strict=True))
         report.timings_ms["nli"] = _ms(started)
 
         # ── Unsupported spans across the whole answer ───────────────────
         started = time.perf_counter()
-        joined, offsets = _join_claims(checkable)
-        spans = await self._detectors.spans([e.text for e in evidence], question, joined)
+        joined, offsets = _join_claims([texts[d.ordinal] for d in checkable], [d.ordinal for d in checkable])
+        # Only the passages the claims rest on are given to the span detector: shorter input, faster.
+        span_context = [natural_text(headers[ref] + by_ref[ref].text) for ref in dict.fromkeys(primary.values())]
+        spans = await self._detectors.spans(span_context, question, joined)
         report.timings_ms["spans"] = _ms(started)
 
         # ── Combine ─────────────────────────────────────────────────────
@@ -214,16 +244,19 @@ class ValidationEngine:
             ref = primary[draft.ordinal]
             window = windows[(draft.ordinal, ref)]
             cited = [r for r in draft.cited if r in by_ref]
-            fact_source = "\n".join(by_ref[r].text for r in dict.fromkeys([*cited, ref]))
+            fact_source = "\n".join(headers[r] + by_ref[r].text for r in dict.fromkeys([*cited, ref]))
             facts = check_facts(draft.text, fact_source)
-            claim_spans = _spans_for(draft, offsets[draft.ordinal], spans)
+            model_text = texts[draft.ordinal]
+            claim_spans = _spans_for(model_text, offsets[draft.ordinal], spans)
             span_chars = sum(s["end"] - s["start"] for s in claim_spans)
+            if model_text != draft.text:
+                claim_spans = []  # offsets refer to the stand-in text, not to what the reader sees
             scores = nli[(draft.ordinal, ref)]
             signals: dict[str, Any] = {
                 "grounding": round(grounding[(draft.ordinal, ref)], 4),
                 "entailment": round(scores.entailment, 4),
                 "contradiction": round(scores.contradiction, 4),
-                "span_fraction": round(min(1.0, span_chars / max(len(draft.text), 1)), 4),
+                "span_fraction": round(min(1.0, span_chars / max(len(model_text), 1)), 4),
                 "numbers_ok": 1.0 if facts.numbers_ok else 0.0,
                 "names_ok": 1.0 if facts.names_ok else 0.0,
                 "overlap": round(window.overlap, 4),
@@ -244,6 +277,7 @@ class ValidationEngine:
                 {
                     "primary_evidence": ref,
                     "evidence_changed": recited[draft.ordinal],
+                    "wide_context": draft.ordinal in widened,
                     "supporting_documents": len(supporting),
                     "numbers_missing": facts.numbers_missing,
                     "names_missing": facts.names_missing,
@@ -255,7 +289,7 @@ class ValidationEngine:
                     "judge": None,
                 }
             )
-            verdict, reason = _decide(signals, probability, self._settings.support_threshold)
+            verdict, reason = _decide(signals, probability, self.support_threshold)
             citation_refs = [
                 ref,
                 *[r for r in cited if r != ref and grounding[(draft.ordinal, r)] >= SUPPORTING_SOURCE_THRESHOLD],
@@ -320,7 +354,7 @@ class ValidationEngine:
             refs = list(dict.fromkeys([claim.signals["primary_evidence"], *[r for r in claim.cited if r in by_ref]]))[
                 :2
             ]
-            evidence_text = "\n".join(windows[(claim.ordinal, r)].text for r in refs)
+            evidence_text = "\n".join(source_header(by_ref[r]) + windows[(claim.ordinal, r)].text for r in refs)
             shown[claim.ordinal] = evidence_text
             blocks.append(
                 f"Claim id {claim.ordinal}: {claim.text}\nEvidence for claim {claim.ordinal}:\n{evidence_text}"
@@ -336,7 +370,7 @@ class ValidationEngine:
         )
         verdicts = payload.get("verdicts", []) if isinstance(payload, dict) else payload
         by_ordinal = {c.ordinal: c for c in claims}
-        threshold = self._settings.support_threshold
+        threshold = self.support_threshold
         for item in verdicts if isinstance(verdicts, list) else []:
             try:
                 claim = by_ordinal[int(item["id"])]
@@ -420,20 +454,62 @@ def _unverifiable(draft: ClaimDraft, reason: str) -> ClaimResult:
     )
 
 
-def _join_claims(claims: list[ClaimDraft]) -> tuple[str, dict[int, int]]:
-    parts: list[str] = []
+def source_header(evidence: Any) -> str:
+    """One line naming the document and section a passage belongs to."""
+    title = (getattr(evidence, "title", "") or "").strip()
+    section = (getattr(evidence, "section_path", "") or "").strip()
+    if not title and not section:
+        return ""
+    if section and section != title and not section.startswith(title):
+        return f"From the document \"{title}\", section \"{section}\":\n" if title else f"Section \"{section}\":\n"
+    return f"From the document \"{section or title}\":\n"
+
+
+_SURROGATE_NAMES = (
+    "Alex Morgan", "Jordan Blake", "Casey Rivera", "Taylor Quinn", "Morgan Ellis", "Riley Harper",
+    "Jamie Lawson", "Avery Collins", "Cameron Doyle", "Dana Whitfield", "Reese Calloway", "Skyler Bennett",
+)
+_PLACEHOLDER = re.compile(r"\[(?:(REDACTED):([A-Z_]+)|([A-Z_]+)_(\d+))\]")
+
+
+def natural_text(text: str) -> str:
+    """Replace privacy placeholders with neutral, natural-looking stand-ins for the detectors.
+
+    ``[PERSON_2]`` becomes one fixed invented name, ``[REDACTED:PERSON]`` "a named individual", and
+    so on. The mapping is deterministic, so the same placeholder reads the same in a claim and in
+    its evidence. Nothing is revealed: the stand-ins carry no information about the real value.
+    """
+    if "[" not in text:
+        return text
+
+    def swap(match: re.Match[str]) -> str:
+        if match.group(1):
+            kind = match.group(2)
+            return "a named individual" if kind == "PERSON" else f"a withheld {kind.lower().replace('_', ' ')}"
+        kind, number = match.group(3), int(match.group(4))
+        if kind == "PERSON":
+            return _SURROGATE_NAMES[(number - 1) % len(_SURROGATE_NAMES)]
+        if kind == "EMAIL_ADDRESS":
+            return f"contact{number}@example.org"
+        if kind == "PHONE_NUMBER":
+            return f"555-01{number % 100:02d}"
+        return f"{kind.lower().replace('_', ' ')} {number}"
+
+    return _PLACEHOLDER.sub(swap, text)
+
+
+def _join_claims(texts: list[str], ordinals: list[int]) -> tuple[str, dict[int, int]]:
     offsets: dict[int, int] = {}
     cursor = 0
-    for claim in claims:
-        offsets[claim.ordinal] = cursor
-        parts.append(claim.text)
-        cursor += len(claim.text) + 1
-    return " ".join(parts), offsets
+    for ordinal, text in zip(ordinals, texts, strict=True):
+        offsets[ordinal] = cursor
+        cursor += len(text) + 1
+    return " ".join(texts), offsets
 
 
-def _spans_for(claim: ClaimDraft, offset: int, spans: list[UnsupportedSpan]) -> list[dict[str, Any]]:
+def _spans_for(claim_text: str, offset: int, spans: list[UnsupportedSpan]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
-    end = offset + len(claim.text)
+    end = offset + len(claim_text)
     for span in spans:
         start_in, end_in = max(span.start, offset), min(span.end, end)
         if end_in - start_in <= 1:
@@ -443,7 +519,7 @@ def _spans_for(claim: ClaimDraft, offset: int, spans: list[UnsupportedSpan]) -> 
                 "start": start_in - offset,
                 "end": end_in - offset,
                 "confidence": round(span.confidence, 3),
-                "text": claim.text[start_in - offset : end_in - offset],
+                "text": claim_text[start_in - offset : end_in - offset],
             }
         )
     return out

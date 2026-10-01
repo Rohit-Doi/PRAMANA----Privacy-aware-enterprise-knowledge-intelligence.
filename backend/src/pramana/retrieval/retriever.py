@@ -256,7 +256,9 @@ class HybridRetriever:
             "keyword": vectors.keyword,
             "graph": graph.chunks,
         }
-        fused = reciprocal_rank_fusion(rankings, k=settings.rrf_k, weights=RETRIEVER_WEIGHTS)[:candidates]
+        fused = reciprocal_rank_fusion(rankings, k=settings.rrf_k, weights=RETRIEVER_WEIGHTS)
+        # The cross-encoder is the expensive step: it reads only the best fused candidates.
+        fused = fused[: min(candidates, settings.rerank_candidates) if options.use_rerank else candidates]
 
         def result(evidence: list[Evidence], considered: int) -> RetrievalResult:
             return RetrievalResult(
@@ -299,7 +301,9 @@ class HybridRetriever:
 
         started = time.perf_counter()
         passages = [
-            embedding_text(title=rows[cid][1].title, section_path=rows[cid][0].section_path, text=rows[cid][0].text)
+            embedding_text(
+                title=rows[cid][1].title, section_path=rows[cid][0].section_path, text=rows[cid][0].text
+            )[: settings.rerank_max_chars]
             for cid, _ in fused
         ]
         if options.use_rerank:

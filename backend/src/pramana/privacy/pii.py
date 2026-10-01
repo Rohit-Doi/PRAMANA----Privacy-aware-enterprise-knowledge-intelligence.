@@ -31,13 +31,13 @@ HIGH_RISK = frozenset(
         "IBAN_CODE",
         "US_BANK_NUMBER",
         "US_PASSPORT",
-        "US_DRIVER_LICENSE",
         "IN_AADHAAR",
         "IN_PAN",
         "BANK_ACCOUNT",
     }
 )
 CONTACT = frozenset({"PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "EMPLOYEE_ID", "IP_ADDRESS"})
+_SYSTEM_MARKER = re.compile(r"\[(?:E\d+(?:\s*[,;]\s*E\d+)*|G\d+|[A-Z_]+_\d+|REDACTED:[A-Z_]+)\]")
 ALL_ENTITIES = sorted(HIGH_RISK | CONTACT)
 
 # Capitalised phrases that statistical NER regularly mistakes for people in policy text.
@@ -175,7 +175,13 @@ class PiiEngine:
             for r in raw
             if r.score >= min_score
         ]
-        findings = [f for f in findings if self._plausible(f)]
+        # The system's own markers ([E1], [PERSON_2], [REDACTED:US_SSN]) are never personal data.
+        markers = [(m.start(), m.end()) for m in _SYSTEM_MARKER.finditer(text)]
+        findings = [
+            f
+            for f in findings
+            if self._plausible(f) and not any(f.start < end and start < f.end for start, end in markers)
+        ]
         return _drop_overlaps(findings)
 
     def _plausible(self, finding: PiiFinding) -> bool:

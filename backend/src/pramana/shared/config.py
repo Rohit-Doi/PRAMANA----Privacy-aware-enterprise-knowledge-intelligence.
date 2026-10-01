@@ -94,6 +94,8 @@ class Settings(BaseSettings):
     chunk_target_tokens: int = 320
     chunk_overlap_sentences: int = 1
     retrieval_candidates: int = 30
+    rerank_candidates: int = 18
+    rerank_max_chars: int = 1400
     retrieval_top_k: int = 8
     rrf_k: int = 60
     min_evidence_score: float = Field(

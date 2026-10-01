@@ -187,7 +187,7 @@ async def system(_: Operator, db: DbSession, runtime: RuntimeDep) -> dict[str, A
         },
         "llm_chain": [p.name for p in runtime.services.llm.chain],
         "thresholds": {
-            "support": settings.support_threshold,
+            "support": calibrator.threshold or settings.support_threshold,
             "uncertain_low": settings.uncertain_low,
             "uncertain_high": settings.uncertain_high,
             "min_evidence_score": settings.min_evidence_score,
