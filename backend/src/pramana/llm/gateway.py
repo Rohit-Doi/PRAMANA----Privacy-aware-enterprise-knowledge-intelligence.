@@ -153,7 +153,11 @@ class LLMGateway:
         if not self.chain:
             raise DependencyUnavailable("No LLM provider is configured (set GOOGLE_API_KEY)")
         cache_key = "llm:cache:" + sha256_hex(
-            json.dumps([system, user, max_tokens, temperature, json_mode, local_only], ensure_ascii=False)
+            # The configured models are part of the key: a different model is a different answer.
+            json.dumps(
+                [system, user, max_tokens, temperature, json_mode, local_only, [p.name for p in self.chain]],
+                ensure_ascii=False,
+            )
         )
         if use_cache:
             cached = await self._cache_get(cache_key)

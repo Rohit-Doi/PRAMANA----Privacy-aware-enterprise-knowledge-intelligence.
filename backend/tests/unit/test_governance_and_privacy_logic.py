@@ -269,3 +269,25 @@ def test_covers_agrees_with_the_reference_rule() -> None:
         for department, rank, region in itertools.product(departments, range(4), regions):
             if b.permits(department=department, sensitivity_rank=rank, region=region):
                 assert a.permits(department=department, sensitivity_rank=rank, region=region), (a, b)
+
+
+# ── Leak check used by the evaluations ──────────────────────────────────────
+def test_the_leak_check_reads_text_not_identifiers_or_offsets() -> None:
+    from pramana.evaluation.suites import contains_value, readable_text
+
+    result = {
+        "answer": "The sources you can access do not contain this.",
+        "claims": [],
+        "evidence": [
+            {"title": "Handbook", "text": "Report incidents promptly.", "char_end": 4312, "chunk_ids": ["a312b"]}
+        ],
+        "graph": {"facts": []},
+        "explanation": {"route": "external"},
+    }
+    text = readable_text(result)
+    assert "Report incidents promptly." in text and "4312" not in text and "a312b" not in text
+    assert not contains_value(text, "312")
+    leaking = {**result, "evidence": [{"title": "Incident", "text": "The exposure affected 312 customer records."}]}
+    assert contains_value(readable_text(leaking), "312")
+    assert contains_value("The price is $412.5 million.", "$412.5 million")
+    assert not contains_value("relevance 3.312", "312")

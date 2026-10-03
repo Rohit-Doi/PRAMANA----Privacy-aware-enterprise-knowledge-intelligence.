@@ -62,7 +62,8 @@ def build_user_prompt(state: PipelineState, question: str) -> str:
     return "\n\n".join(parts)
 
 
-LOOKUP_LINE = re.compile(r"(?im)^[ \t]*LOOKUP:[ \t]*(.+?)[ \t]*$")
+# The model is asked to put it on a line of its own, but often appends it to the last sentence.
+LOOKUP_LINE = re.compile(r"(?im)\bLOOKUP:[ \t]*(.+?)[ \t]*$")
 LOOKUP_PASSAGES = 3
 
 
@@ -240,7 +241,9 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
                 result = second
                 draft, _ = split_lookup(second.text)
     updates.update({"draft": draft, "llm_calls": llm_calls})
-    if is_insufficient(draft) and len(draft) < 60:
+    if is_insufficient(draft) or not draft:
+        # Also when the marker follows a sentence or two of context ("X is … INSUFFICIENT_EVIDENCE"):
+        # the model is saying that what it found does not answer the question.
         updates.update({"outcome": "abstained", "outcome_reason": "insufficient_evidence"})
         summary = "The model found the evidence insufficient to answer"
     else:

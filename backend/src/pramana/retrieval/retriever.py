@@ -154,6 +154,32 @@ def reciprocal_rank_fusion(
     return sorted(scores.items(), key=lambda pair: -pair[1])
 
 
+FIRST_HITS_PER_RETRIEVER = 2
+
+
+def _with_first_hits(
+    scored: list[tuple[uuid.UUID, float, float]], rankings: dict[str, list[uuid.UUID]], top_k: int
+) -> list[tuple[uuid.UUID, float, float]]:
+    """The reranker's choice, with the best hits of the meaning and keyword searches guaranteed a place.
+
+    The small cross-encoder is reliable when a question uses the document's words and poor when it
+    is reworded or the passage is a table row: on unseen documents it pushed the right passage out
+    of the evidence for one answerable question in six, while the searches themselves had found it.
+    So each search's first hits stay in, and the reranker fills the remaining places.
+    """
+    by_id = {item[0]: item for item in scored}
+    guaranteed: list[uuid.UUID] = []
+    for name in ("semantic", "keyword"):
+        hits = [cid for cid in rankings.get(name, []) if cid in by_id][:FIRST_HITS_PER_RETRIEVER]
+        guaranteed.extend(cid for cid in hits if cid not in guaranteed)
+    chosen = [item for item in scored[:top_k] if item[0] in guaranteed]
+    missing = [by_id[cid] for cid in guaranteed if cid not in {item[0] for item in chosen}]
+    places = top_k - len(chosen) - len(missing)
+    others = [item for item in scored if item[0] not in guaranteed][: max(places, 0)]
+    # Reranker order first; a guaranteed passage the reranker disliked comes after them.
+    return sorted([*chosen, *others], key=lambda item: -item[1]) + missing
+
+
 class HybridRetriever:
     def __init__(
         self, *, models: RetrievalModels, vectors: VectorStore, graph: GraphStore, policy: PolicyEngine
@@ -317,9 +343,12 @@ class HybridRetriever:
             adjusted = rerank_score - (0.0 if rows[cid][1].is_current else STALE_PENALTY)
             scored.append((cid, adjusted, fused_score))
         scored.sort(key=lambda item: -item[1])
+        selected = scored[:top_k]
+        if options.use_rerank and len(scored) > top_k:
+            selected = _with_first_hits(scored, rankings, top_k)
 
         started = time.perf_counter()
-        evidence = await self._assemble(scored[:top_k], rows, rankings, expand=options.expand_context)
+        evidence = await self._assemble(selected, rows, rankings, expand=options.expand_context)
         timings["assemble"] = _ms(started)
         return result(evidence, len(fused))
 

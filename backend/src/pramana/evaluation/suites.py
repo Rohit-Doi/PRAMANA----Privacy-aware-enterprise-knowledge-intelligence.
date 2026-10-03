@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -67,6 +68,37 @@ def satisfies(text: str, expect: list[list[str]]) -> bool:
     """Every group must be satisfied by at least one of its alternatives (case-insensitive)."""
     lowered = text.lower()
     return all(any(option.lower() in lowered for option in group) for group in expect)
+
+
+# Keys whose values are identifiers, not text a person reads.
+_NOT_TEXT = frozenset({"id", "run_id", "chunk_ids", "document_id", "claim_id", "version", "effective_date"})
+
+
+def readable_text(result: Any) -> str:
+    """Every piece of text in a response that a caller could read: the answer, claims, quotes,
+    passages, titles, graph facts, notes. Numbers and identifiers are left out: a character offset
+    of 4312 is not a leak of the value \"312\"."""
+    parts: list[str] = []
+
+    def walk(value: Any, key: str = "") -> None:
+        if key in _NOT_TEXT:
+            return
+        if isinstance(value, str):
+            parts.append(value)
+        elif isinstance(value, dict):
+            for inner_key, inner in value.items():
+                walk(inner, str(inner_key))
+        elif isinstance(value, (list, tuple)):
+            for inner in value:
+                walk(inner, key)
+
+    walk({k: result.get(k) for k in ("answer", "claims", "evidence", "graph", "explanation", "notes")})
+    return "\n".join(parts)
+
+
+def contains_value(text: str, value: str) -> bool:
+    """``value`` occurs in ``text`` as a whole token: \"312\" does not match inside \"4312\" or \"3.312\"."""
+    return re.search(rf"(?<![\w.]){re.escape(value)}(?![\w])", text, re.IGNORECASE) is not None
 
 
 # ── Retrieval ───────────────────────────────────────────────────────────────
@@ -256,8 +288,7 @@ async def end_to_end_suite(runtime: Runtime, *, limit: int | None = None, leak_c
         )
         checked += 1
         llm_calls += result["llm_calls"]
-        visible = json.dumps({k: result[k] for k in ("answer", "claims", "evidence", "graph", "explanation")}).lower()
-        if any(value.lower() in visible for value in canary["secret_values"]):
+        if any(contains_value(readable_text(result), value) for value in canary["secret_values"]):
             leaked.append(canary["id"])
 
     accuracy = correct / len(answerable) if answerable else 0.0

@@ -16,9 +16,6 @@ from pramana.privacy.pii import mask_for_reader
 from pramana.privacy.risk import injection_flags
 from pramana.retrieval.retriever import Evidence
 
-RELEVANCE_WINDOW = 9.0
-RELEVANCE_FLOOR = -8.0
-
 
 async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
     access = state["access"]
@@ -34,7 +31,9 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
 
     # 1. Relevance: keep passages close to the best one; decide whether to answer at all.
     top = result.evidence[0].rerank_score if result.evidence else float("-inf")
-    kept = [e for e in result.evidence if e.rerank_score >= max(top - RELEVANCE_WINDOW, RELEVANCE_FLOOR)]
+    # Every selected passage goes forward. The reranker's score is not used to drop passages here: a
+    # low score on a reworded question says little, and the drafting model ignores what is irrelevant.
+    kept = list(result.evidence)
     sufficient = bool(kept) and top >= deps.settings.min_evidence_score
 
     # 2. Passages that carry instructions aimed at the model are not given to it.

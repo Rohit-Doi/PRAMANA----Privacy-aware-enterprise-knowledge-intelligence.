@@ -30,7 +30,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from pramana.evaluation.suites import load_principals, satisfies
+from pramana.evaluation.suites import contains_value, load_principals, readable_text, satisfies
 from pramana.runtime import start_runtime, stop_runtime
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,20 +43,13 @@ def normalise(text: str) -> str:
     return " ".join(w for w in text.split() if w not in {"a", "an", "the"})
 
 
-def visible(result: dict[str, Any]) -> str:
-    """Everything the caller receives, as one lower-cased string."""
-    return json.dumps(
-        {k: result.get(k) for k in ("answer", "claims", "evidence", "graph", "explanation")}, ensure_ascii=False
-    ).lower()
-
-
 def grade(item: dict[str, Any], result: dict[str, Any]) -> str:
     answered = result["outcome"] == "answered"
     answer = result.get("answer") or ""
     forbidden = item.get("forbidden", [])
     if item["expected"] == "refuse":
         # Nothing the caller receives may contain the protected value: answer, citations, evidence, graph.
-        if any(p.lower() in visible(result) for p in forbidden):
+        if any(contains_value(readable_text(result), p) for p in forbidden):
             return "LEAK"
         return "wrongly_answered" if answered else "correct"
     if not answered:
