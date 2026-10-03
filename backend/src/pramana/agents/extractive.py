@@ -58,6 +58,12 @@ async def extractive_answer(question: str, evidence: list[Evidence], reader: Ext
     return ""
 
 
+def about_the_named(question_names: list[str], quote: str) -> bool:
+    """A quoted row answers a question about a named person only if it is that person's row."""
+    lowered = quote.lower()
+    return all(name.lower() in lowered or name.split()[-1].lower() in lowered for name in question_names)
+
+
 async def extractive_follow_up(
     question: str, missing: str, terms: list[str], passages: list[Evidence], reader: ExtractiveReader
 ) -> str:

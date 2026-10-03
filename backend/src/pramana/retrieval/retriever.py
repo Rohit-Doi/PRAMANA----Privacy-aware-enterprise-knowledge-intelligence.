@@ -14,6 +14,7 @@ question
 from __future__ import annotations
 
 import asyncio
+import re
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -21,7 +22,7 @@ from itertools import zip_longest
 from typing import Any
 
 from qdrant_client import models as qm
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from pramana.auth.principal import Principal
 from pramana.graph.reasoning import GraphRanking, rank_passages
@@ -119,6 +120,9 @@ class VectorCandidates:
     withheld_count: int = 0
     withheld_max_rank: int | None = None
     timings_ms: dict[str, int] = field(default_factory=dict)
+    # The question without the name of the organisation it is about, when that name was set aside
+    # (see ``HybridRetriever._focus``). Passages are then judged against this wording.
+    focused_query: str = ""
 
 
 @dataclass(slots=True)
@@ -156,6 +160,10 @@ def reciprocal_rank_fusion(
 
 
 FIRST_HITS_PER_RETRIEVER = 2
+FOCUS_HITS = 10  # the search hits whose collection decides which organisation a question is about
+FOCUS_MIN_DOCUMENTS = 5
+FOCUS_SHARE = 0.6  # a name in this share of a collection's documents is the organisation's own
+FOCUS_MIN_WORDS = 2
 SECOND_HOP_PASSAGES = 4
 SECOND_HOP_CANDIDATES = 30
 SECOND_HOP_RERANKED = 16
@@ -188,6 +196,78 @@ def _with_first_hits(
     return sorted([*chosen, *others], key=lambda item: -item[1]) + missing
 
 
+_PROPER = re.compile(r"\b(?:[A-Z][\w&'’-]*|[A-Z]{2,})(?:\s+(?:of\s+|and\s+|the\s+)?[A-Z][\w&’-]*)*")
+_NOT_A_NAME = frozenset(
+    {
+        "what",
+        "when",
+        "where",
+        "which",
+        "who",
+        "whom",
+        "whose",
+        "why",
+        "how",
+        "is",
+        "are",
+        "was",
+        "were",
+        "do",
+        "does",
+        "did",
+        "can",
+        "could",
+        "may",
+        "must",
+        "should",
+        "will",
+        "would",
+        "at",
+        "in",
+        "on",
+        "under",
+        "for",
+        "from",
+        "by",
+        "if",
+        "once",
+        "the",
+        "a",
+        "an",
+        "i",
+        "my",
+        "our",
+        "we",
+        "up",
+        "to",
+        "of",
+        "and",
+    }
+)
+
+
+def _proper_phrases(question: str) -> list[str]:
+    """Capitalised names in a question, longest first, without the sentence's own first words."""
+    found: list[str] = []
+    for match in _PROPER.finditer(question):
+        words = re.sub(r"['’]s\b", "", match.group(0)).split()
+        while words and words[0].lower() in _NOT_A_NAME:
+            words = words[1:]
+        while words and words[-1].lower() in _NOT_A_NAME:
+            words = words[:-1]
+        phrase = " ".join(words)
+        if len(phrase) >= 3 and phrase not in found:
+            found.append(phrase)
+            # "Marrowgate Quill Mutual" may be written "Marrowgate Quill" in the documents, or the reverse.
+            if len(words) > 2:
+                found.append(" ".join(words[:-1]))
+    return sorted(dict.fromkeys(found), key=len, reverse=True)
+
+
+def _like(text: str) -> str:
+    return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 def _lines_with(text: str, term: str) -> str:
     lowered = term.lower()
     return "\n".join(line for line in text.splitlines() if lowered in line.lower()) or text
@@ -202,6 +282,7 @@ class HybridRetriever:
         self._graph = graph
         self._policy = policy
         self._settings = get_settings()
+        self._ubiquity: dict[tuple[str, str], bool] = {}
 
     async def retrieve(
         self,
@@ -222,7 +303,7 @@ class HybridRetriever:
 
     # ── Stage 1a: passage search (Retrieval Agent) ──────────────────────
     async def search_passages(
-        self, question: str, scope: AccessScope, *, options: RetrievalOptions | None = None
+        self, question: str, scope: AccessScope, *, options: RetrievalOptions | None = None, focus: bool = True
     ) -> VectorCandidates:
         options = options or RetrievalOptions()
         limit = options.candidates or self._settings.retrieval_candidates
@@ -247,13 +328,89 @@ class HybridRetriever:
             else none(),
             self._withheld(dense_vector, scope),
         )
+        timings = {"embed": embed_ms, "search": _ms(started)}
+        focused_query = ""
+        if focus:
+            started = time.perf_counter()
+            focused_query, collections = await self._focus(question, keyword_hits or semantic_hits)
+            if focused_query:
+                # Search again for what is asked, among the documents of the organisation asked about.
+                dense_vector, sparse_vector = await asyncio.gather(
+                    self._models.embed_query(focused_query), self._models.sparse_query(focused_query)
+                )
+                within = scope.qdrant_filter(qm.FieldCondition(key="collection", match=qm.MatchAny(any=collections)))
+                focused_semantic, focused_keyword = await asyncio.gather(
+                    self._vectors.search_dense(dense_vector, query_filter=within, limit=limit)
+                    if options.use_semantic
+                    else none(),
+                    self._vectors.search_sparse(sparse_vector, query_filter=within, limit=limit)
+                    if options.use_keyword
+                    else none(),
+                )
+                if focused_semantic or focused_keyword:
+                    semantic_hits, keyword_hits = focused_semantic, focused_keyword
+                else:
+                    focused_query = ""
+            timings["focus"] = _ms(started)
         return VectorCandidates(
             semantic=[h.chunk_id for h in semantic_hits],
             keyword=[h.chunk_id for h in keyword_hits],
             withheld_count=withheld,
             withheld_max_rank=withheld_rank,
-            timings_ms={"embed": embed_ms, "search": _ms(started)},
+            timings_ms=timings,
+            focused_query=focused_query,
         )
+
+    async def _focus(self, question: str, hits: list[VectorHit]) -> tuple[str, list[str]]:
+        """The question without the name of the organisation it is about, and that organisation's
+        collection; ("", []) when the question names none.
+
+        "What is the minimum password length at Marrowgate Quill Mutual?" matches, word for word, the
+        title page of every Marrowgate document: the rare name outweighs "password length". A name
+        found in most documents of the collection the search leads to says which documents are
+        meant and nothing about which passage. It is used for exactly that, as a filter, and taken
+        out of the wording that passages are ranked by.
+        """
+        phrases = _proper_phrases(question)
+        collections = [str(h.payload.get("collection") or "") for h in hits[:FOCUS_HITS]]
+        if not phrases or not collections:
+            return "", []
+        home = max(set(collections), key=collections.count)
+        if not home or collections.count(home) * 2 < len(collections):
+            return "", []
+        focused = question
+        for phrase in phrases:
+            if phrase.lower() in focused.lower() and await self._ubiquitous(phrase, home):
+                focused = re.sub(
+                    rf"(?i)\b(?:(?:at|of|in|for|by|from|under)\s+)?(?:the\s+)?{re.escape(phrase)}(?:['’]s)?",
+                    " ",
+                    focused,
+                )
+        focused = re.sub(r"\s+([?.,!])", r"\1", re.sub(r"\s{2,}", " ", focused)).strip(" ,")
+        if focused == question or len(re.findall(r"\w{3,}", focused)) < FOCUS_MIN_WORDS:
+            return "", []
+        return focused, [home]
+
+    async def _ubiquitous(self, phrase: str, collection: str) -> bool:
+        """Is this phrase in most documents of the collection (an organisation's own name is)?"""
+        key = (phrase.lower(), collection)
+        known = self._ubiquity.get(key)
+        if known is not None:
+            return known
+        async with session_scope() as db:
+            in_collection = Document.collection == collection, Document.status == "ready"
+            total = (await db.execute(select(func.count()).select_from(Document).where(*in_collection))).scalar_one()
+            naming = (
+                await db.execute(
+                    select(func.count(func.distinct(Chunk.document_id)))
+                    .join(Document, Document.id == Chunk.document_id)
+                    .where(*in_collection, Chunk.text.ilike(f"%{_like(phrase)}%", escape="\\"))
+                )
+            ).scalar_one()
+        result = total >= FOCUS_MIN_DOCUMENTS and naming >= total * FOCUS_SHARE
+        if len(self._ubiquity) < 10_000:
+            self._ubiquity[key] = result
+        return result
 
     # ── Stage 1b: graph search (Graph Reasoning Agent) ──────────────────
     async def search_graph(
@@ -346,7 +503,7 @@ class HybridRetriever:
             for cid, _ in fused
         ]
         if options.use_rerank:
-            rerank_scores = await self._models.rerank(question, passages)
+            rerank_scores = await self._models.rerank(vectors.focused_query or question, passages)
         else:
             rerank_scores = [score * 1000 for _, score in fused]  # keep fusion order
         timings["rerank"] = _ms(started)
@@ -392,8 +549,11 @@ class HybridRetriever:
         picked: list[uuid.UUID] = []
         rows: dict[uuid.UUID, tuple[Chunk, Document]] = {}
 
+        focused: dict[str, str] = {}
+
         async def candidates(text: str) -> list[uuid.UUID]:
             found = await self.search_passages(text, scope, options=options)
+            focused[text] = found.focused_query or text
             mixed = [cid for pair in zip_longest(found.keyword, found.semantic) for cid in pair if cid is not None]
             ordered = [cid for cid in dict.fromkeys(mixed) if cid not in exclude and cid not in picked]
             rows.update(await self._load_chunks([cid for cid in ordered if cid not in rows]))
@@ -434,7 +594,7 @@ class HybridRetriever:
             room = limit + SECOND_HOP_LOOKUP_EXTRA - len(picked)
             if room > 0:
                 pool = (await candidates(lookup))[:SECOND_HOP_RERANKED]
-                picked.extend(await best(lookup, pool, min(room, SECOND_HOP_PER_LOOKUP)))
+                picked.extend(await best(focused[lookup], pool, min(room, SECOND_HOP_PER_LOOKUP)))
         for query in queries:
             for cid in (await candidates(query))[:SECOND_HOP_PER_QUERY]:
                 if len(picked) < limit:

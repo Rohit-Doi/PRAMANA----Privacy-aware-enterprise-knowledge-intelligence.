@@ -40,6 +40,7 @@ SUPPORTING_SOURCE_THRESHOLD = 0.5
 SUPERSEDED_PENALTY = 0.25
 CALCULATED_CONFIDENCE = 0.8
 MIN_PARTNER_OVERLAP = 0.15
+JUDGE_OVERLAP = 0.7
 EXTRA_SOURCES_PER_CLAIM = 2
 WIDE_CONTEXT_PASSAGES = 2
 WIDE_CONTEXT_CHARS = 2400
@@ -442,7 +443,10 @@ class ValidationEngine:
             if c.verdict not in (Verdict.SUPPORTED, Verdict.CONFLICTING)
             and c.signals["probability"] >= self._settings.uncertain_low
             and c.signals["numbers_ok"] == 1.0
-            and not nothing_supports(c.signals)
+            # The local models read prose; a row of a register ("Office: …; Holder: …") can leave them
+            # with nothing. When the claim's own words are nearly all in the passage, the judge, who
+            # must quote the source verbatim, is asked.
+            and (not nothing_supports(c.signals) or c.signals["overlap"] >= JUDGE_OVERLAP)
         ]
         if use_judge and uncertain and self._llm is not None and self._llm.configured:
             started = time.perf_counter()

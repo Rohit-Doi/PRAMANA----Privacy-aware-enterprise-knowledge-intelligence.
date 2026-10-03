@@ -66,8 +66,9 @@ async def load_principals() -> dict[str, Principal]:
 
 def satisfies(text: str, expect: list[list[str]]) -> bool:
     """Every group must be satisfied by at least one of its alternatives (case-insensitive)."""
-    lowered = text.lower()
-    return all(any(option.lower() in lowered for option in group) for group in expect)
+    # Some models write narrow or non-breaking spaces ("10 working days"): those are spaces.
+    lowered = " ".join(text.lower().split())
+    return all(any(" ".join(option.lower().split()) in lowered for option in group) for group in expect)
 
 
 # Keys whose values are identifiers, not text a person reads.

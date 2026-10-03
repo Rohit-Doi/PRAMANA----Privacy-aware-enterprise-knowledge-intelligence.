@@ -6,8 +6,8 @@ Each run is stored in the database, shown on the **Reports** page of the web app
 can be repeated with the command given in its section.
 
 > These are results on questions written alongside the system. On unseen documents with
-> independent questions the answer rate was 51 % in a first blind test and 72 % in a
-> second one after fixes; safety results held in both. See [BLIND_TEST.md](BLIND_TEST.md).
+> independent questions the answer rate was 51 %, 72 % and 68 % in three blind tests
+> (with fixes between them); safety results held in all three. See [BLIND_TEST.md](BLIND_TEST.md).
 
 **Summary**
 

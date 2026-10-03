@@ -265,3 +265,22 @@ def test_only_the_lines_naming_a_term_are_judged_for_it() -> None:
     register = "Post: Chief Executive; Holder: A\nPost: Marine Superintendent; Holder: Captain Ilse Dornan\nPost: Registrar; Holder: B"
     assert _lines_with(register, "marine superintendent") == "Post: Marine Superintendent; Holder: Captain Ilse Dornan"
     assert _lines_with(register, "Harbour Master") == register
+
+
+def test_the_organisations_name_is_found_among_a_questions_proper_names() -> None:
+    from pramana.retrieval.retriever import _proper_phrases
+
+    assert _proper_phrases("What is the minimum password length at Marrowgate Quill Mutual?") == [
+        "Marrowgate Quill Mutual",
+        "Marrowgate Quill",
+    ]
+    assert _proper_phrases("How many vacation days do I get?") == []
+
+
+def test_a_quote_about_someone_else_is_not_an_answer() -> None:
+    from pramana.agents.extractive import about_the_named
+
+    row = "Name: Ngozi Fairbrother-Kang; Grade: Q3; Social security number: 604-19-8352 [E1]."
+    assert not about_the_named(["Ruairi Castellan-Moss"], row)
+    assert about_the_named(["Ngozi Fairbrother-Kang"], row)
+    assert about_the_named([], row)

@@ -12,7 +12,7 @@ from pramana.agents.completeness import (
     missing_answer_type,
     names_an_office,
 )
-from pramana.agents.extractive import extractive_answer, extractive_follow_up
+from pramana.agents.extractive import about_the_named, extractive_answer, extractive_follow_up
 from pramana.agents.state import AgentDeps, PipelineState
 from pramana.llm.prompts import ANSWER, CORRECTION
 from pramana.privacy.pii import mask_for_reader
@@ -146,6 +146,24 @@ async def second_hop(
     return for_reader, for_llm
 
 
+_FULL_NAME = re.compile(r"\b[A-Z][a-z]+(?:[-'’][A-Z]?[a-z]+)?(?:\s+[A-Z][a-z]+(?:[-'’][A-Z]?[a-z]+)?){1,2}\b")
+
+
+def subject_names(question: str, passages: list[str], deps: AgentDeps) -> list[str]:
+    """People the question is about: names it gives that some, but not most, of the passages contain.
+
+    A name in nearly every passage is the organisation's; a name in a few is a row of a register.
+    """
+    found = [f.text for f in deps.pii.analyze(question) if f.entity_type == "PERSON"]
+    found += [m.group(0) for m in _FULL_NAME.finditer(question)]
+    names: list[str] = []
+    for name in dict.fromkeys(found):
+        holding = sum(name.lower() in passage.lower() for passage in passages)
+        if not names_an_office(name) and 0 < holding <= max(1, len(passages) // 2):
+            names.append(name)
+    return names
+
+
 def has_person_name(text: str, deps: AgentDeps) -> bool:
     found = deps.pii.analyze(strip_citations(text))
     return any(f.entity_type == "PERSON" and not names_an_office(f.text) for f in found)
@@ -159,6 +177,10 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
 
     if route == "extractive":
         draft = await extractive_answer(reader_question, state["llm_evidence"], deps.reader)
+        asked_about = subject_names(reader_question, [e.text for e in state["llm_evidence"]], deps)
+        if draft and not about_the_named(asked_about, draft):
+            # The reader quoted a neighbouring row: someone else's record is not an answer.
+            draft = ""
         if draft:
             missing = missing_answer_type(reader_question, draft, has_person=has_person_name(draft, deps))
             if missing:
@@ -241,8 +263,10 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
             local_only=route == "local",
         )
     except DependencyUnavailable as exc:
-        # Degraded, not faked: fall back to quoting the sources and say so.
-        draft = await extractive_answer(reader_question, state["evidence"], deps.reader)
+        # Degraded, not faked. No sentence is quoted in place of the model's answer: without the model
+        # nothing has judged whether the passages answer the question at all, and a quoted sentence
+        # that merely sits near the topic reads like an answer.
+        draft = ""
         note = f"The language model was unavailable ({exc.code}); the answer is quoted directly from the sources"
         if not draft:
             return {

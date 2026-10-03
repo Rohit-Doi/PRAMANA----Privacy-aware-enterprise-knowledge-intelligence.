@@ -5,8 +5,9 @@ that built the system. This document reports what happened on material the syste
 never seen, with questions it was not built around. **The numbers here are much lower,
 and they are the ones to believe.**
 
-Both blind tests were run on 3 October 2026. Each is a first run: nothing was tuned on the
-questions beforehand and nothing was re-run.
+The first two blind tests were run on 3 October 2026 and the third on 4 October 2026. Each
+figure reported as blind is a first run: nothing was tuned on the questions beforehand.
+Re-runs made after fixes are labelled as such and are not blind.
 
 ## Summary
 
@@ -20,10 +21,13 @@ questions beforehand and nothing was re-run.
 | Protected facts leaked | 0 | **0** | **0** | — |
 | Unanswerable questions declined | 10 / 10 | 9 / 10 | 10 / 10 | — |
 
-**In one sentence:** on both blind tests the system leaked nothing, invented nothing and
-resisted every attempt to talk it round. On the first it was far too cautious. After
-the causes were fixed, a second blind test on new documents gave 72 % — plain facts and
-tables 24 of 24 — with questions that chain two documents still the clear weakness.
+**In one sentence:** on all three blind tests the system leaked nothing, invented nothing
+and resisted every attempt to talk it round. On the first it was far too cautious. After
+the causes were fixed, a second blind test on new documents gave 72 %. The fixes for what
+the second test found were then confirmed on its own questions (86 %, not blind) — but a
+**third blind test gave 68 %**: it found a different weakness. Each fix holds for the
+problem it was made for; unseen material keeps finding new ones. See
+[Part 4](#part-4--the-third-blind-test).
 
 ## How the test was made blind
 
@@ -276,13 +280,130 @@ somewhat easier or harder than the first.
 * **Slower.** More passages are read and some questions take a second search: the
   median rose to 14 s on this CPU.
 
+## Part 4 — the third blind test
+
+After the second test, each remaining failure was traced to a cause and fixed in a general
+way (not for the particular question). The second set then became development data, and a
+third organisation was written to test the fixes on material nobody had seen: *Marrowgate
+Quill Mutual*, a fictional member-owned financial cooperative — 28 documents by an
+independent author, 100 questions by an independent examiner, both committed to git
+before the documents were indexed (`eval/blind3/`).
+
+### What was changed before it
+
+| Problem in test 2 | Change |
+|---|---|
+| Answers stop one step short ("approved by the Director of Operations") | A deterministic check of whether the draft contains the kind of thing asked for (a person, a date, an amount). If not, the offices, bodies and codes the draft names are looked up in one more search inside the same access scope, and the answer is drafted again. On the quoting route the local reader is asked "Who is the …?" and a second sentence is quoted. |
+| "Do not compute" lost questions needing a difference or a rate | The model may calculate if it writes the calculation out (`$46,800 / 2,080 = $22.50`). The verifier checks the arithmetic exactly and that every operand is a figure in the passages. |
+| A correct sentence resting on two passages was rejected | A claim one passage does not carry is read once more against that passage and its best complement together. |
+| "My division" not connected to the session's region | A regional document's passages are labelled with the region they apply to. |
+| ID numbers masked even for the executive | For a reader holding `pii:read` an identifier is replaced by a numbered placeholder; the value never leaves the machine and is put back locally. A claim that links placeholders found together in one row is checked literally. |
+| "Conflicting" flags between different organisations' policies | Conflicts are reported only within one collection. |
+| "Language model unavailable" | The gateway waits out a per-minute rate limit once instead of failing. |
+
+On the second set's own questions (development data, **not blind**) this gave 67 of 78
+answerable (86 %, from 72 %): chained questions 13 of 16 (from 6), region 4 of 6 (from 1),
+identifiers 2 of 2; 22 of 22 refusals, no leaks. The original regression questions:
+52 of 55, 10 of 10 unanswerable declined, no leaks.
+
+### The blind result — 100 questions, one run
+
+| | Result |
+|---|---|
+| Must refuse (22): access 8, personal data 2, injection 2, unanswerable 10 | **20 correct**; 0 leaks |
+| Must answer (78) | **53 correct (68 %)**, 21 declined, 4 wrong or incomplete |
+
+| Kind of answerable question | Correct | Test 2 (first run) |
+|---|---|---|
+| Fact stated plainly | 12 / 14 | 14 / 14 |
+| Reworded in everyday language | 9 / 16 | 12 / 16 |
+| A cell of a table | 8 / 10 | 10 / 10 |
+| Needs two documents | 11 / 16 | 6 / 16 |
+| Superseded and current version | 3 / 6 | 5 / 6 |
+| "My area" (regional variants) | 4 / 6 | 1 / 6 |
+| Confidential content, authorised reader | 6 / 8 | 7 / 8 |
+| Personal data, entitled reader | 0 / 2 | 1 / 2 |
+
+One answer was regraded by hand from wrong to correct: the model wrote "11 working days"
+with a narrow no-break space, which the string comparison did not match. The grader now
+treats all space characters alike.
+
+**What the fixes did.** The two things test 2 was worst at improved on unseen material:
+questions needing two documents 11 of 16 (6 before), regional questions 4 of 6 (1 before).
+
+**What went wrong instead.** Plain and reworded questions fell (21 of 30, against 26 of 30).
+Tracing the declined ones showed one cause for most of them: nearly every question
+named the organisation ("…at Marrowgate Quill Mutual?"), a rare name that appears on the
+title page of every one of its documents. Both searches matched the name, so the evidence
+filled with title pages and the passage holding the answer was left out; the model then
+correctly said the evidence was insufficient. In test 2 the questions mostly said "BRTA"
+while the documents spelled the name out, so the effect did not show.
+
+Other failures:
+
+* **The two refusals that failed** were unanswerable questions put by the executive on
+  the quoting route (restricted evidence, no local model): the reader quoted a sentence
+  about the right topic that did not answer the question (the chief executive of this
+  society for a question about another one). Nothing protected was disclosed, but it is
+  a wrong answer.
+* **Personal data for the executive (0 of 2).** Once the row was not retrieved (the cause
+  above); once the reader quoted the neighbouring row of the register — another person's
+  record. The reader was entitled to see it, but it was the wrong person's number.
+* **One figure was misread by OCR** on a scanned page ("$1 65,000").
+* **The primary language model's free daily quota was used up** before this run, so most
+  answers were drafted by the weaker fallback models, and the median time per question
+  rose to 20 s.
+
+### Changes made after it (not confirmed blind)
+
+* **The organisation's name is used as a filter, not as a search word.** A name found in
+  most documents of the collection the search leads to says which documents are meant
+  and nothing about which passage. It is taken out of the wording passages are ranked
+  by, and the search is repeated within that collection.
+* **A quoted row must be about the person the question names**; otherwise nothing is quoted.
+* **A sentence that repeats a register row** nearly word for word may be put to the judge
+  even when the local models find no support (they read prose, not rows).
+* **When no language model is available the system declines** instead of quoting the
+  nearest sentence.
+
+Seven of the declined questions were traced again after these changes: five now answer
+correctly. A full re-run was attempted, but the free quota of every configured provider
+ran out part-way (20 of 100 questions found no model available), so **there is no valid
+after-fix measurement of this set, and these changes have not been tested on unseen
+material.** They pass the unit tests, the access-control suite (149 attempts, no leak) and
+the retrieval check on the original questions (recall@8 1.00, MRR 0.975 — unchanged).
+
+### What three tests say together
+
+| | Test 1 | Test 2 | Test 3 |
+|---|---|---|---|
+| Answerable questions correct (first run) | 51 % | 72 % | 68 % |
+| Must-refuse questions handled correctly | 23 / 24 | 22 / 22 | 20 / 22 |
+| Protected facts leaked | 0 | 0 | 0 |
+| Invented facts found | 0 | 0 | 0 |
+
+* The safety properties held every time, including on questions designed to break them.
+  They are enforced before retrieval and by literal checks, and do not depend on the
+  language model.
+* The answer rate on unseen material is about **70 %**, and has not been shown to be
+  higher. A fix made for one test's failures worked for those failures; the next test
+  found others. It is likely that a fourth test would find more.
+* When the system does not answer correctly it mostly declines (21 of 25 in test 3)
+  rather than answering wrongly. That is the designed behaviour, but a declined question
+  is still a question the user did not get answered.
+* No system of this kind can promise that failures will not occur on new documents.
+  What can be promised is what was measured: it does not leak, and it prefers saying
+  "I cannot verify this" to guessing.
+
 ## Limits of this test
 
 * About 100 questions per test: one question is about one percentage point; small
-  differences mean nothing.
-* The documents of both fictional organisations were written by an AI author to a
+  differences mean nothing. The difference between 72 % and 68 % is within that noise.
+* The tests ran on a free language-model tier. Which model drafted an answer depended on
+  how much quota was left that day; test 3 ran mostly on the fallback models.
+* The documents of the three fictional organisations were written by an AI author to a
   specification. They are unseen and realistic in form, but tidier than real paperwork,
-  and the same specification shaped both sets.
+  and similar specifications shaped all three sets.
 * One examiner wrote the keys. Six were found too strict on reading; others may be too
   lenient — several keys are bare numbers that could match by accident.
 * HotpotQA paragraphs are Wikipedia text that the drafting model may have seen in
