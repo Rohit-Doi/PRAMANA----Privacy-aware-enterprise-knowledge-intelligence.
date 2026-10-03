@@ -82,7 +82,7 @@ _NOT_A_PERSON = frozenset(
         "it",
     }
 )
-_TOKEN = re.compile(r"\[(PERSON|EMAIL_ADDRESS|PHONE_NUMBER|EMPLOYEE_ID|IP_ADDRESS)_(\d+)\]")
+_TOKEN = re.compile(r"\[(" + "|".join(ALL_ENTITIES) + r")_(\d+)\]")
 
 
 @dataclass(frozen=True, slots=True)
@@ -255,8 +255,15 @@ class Pseudonymizer:
     _counters: Counter[str] = field(default_factory=Counter)
     high_risk_removed: Counter[str] = field(default_factory=Counter)
 
-    def protect(self, text: str, *, sensitivity_rank: int, pseudonymize_contact: bool = True) -> str:
-        """Text safe to send to an external LLM."""
+    def protect(
+        self, text: str, *, sensitivity_rank: int, pseudonymize_contact: bool = True, restorable_ids: bool = False
+    ) -> str:
+        """Text safe to send to an external LLM.
+
+        A high-risk identifier never leaves the machine. Normally it is removed for good. With
+        ``restorable_ids`` (the reader holds ``pii:read``) it is replaced by a numbered placeholder
+        instead, so that the answer can name it and the value is put back locally for that reader.
+        """
         findings = self.engine.analyze(text)
         contact_is_personal = pseudonymize_contact and sensitivity_rank >= Sensitivity.CONFIDENTIAL
         selected = [f for f in findings if f.high_risk or contact_is_personal]
@@ -264,7 +271,8 @@ class Pseudonymizer:
         def label(finding: PiiFinding) -> str:
             if finding.high_risk:
                 self.high_risk_removed[finding.entity_type] += 1
-                return f"[REDACTED:{finding.entity_type}]"
+                if not restorable_ids:
+                    return f"[REDACTED:{finding.entity_type}]"
             return self._token(finding.entity_type, finding.text)
 
         return _replace(text, selected, label)

@@ -27,7 +27,7 @@ from pramana.validation.alignment import Window, best_window
 from pramana.validation.calibration import Calibrator, get_calibrator
 from pramana.validation.claims import ClaimDraft, extract_claims, is_insufficient
 from pramana.validation.detectors import Detectors, UnsupportedSpan
-from pramana.validation.facts import check_facts
+from pramana.validation.facts import check_facts, evidence_numbers
 
 log = get_logger(__name__)
 
@@ -38,6 +38,8 @@ CONFLICT_THRESHOLD = 0.85
 CONFLICT_MIN_OVERLAP = 0.5
 SUPPORTING_SOURCE_THRESHOLD = 0.5
 SUPERSEDED_PENALTY = 0.25
+CALCULATED_CONFIDENCE = 0.8
+MIN_PARTNER_OVERLAP = 0.15
 EXTRA_SOURCES_PER_CLAIM = 2
 WIDE_CONTEXT_PASSAGES = 2
 WIDE_CONTEXT_CHARS = 2400
@@ -240,6 +242,9 @@ class ValidationEngine:
             for ref in candidates[d.ordinal]
             if ref != primary[d.ordinal]
             and by_ref[ref].document_id != by_ref[primary[d.ordinal]].document_id
+            # Two organisations' policies that differ do not contradict each other: a conflict is
+            # reported only between documents of the same collection.
+            and getattr(by_ref[ref], "collection", "") == getattr(by_ref[primary[d.ordinal]], "collection", "")
             and windows[(d.ordinal, ref)].overlap >= CONFLICT_MIN_OVERLAP
         ]
         # Each claim is read twice against its primary passage: against the surrounding window, and
@@ -266,12 +271,14 @@ class ValidationEngine:
         # ── Combine ─────────────────────────────────────────────────────
         calibrator = self.calibrator
         results: dict[int, ClaimResult] = {}
+        derived: set[str] = set()  # figures established by calculations earlier in the answer
+        all_figures = evidence_numbers("\n".join(e.text for e in by_ref.values()))
         for draft in checkable:
             ref = primary[draft.ordinal]
             window = windows[(draft.ordinal, ref)]
             cited = [r for r in draft.cited if r in by_ref]
             fact_source = "\n".join(headers[r] + by_ref[r].text for r in dict.fromkeys([*cited, ref]))
-            facts = check_facts(draft.text, fact_source)
+            facts = check_facts(draft.text, fact_source, derived=derived, operands=all_figures)
             model_text = texts[draft.ordinal]
             claim_spans = _spans_for(model_text, offsets[draft.ordinal], spans)
             span_chars = sum(s["end"] - s["start"] for s in claim_spans)
@@ -312,6 +319,8 @@ class ValidationEngine:
                     "supporting_documents": len(supporting),
                     "numbers_missing": facts.numbers_missing,
                     "names_missing": facts.names_missing,
+                    "calculations": facts.calculations,
+                    "same_record": same_record(draft.text, by_ref[ref].text),
                     "invalid_citations": [r for r in draft.cited if r not in by_ref],
                     "uncited": not draft.cited,
                     "conflicting_evidence": conflicts,
@@ -337,7 +346,9 @@ class ValidationEngine:
                 kind="claim",
                 cited=draft.cited,
                 verdict=verdict,
-                confidence=_confidence(verdict, probability),
+                confidence=_confidence(
+                    verdict, probability, calculated=bool(facts.calculations or signals["same_record"])
+                ),
                 reason=reason,
                 signals=signals,
                 citations=[
@@ -352,6 +363,74 @@ class ValidationEngine:
                 ],
                 unsupported_spans=claim_spans,
             )
+
+        # ── Claims that rest on two passages ────────────────────────────
+        # "The Marine Superintendent, Captain Dornan, decides …" is stated by no single passage: one
+        # gives the office, another its holder. A claim the primary passage does not carry is read
+        # once more against that passage and the one that best complements it, together.
+        started = time.perf_counter()
+        pairs: dict[int, str] = {}
+        for claim in results.values():
+            if claim.verdict in (Verdict.SUPPORTED, Verdict.CONFLICTING) or claim.signals["numbers_ok"] != 1.0:
+                continue
+            partner = _partner(claim, windows, by_ref)
+            if partner is not None:
+                pairs[claim.ordinal] = partner
+        if pairs:
+            joined_premises = {
+                ordinal: natural_text(
+                    headers[results[ordinal].signals["primary_evidence"]]
+                    + windows[(ordinal, results[ordinal].signals["primary_evidence"])].text
+                    + "\n\n"
+                    + headers[partner]
+                    + windows[(ordinal, partner)].text
+                )
+                for ordinal, partner in pairs.items()
+            }
+            order = list(pairs)
+            inputs = [(joined_premises[ordinal], hypotheses[ordinal]) for ordinal in order]
+            joint_grounding = await self._detectors.grounding(inputs)
+            joint_nli = await self._detectors.nli(inputs)
+            for ordinal, grounded, read in zip(order, joint_grounding, joint_nli, strict=True):
+                claim, partner = results[ordinal], pairs[ordinal]
+                primary_ref = claim.signals["primary_evidence"]
+                facts = check_facts(
+                    claim.text,
+                    "\n".join(headers[r] + by_ref[r].text for r in (primary_ref, partner)),
+                    derived=derived,
+                    operands=all_figures,
+                )
+                together = {
+                    **claim.signals,
+                    "grounding": round(grounded, 4),
+                    "entailment": round(max(claim.signals["entailment"], read.entailment), 4),
+                    "contradiction": round(read.contradiction, 4),
+                    "entailment_window": round(read.entailment, 4),
+                    "entailment_sentence": round(max(claim.signals["entailment_sentence"], read.entailment), 4),
+                    "contradiction_window": round(read.contradiction, 4),
+                    "names_ok": 1.0 if facts.names_ok else 0.0,
+                    "names_missing": facts.names_missing,
+                    "numbers_ok": 1.0 if facts.numbers_ok else 0.0,
+                    "numbers_missing": facts.numbers_missing,
+                }
+                probability = calibrator.probability(together)
+                if (
+                    probability < self.support_threshold
+                    or overruled(together)
+                    or read.contradiction >= CONFLICT_THRESHOLD
+                ):
+                    continue
+                together.update({"probability": round(probability, 4), "read_together_with": partner})
+                claim.signals = together
+                claim.verdict, claim.confidence = Verdict.SUPPORTED, round(probability, 4)
+                claim.reason = "supported by two passages read together"
+                claim.unsupported_spans = []
+                window = windows[(ordinal, partner)]
+                if all(c.ref != partner for c in claim.citations):
+                    claim.citations.append(
+                        CitationResult(partner, window.quote, window.quote_start, window.quote_end, round(grounded, 4))
+                    )
+        report.timings_ms["joint"] = _ms(started)
 
         # ── LLM judge for the uncertain band ────────────────────────────
         # Only claims the local checks did not accept are sent, so the judge can rescue a correct
@@ -434,8 +513,42 @@ class ValidationEngine:
                 claim.reason = "the source supports the main point but not every detail"
 
 
+def _partner(claim: ClaimResult, windows: dict[tuple[int, str], Window], by_ref: dict[str, Any]) -> str | None:
+    """The passage that best complements the claim's primary one: a cited passage if there is
+    another, else the one that holds the names the primary passage lacks, else the closest in wording."""
+    primary = claim.signals["primary_evidence"]
+    others = [ref for ref in by_ref if ref != primary]
+    if not others:
+        return None
+    cited = [ref for ref in claim.cited if ref in by_ref and ref != primary]
+    missing = [name.lower() for name in claim.signals.get("names_missing") or []]
+
+    def score(ref: str) -> tuple[int, int, float]:
+        text = by_ref[ref].text.lower()
+        return (sum(name in text for name in missing), int(ref in cited), windows[(claim.ordinal, ref)].overlap)
+
+    best = max(others, key=score)
+    return best if score(best) > (0, 0, MIN_PARTNER_OVERLAP) else None
+
+
+_RESTORABLE = re.compile(r"\[[A-Z_]+_\d+\]")
+
+
+def same_record(claim: str, passage: str) -> bool:
+    """The claim links two or more protected values, and one line of the passage holds them all.
+
+    A row of a personnel register reads "Name: [PERSON_1]; Staff ID: [US_SSN_2]; …". A claim that
+    gives [US_SSN_2] for [PERSON_1] is exactly what that row records."""
+    values = set(_RESTORABLE.findall(claim))
+    if len(values) < 2:
+        return False
+    return any(all(value in line for value in values) for line in passage.splitlines())
+
+
 def states_the_opposite(signals: dict[str, Any]) -> bool:
     """The closest source sentence contradicts the claim, and no reading of the passage entails it."""
+    if signals.get("same_record"):
+        return False
     return bool(signals["contradiction_sentence"] >= CONTRADICTION_THRESHOLD and signals["entailment"] < NO_ENTAILMENT)
 
 
@@ -445,6 +558,8 @@ def nothing_supports(signals: dict[str, Any]) -> bool:
     The trained model alone would let some of these through: in real LLM answers most sentences are
     true, so with no evidence either way it leans towards "supported". A verifier must not.
     """
+    if signals.get("calculations") or signals.get("same_record"):
+        return False  # checked exactly instead: arithmetic, or values found together in one record
     return bool(signals["grounding"] < NO_SUPPORT and signals["entailment"] < NO_SUPPORT)
 
 
@@ -465,6 +580,14 @@ def _decide(signals: dict[str, Any], probability: float, support_threshold: floa
         return Verdict.CONTRADICTED, "the cited source states the opposite"
     if nothing_supports(signals):
         return Verdict.UNSUPPORTED, "nothing in the source supports this"
+    if signals.get("same_record"):
+        # Placeholders are opaque to the entailment models. Protected values that stand together in
+        # one row of the cited source, and are stated together, are checked literally instead.
+        return Verdict.SUPPORTED, "the protected values are recorded together in one row of the cited source"
+    if signals.get("calculations") and signals["names_ok"]:
+        # Entailment models cannot follow arithmetic. A calculation whose operands are all in the
+        # cited passages and whose result is right is checked exactly instead.
+        return Verdict.SUPPORTED, "calculated from figures in the cited sources; the arithmetic was checked"
     if probability >= support_threshold:
         if signals["conflicting_evidence"] and signals["conflict_with_current"]:
             return Verdict.CONFLICTING, "supported by one source but contradicted by another current source"
@@ -480,9 +603,11 @@ def _decide(signals: dict[str, Any], probability: float, support_threshold: floa
     return Verdict.UNSUPPORTED, "not found in the cited source"
 
 
-def _confidence(verdict: Verdict, probability: float) -> float:
+def _confidence(verdict: Verdict, probability: float, *, calculated: bool = False) -> float:
     if verdict in (Verdict.UNSUPPORTED, Verdict.CONTRADICTED):
         return round(min(probability, 0.35), 4)
+    if calculated and verdict == Verdict.SUPPORTED:
+        return round(max(probability, CALCULATED_CONFIDENCE), 4)
     return round(probability, 4)
 
 
@@ -589,7 +714,8 @@ def natural_text(text: str) -> str:
             return f"contact{number}@example.org"
         if kind == "PHONE_NUMBER":
             return f"555-01{number % 100:02d}"
-        return f"{kind.lower().replace('_', ' ')} {number}"
+        # An identifier reads as an identifier: the detectors treat a reference number as a value.
+        return f"ID-{9000 + number}"
 
     return _PLACEHOLDER.sub(swap, text)
 

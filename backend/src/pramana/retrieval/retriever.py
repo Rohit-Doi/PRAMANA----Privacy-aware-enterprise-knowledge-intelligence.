@@ -17,6 +17,7 @@ import asyncio
 import time
 import uuid
 from dataclasses import dataclass, field
+from itertools import zip_longest
 from typing import Any
 
 from qdrant_client import models as qm
@@ -155,6 +156,13 @@ def reciprocal_rank_fusion(
 
 
 FIRST_HITS_PER_RETRIEVER = 2
+SECOND_HOP_PASSAGES = 4
+SECOND_HOP_CANDIDATES = 30
+SECOND_HOP_RERANKED = 16
+SECOND_HOP_PER_QUERY = 2
+SECOND_HOP_PER_TERM = 2
+SECOND_HOP_PER_LOOKUP = 4
+SECOND_HOP_LOOKUP_EXTRA = 2
 
 
 def _with_first_hits(
@@ -178,6 +186,11 @@ def _with_first_hits(
     others = [item for item in scored if item[0] not in guaranteed][: max(places, 0)]
     # Reranker order first; a guaranteed passage the reranker disliked comes after them.
     return sorted([*chosen, *others], key=lambda item: -item[1]) + missing
+
+
+def _lines_with(text: str, term: str) -> str:
+    lowered = term.lower()
+    return "\n".join(line for line in text.splitlines() if lowered in line.lower()) or text
 
 
 class HybridRetriever:
@@ -351,6 +364,97 @@ class HybridRetriever:
         evidence = await self._assemble(selected, rows, rankings, expand=options.expand_context)
         timings["assemble"] = _ms(started)
         return result(evidence, len(fused))
+
+    async def second_hop(
+        self,
+        *,
+        lookups: list[str],
+        queries: list[str],
+        terms: list[str],
+        term_question: str = "{term}",
+        principal: Principal,
+        scope: AccessScope,
+        exclude: set[uuid.UUID],
+        limit: int = SECOND_HOP_PASSAGES,
+    ) -> list[Evidence]:
+        """Passages for a follow-up search, inside the same scope and re-checked like any others.
+
+        * ``terms`` are looked up literally: the passage must contain the term, and among those that
+          do, the ones that best answer ``term_question`` ("Who is the {term}?") are taken: the row
+          of a register that says who holds an office, not a paragraph that mentions the office.
+        * ``lookups`` are questions (the model's own description of what is missing). Their
+          candidates are reranked against the lookup, like a first search.
+        * ``queries`` are statements (the first draft). They are searched by meaning and keywords
+          and not reranked: a passage that completes a statement need not look relevant to it.
+        """
+        options = RetrievalOptions(candidates=SECOND_HOP_CANDIDATES, use_graph=False)
+        settings = self._settings
+        picked: list[uuid.UUID] = []
+        rows: dict[uuid.UUID, tuple[Chunk, Document]] = {}
+
+        async def candidates(text: str) -> list[uuid.UUID]:
+            found = await self.search_passages(text, scope, options=options)
+            mixed = [cid for pair in zip_longest(found.keyword, found.semantic) for cid in pair if cid is not None]
+            ordered = [cid for cid in dict.fromkeys(mixed) if cid not in exclude and cid not in picked]
+            rows.update(await self._load_chunks([cid for cid in ordered if cid not in rows]))
+            return [cid for cid in ordered if cid in rows]
+
+        async def best(question: str, among: list[uuid.UUID], count: int, term: str = "") -> list[uuid.UUID]:
+            if len(among) <= 1:
+                return among[:count]
+            passages = [
+                embedding_text(
+                    title=rows[cid][1].title,
+                    section_path=rows[cid][0].section_path,
+                    # A register is long and the row sought may be far down it: for a term, only the
+                    # lines that contain it are judged.
+                    text=_lines_with(rows[cid][0].text, term) if term else rows[cid][0].text,
+                )[: settings.rerank_max_chars]
+                for cid in among
+            ]
+            scores = await self._models.rerank(question, passages)
+            # Among equally relevant passages the current version of a document comes first.
+            ranked = sorted(
+                zip(among, scores, strict=True),
+                key=lambda pair: -(pair[1] - (0.0 if rows[pair[0]][1].is_current else STALE_PENALTY)),
+            )
+            return [cid for cid, _ in ranked[:count]]
+
+        for term in terms:
+            if len(picked) >= limit:
+                break
+            found = await candidates(term)
+            containing = [cid for cid in found if term.lower() in rows[cid][0].text.lower()]
+            if len(containing) > len(found) // 2 and len(found) >= SECOND_HOP_PER_LOOKUP:
+                continue  # a name that is in most passages (the organisation's own) points nowhere
+            picked.extend(
+                await best(term_question.format(term=term), containing[:SECOND_HOP_RERANKED], SECOND_HOP_PER_TERM, term)
+            )
+        for lookup in lookups:
+            room = limit + SECOND_HOP_LOOKUP_EXTRA - len(picked)
+            if room > 0:
+                pool = (await candidates(lookup))[:SECOND_HOP_RERANKED]
+                picked.extend(await best(lookup, pool, min(room, SECOND_HOP_PER_LOOKUP)))
+        for query in queries:
+            for cid in (await candidates(query))[:SECOND_HOP_PER_QUERY]:
+                if len(picked) < limit:
+                    picked.append(cid)
+        if not picked:
+            return []
+        allowed = await self._policy.allowed_ids(
+            principal,
+            [
+                ResourceRef(
+                    id=str(cid),
+                    department=rows[cid][1].department,
+                    sensitivity_rank=rows[cid][1].sensitivity_rank,
+                    region=rows[cid][1].region,
+                )
+                for cid in picked
+            ],
+        )
+        kept = [(cid, 0.0, 0.0) for cid in picked if str(cid) in allowed]
+        return await self._assemble(kept, rows, {}, expand=False)
 
     async def _graph_ranking(
         self, question: str, vector: list[float], scope: AccessScope, limit: int

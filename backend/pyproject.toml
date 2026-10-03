@@ -113,6 +113,8 @@ ignore = [
 "../scripts/**" = ["S311", "E501"]
 # Prompt text is kept one instruction per line, the way the model reads it.
 "src/pramana/llm/prompts.py" = ["E501"]
+# Long alternations in regular expressions read better on one line.
+"src/pramana/agents/completeness.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"

@@ -11,6 +11,7 @@ uncertain claims, acts as a judge. Retrieval, access control and most verificati
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 import time
@@ -42,6 +43,7 @@ PROVIDER_BASE_URLS = {
 }
 QUOTA_COOLDOWN_SECONDS = 600
 TRANSIENT_COOLDOWN_SECONDS = 45
+MAX_COOLDOWN_WAIT_SECONDS = 60
 
 
 @dataclass(frozen=True, slots=True)
@@ -171,43 +173,52 @@ class LLMGateway:
             raise DependencyUnavailable("No local LLM is configured for content that may not leave this system")
         errors: list[str] = []
         quota_errors = 0
-        for provider in candidates:
-            if await self._cooling_down(provider):
-                errors.append(f"{provider.name}: cooling down")
-                quota_errors += 1
-                continue
-            started = time.perf_counter()
-            try:
-                text, tokens_in, tokens_out = await self._call(
-                    provider, system, user, max_tokens, temperature, json_mode
+        for attempt in range(2):
+            errors, quota_errors = [], 0
+            for provider in candidates:
+                if await self._cooling_down(provider):
+                    errors.append(f"{provider.name}: cooling down")
+                    quota_errors += 1
+                    continue
+                started = time.perf_counter()
+                try:
+                    text, tokens_in, tokens_out = await self._call(
+                        provider, system, user, max_tokens, temperature, json_mode
+                    )
+                except _QuotaError as exc:
+                    quota_errors += 1
+                    errors.append(f"{provider.name}: quota ({exc})")
+                    await self._set_cooldown(provider, exc.cooldown)
+                    await self._record_failure(provider, purpose, run_id, prompt_version, started, "quota", str(exc))
+                    continue
+                except _ProviderError as exc:
+                    errors.append(f"{provider.name}: {exc}")
+                    await self._set_cooldown(provider, TRANSIENT_COOLDOWN_SECONDS)
+                    await self._record_failure(provider, purpose, run_id, prompt_version, started, "error", str(exc))
+                    continue
+                if not text:
+                    errors.append(f"{provider.name}: empty response")
+                    await self._record_failure(provider, purpose, run_id, prompt_version, started, "empty", "")
+                    continue
+                result = LLMResult(
+                    text,
+                    provider.provider,
+                    provider.model,
+                    tokens_in,
+                    tokens_out,
+                    int((time.perf_counter() - started) * 1000),
                 )
-            except _QuotaError as exc:
-                quota_errors += 1
-                errors.append(f"{provider.name}: quota ({exc})")
-                await self._set_cooldown(provider, exc.cooldown)
-                await self._record_failure(provider, purpose, run_id, prompt_version, started, "quota", str(exc))
-                continue
-            except _ProviderError as exc:
-                errors.append(f"{provider.name}: {exc}")
-                await self._set_cooldown(provider, TRANSIENT_COOLDOWN_SECONDS)
-                await self._record_failure(provider, purpose, run_id, prompt_version, started, "error", str(exc))
-                continue
-            if not text:
-                errors.append(f"{provider.name}: empty response")
-                await self._record_failure(provider, purpose, run_id, prompt_version, started, "empty", "")
-                continue
-            result = LLMResult(
-                text,
-                provider.provider,
-                provider.model,
-                tokens_in,
-                tokens_out,
-                int((time.perf_counter() - started) * 1000),
-            )
-            await self._record(result, purpose, run_id, prompt_version, status="ok")
-            if use_cache:
-                await self._cache_set(cache_key, result)
-            return result
+                await self._record(result, purpose, run_id, prompt_version, status="ok")
+                if use_cache:
+                    await self._cache_set(cache_key, result)
+                return result
+
+            # A per-minute limit clears in seconds. Waiting once is better than telling the user
+            # that no model is available.
+            wait = await self._shortest_cooldown(candidates)
+            if attempt or wait is None or wait > MAX_COOLDOWN_WAIT_SECONDS:
+                break
+            await asyncio.sleep(wait + 1)
 
         log.error("llm.all_providers_failed", purpose=purpose, errors=errors)
         if quota_errors == len(candidates):
@@ -272,6 +283,14 @@ class LLMGateway:
             return bool(await self._redis.exists(f"llm:cooldown:{provider.name}"))
         except Exception:
             return False
+
+    async def _shortest_cooldown(self, providers: list[ProviderModel]) -> int | None:
+        """Seconds until the first of these providers may be tried again; None if unknown."""
+        try:
+            waits = [await self._redis.ttl(f"llm:cooldown:{p.name}") for p in providers]
+        except Exception:
+            return None
+        return min((w for w in waits if w > 0), default=None)
 
     async def _set_cooldown(self, provider: ProviderModel, seconds: int) -> None:
         try:

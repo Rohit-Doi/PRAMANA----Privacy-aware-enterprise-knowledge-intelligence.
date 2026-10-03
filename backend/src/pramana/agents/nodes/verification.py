@@ -78,7 +78,10 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
             replace(
                 e,
                 text=pseudonymizer.protect(
-                    e.text, sensitivity_rank=e.sensitivity_rank, pseudonymize_contact=egress.pseudonymize_names
+                    e.text,
+                    sensitivity_rank=e.sensitivity_rank,
+                    pseudonymize_contact=egress.pseudonymize_names,
+                    restorable_ids=scope.can_read_pii,
                 ),
             )
             for e in reader_evidence
@@ -97,7 +100,10 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
                 replace(
                     e,
                     text=pseudonymizer.protect(
-                        e.text, sensitivity_rank=e.sensitivity_rank, pseudonymize_contact=egress.pseudonymize_names
+                        e.text,
+                        sensitivity_rank=e.sensitivity_rank,
+                        pseudonymize_contact=egress.pseudonymize_names,
+                        restorable_ids=scope.can_read_pii,
                     ),
                 )
                 for e in reader_evidence

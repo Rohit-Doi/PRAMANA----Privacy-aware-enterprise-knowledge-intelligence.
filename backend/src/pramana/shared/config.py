@@ -104,11 +104,12 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 8
     rrf_k: int = 60
     min_evidence_score: float = Field(
-        default=-8.0,
+        default=-100.0,
         description=(
-            "Reranker logit of the best passage below which the system does not even draft. Set low on "
-            "purpose: a reworded question scores far below a literal one; whether the passages answer it "
-            "is decided by the drafting model and the verifier, not by this gate."
+            "Reranker logit of the best passage below which the system does not even draft. Off by "
+            "default: a reworded question can score very low on the right passage, and the drafting "
+            "model may then ask for a second search in the documents' own wording. Whether the passages "
+            "answer the question is decided by the drafting model and the verifier, not by this gate."
         ),
     )
 

@@ -22,6 +22,7 @@ RELEVANCE_WINDOW = 2.0
 # Reader margin (answer score minus "no answer" score) from which a passage counts as answering.
 MIN_MARGIN = 0.0
 STRONG_MARGIN = 3.5
+FOLLOW_UP_MARGIN = 1.0
 MIN_QUOTE_WORDS = 3
 MIN_UNPUNCTUATED_WORDS = 8
 
@@ -57,6 +58,32 @@ async def extractive_answer(question: str, evidence: list[Evidence], reader: Ext
     return ""
 
 
+async def extractive_follow_up(
+    question: str, missing: str, terms: list[str], passages: list[Evidence], reader: ExtractiveReader
+) -> str:
+    """A second quoted sentence that supplies what the first one only pointed to.
+
+    For a missing person the reader is asked who holds each office the first quote named; for a
+    missing date or amount it is asked the original question of the new passages.
+    """
+    if not passages:
+        return ""
+    questions = [f"Who is the {term}?" for term in terms] if missing == "person" and terms else []
+    questions.append(question)
+    best: tuple[float, str] | None = None
+    for follow_up in questions:
+        readings = await reader.read(follow_up, [e.text for e in passages])
+        for item, reading in zip(passages, readings, strict=True):
+            if reading is None or reading.margin < FOLLOW_UP_MARGIN:
+                continue
+            quote = quotable(item.text, reading.start, reading.end)
+            if quote and (best is None or reading.margin > best[0]):
+                best = (reading.margin, f"{quote.rstrip('.!?')} [{item.ref}].")
+        if best is not None:
+            break
+    return best[1] if best else ""
+
+
 def quotable(text: str, start: int, end: int) -> str:
     """The whole sentence (or sentences) around an answer span; "" if it is not a quotable sentence."""
     spans = [(s, e) for s, e in split_sentences(text) if s < end and start < e]
@@ -67,6 +94,6 @@ def quotable(text: str, start: int, end: int) -> str:
     words = len(quote.split())
     if "|" in quote or "\n" in quote or words < MIN_QUOTE_WORDS:
         return ""
-    if quote[-1] not in ".!?" and words < MIN_UNPUNCTUATED_WORDS:
-        return ""  # a short line without a full stop is a heading or a label
+    if quote[-1] not in ".!?" and (words < MIN_UNPUNCTUATED_WORDS or quote.count(": ") >= 2):
+        return ""  # a heading, a label, or a block of "Reference: … Classification: …" lines
     return quote

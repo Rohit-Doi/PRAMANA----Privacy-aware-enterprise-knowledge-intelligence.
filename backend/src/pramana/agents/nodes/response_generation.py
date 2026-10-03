@@ -6,7 +6,13 @@ import re
 from dataclasses import replace
 from typing import Any
 
-from pramana.agents.extractive import extractive_answer
+from pramana.agents.completeness import (
+    bridge_terms,
+    expected_answer_type,
+    missing_answer_type,
+    names_an_office,
+)
+from pramana.agents.extractive import extractive_answer, extractive_follow_up
 from pramana.agents.state import AgentDeps, PipelineState
 from pramana.llm.prompts import ANSWER, CORRECTION
 from pramana.privacy.pii import mask_for_reader
@@ -14,9 +20,10 @@ from pramana.privacy.risk import injection_flags
 from pramana.retrieval.retriever import Evidence
 from pramana.shared.errors import DependencyUnavailable
 from pramana.shared.types import Sensitivity
-from pramana.validation.claims import is_insufficient
+from pramana.validation.claims import is_insufficient, strip_citations
 
 MAX_GRAPH_FACTS = 6
+GLOBAL_REGIONS = ("", "global", "all")
 ANSWER_MAX_TOKENS = 700
 
 
@@ -29,6 +36,8 @@ def evidence_block(evidence: list[Evidence]) -> str:
             details.append(item.section_path)
         if item.effective_date:
             details.append(f"effective {item.effective_date}")
+        if item.region and item.region.lower() not in GLOBAL_REGIONS:
+            details.append(f"applies to the {item.region.upper()} region only")
         blocks.append(f"[{item.ref}] ({'; '.join(details)}; {status})\n{item.text}")
     return "\n\n".join(blocks)
 
@@ -64,7 +73,6 @@ def build_user_prompt(state: PipelineState, question: str) -> str:
 
 # The model is asked to put it on a line of its own, but often appends it to the last sentence.
 LOOKUP_LINE = re.compile(r"(?im)\bLOOKUP:[ \t]*(.+?)[ \t]*$")
-LOOKUP_PASSAGES = 3
 
 
 def split_lookup(text: str) -> tuple[str, str]:
@@ -75,24 +83,41 @@ def split_lookup(text: str) -> tuple[str, str]:
     return LOOKUP_LINE.sub("", text).strip(), match.group(1).strip().strip("<>\"'")[:200]
 
 
-async def look_up(
-    query: str, state: PipelineState, deps: AgentDeps, route: str
+TERM_QUESTIONS = {
+    "person": "Who is the {term}?",
+    "date": "On what date is the {term}?",
+    "amount": "What is the amount for {term}?",
+}
+
+
+async def second_hop(
+    queries: list[str],
+    terms: list[str],
+    state: PipelineState,
+    deps: AgentDeps,
+    route: str,
+    *,
+    lookup: str = "",
+    wanted: str = "",
 ) -> tuple[list[Evidence], list[Evidence]]:
-    """Passages for a follow-up query, prepared exactly like the first ones: inside the caller's scope,
+    """Passages for a second search, prepared exactly like the first ones: inside the caller's scope,
     masked for the reader, and pseudonymised or withheld for an external model."""
     access, pseudonymizer = state["access"], state["pseudonymizer"]
     # Placeholders the model saw are turned back into the real names for the local search only.
-    result = await deps.retriever.retrieve(
-        pseudonymizer.restore(query, reveal=True), principal=state["principal"], scope=access.scope
+    found = await deps.retriever.second_hop(
+        lookups=[pseudonymizer.restore(lookup, reveal=True)] if lookup.strip() else [],
+        term_question=TERM_QUESTIONS.get(wanted, "{term}"),
+        queries=[pseudonymizer.restore(q, reveal=True) for q in queries if q.strip()],
+        terms=[pseudonymizer.restore(t, reveal=True) for t in terms],
+        principal=state["principal"],
+        scope=access.scope,
+        exclude={chunk for e in state["evidence"] for chunk in e.chunk_ids},
     )
-    known = {chunk for e in state["evidence"] for chunk in e.chunk_ids}
     fresh = [
         e
-        for e in result.evidence
-        if not (set(e.chunk_ids) & known)
-        and not injection_flags(e.text)
-        and (route != "external" or e.sensitivity_rank <= access.egress.max_rank)
-    ][:LOOKUP_PASSAGES]
+        for e in found
+        if not injection_flags(e.text) and (route != "external" or e.sensitivity_rank <= access.egress.max_rank)
+    ]
     next_ref = max((int(e.ref[1:]) for e in state["evidence"]), default=0) + 1
     for_reader: list[Evidence] = []
     for_llm: list[Evidence] = []
@@ -112,12 +137,18 @@ async def look_up(
                     shown.text,
                     sensitivity_rank=shown.sensitivity_rank,
                     pseudonymize_contact=access.egress.pseudonymize_names,
+                    restorable_ids=access.scope.can_read_pii,
                 ),
             )
             if route == "external"
             else shown
         )
     return for_reader, for_llm
+
+
+def has_person_name(text: str, deps: AgentDeps) -> bool:
+    found = deps.pii.analyze(strip_citations(text))
+    return any(f.entity_type == "PERSON" and not names_an_office(f.text) for f in found)
 
 
 async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
@@ -129,6 +160,27 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
     if route == "extractive":
         draft = await extractive_answer(reader_question, state["llm_evidence"], deps.reader)
         if draft:
+            missing = missing_answer_type(reader_question, draft, has_person=has_person_name(draft, deps))
+            if missing:
+                # The quoted sentence names an office, a meeting or a category instead of the person,
+                # date or amount asked for. Look that up, still on this machine, and quote it too.
+                terms = bridge_terms(draft, reader_question)
+                found, _ = await second_hop([strip_citations(draft)], terms, state, deps, route, wanted=missing)
+                extra = await extractive_follow_up(reader_question, missing, terms, found, deps.reader)
+                if extra:
+                    cited = [e for e in found if f"[{e.ref}]" in extra]
+                    updates.update(
+                        {
+                            "evidence": [*state["evidence"], *cited],
+                            "llm_evidence": [*state["llm_evidence"], *cited],
+                            "evidence_notes": [
+                                *state.get("evidence_notes", []),
+                                "The first quoted sentence did not name the " + missing + " asked for; a second "
+                                "passage was looked up and quoted",
+                            ],
+                        }
+                    )
+                    draft = f"{draft} {extra}"
             return {
                 **updates,
                 "draft": draft,
@@ -169,6 +221,7 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
             sensitivity_rank=int(Sensitivity.CONFIDENTIAL),
             pseudonymize_contact=state["access"].egress.pseudonymize_names
             and any(e.sensitivity_rank >= Sensitivity.CONFIDENTIAL for e in state["llm_evidence"]),
+            restorable_ids=state["access"].scope.can_read_pii,
         )
     user_prompt = build_user_prompt(state, question)
     prompt = ANSWER
@@ -213,14 +266,27 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
 
     draft, lookup = split_lookup(result.text)
     llm_calls = 0 if result.cached else 1
-    if lookup and round_number == 0:
-        # The model named something it needs and cannot see (the holder of an office, the price of a
-        # band). Search for that, inside the same access scope, and let it try once more.
-        found, found_for_llm = await look_up(lookup, state, deps, route)
-        if found:
+    declined = is_insufficient(draft) or not draft
+    missing = "" if declined else missing_answer_type(reader_question, draft, has_person=has_person_name(draft, deps))
+    if round_number == 0 and (lookup or missing or declined):
+        # The draft stops one step short (it names an office where a person was asked for), or the
+        # model said what it would need to see. One more search, inside the same access scope, for
+        # what the draft points to; then it drafts again with the extra passages.
+        # What to look up: the offices, bodies and codes the draft (or the model's own request) names.
+        terms = [] if declined else bridge_terms(draft, reader_question)
+        terms += [t for t in bridge_terms(lookup, reader_question, titles=False) if t not in terms]
+        queries = [] if declined else [strip_citations(draft)]
+        wanted = missing or expected_answer_type(reader_question)
+        found, found_for_llm = (
+            await second_hop(queries, terms, state, deps, route, lookup=lookup, wanted=wanted)
+            if (queries or terms or lookup)
+            else ([], [])
+        )
+        if found_for_llm:
             evidence = [*state["evidence"], *found]
             llm_evidence = [*state["llm_evidence"], *found_for_llm]
-            note = f'Looked up "{lookup}": {len(found)} more passage(s)'
+            reason = f'looked up "{lookup}"' if lookup else f"the draft did not give the {missing} asked for"
+            note = f"Second search ({reason}): {len(found_for_llm)} more passage(s)"
             notes = [*updates.get("evidence_notes", state.get("evidence_notes", [])), note]
             updates.update({"evidence": evidence, "llm_evidence": llm_evidence, "evidence_notes": notes})
             state = {**state, "evidence": evidence, "llm_evidence": llm_evidence}
@@ -238,8 +304,10 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
                 second = None
             if second is not None:
                 llm_calls += 0 if second.cached else 1
-                result = second
-                draft, _ = split_lookup(second.text)
+                redraft, _ = split_lookup(second.text)
+                # A first draft that said something true is kept if the second attempt says nothing.
+                if not (is_insufficient(redraft) or not redraft) or declined:
+                    result, draft = second, redraft
     updates.update({"draft": draft, "llm_calls": llm_calls})
     if is_insufficient(draft) or not draft:
         # Also when the marker follows a sentence or two of context ("X is … INSUFFICIENT_EVIDENCE"):
