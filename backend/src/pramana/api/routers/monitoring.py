@@ -190,7 +190,6 @@ async def system(_: Operator, db: DbSession, runtime: RuntimeDep) -> dict[str, A
         "thresholds": {
             "support": calibrator.threshold or settings.support_threshold,
             "uncertain_low": settings.uncertain_low,
-            "uncertain_high": settings.uncertain_high,
             "min_evidence_score": settings.min_evidence_score,
             "max_correction_rounds": settings.max_correction_rounds,
         },

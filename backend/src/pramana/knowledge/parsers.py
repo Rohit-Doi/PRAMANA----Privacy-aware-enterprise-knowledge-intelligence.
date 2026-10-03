@@ -66,6 +66,33 @@ SUPPORTED_EXTENSIONS = {
 MAX_OCR_PAGES = 150
 
 
+def table_as_statements(table: str) -> str:
+    """Rewrite a table (rows of ``| cell | cell |``) as one statement per row: ``Header: value; …``.
+
+    A row of bare cells means nothing without its header, to a reader or to a model. Written as
+    "Item: Lost room key; Charge: $35." each row can be found, quoted and checked on its own.
+    """
+    rows = [
+        [cell.strip() for cell in line.strip().strip("|").split("|")]
+        for line in table.splitlines()
+        if line.strip().strip("|").strip()
+    ]
+    if len(rows) < 2 or max(len(r) for r in rows) < 2:
+        return "\n".join("; ".join(c for c in row if c) for row in rows)
+    header = rows[0]
+    statements = []
+    for row in rows[1:]:
+        parts = []
+        for index, cell in enumerate(row):
+            if not cell:
+                continue
+            label = header[index] if index < len(header) else ""
+            parts.append(f"{label}: {cell}" if label else cell)
+        if parts:
+            statements.append("; ".join(parts).rstrip(".") + ".")
+    return "\n".join(statements)
+
+
 def detect_mime(filename: str) -> str:
     extension = PurePath(filename).suffix.lower()
     if extension not in SUPPORTED_EXTENSIONS:
@@ -254,18 +281,32 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
 
     # One entry per layout block: page, lines as (font size, bold, text).
     layout: list[tuple[int, list[tuple[float, bool, str]]]] = []
+    tables_at: dict[int, str] = {}  # position in ``layout`` -> table text
     pages_without_text = 0
     ocr_pages = 0
     ocr_enabled = get_settings().ocr_enabled
     with pdf:
         page_count = pdf.page_count
         title = (pdf.metadata or {}).get("title", "") or ""
+        if title.strip().lower() in {"(anonymous)", "untitled", "untitled document"}:
+            title = ""  # what PDF writers put there when nobody set a title
         for page_index, page in enumerate(pdf, start=1):
             found_text = False
+            page_tables = _pdf_tables(page)
+            placed: set[int] = set()
             # Unsorted extraction follows the file's own reading order, which keeps the
             # columns of multi-column pages apart; sorting by position would interleave them.
             for block in page.get_text("dict").get("blocks", []):
                 if block.get("type") != 0:
+                    continue
+                inside = _table_containing(block.get("bbox"), page_tables)
+                if inside is not None:
+                    # The cells are emitted once, as a table, where the table begins.
+                    if inside not in placed:
+                        placed.add(inside)
+                        tables_at[len(layout)] = page_tables[inside][1]
+                        layout.append((page_index, []))
+                        found_text = True
                     continue
                 block_lines: list[tuple[float, bool, str]] = []
                 for line in block.get("lines", []):
@@ -295,7 +336,7 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
                         )
 
     all_lines = [line for _, block_lines in layout for line in block_lines]
-    if not all_lines:
+    if not all_lines and not tables_at:
         raise ValidationFailed(
             "No readable text was found in this PDF, even with OCR."
             if ocr_enabled
@@ -309,11 +350,14 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
         for shape, n in shape_counts.items()
         if page_count >= 4 and n >= max(3, page_count * 0.5) and len(shape) < 90
     }
-    body_size = statistics.median(size for size, _, _ in all_lines)
+    body_size = statistics.median(size for size, _, _ in all_lines) if all_lines else 10.0
     page_number = re.compile(r"(?:page\s*)?\d{1,4}(?:\s*of\s*\d+)?", re.I)
 
     blocks: list[Block] = []
-    for page_index, block_lines in layout:
+    for position, (page_index, block_lines) in enumerate(layout):
+        if position in tables_at:
+            blocks.append(Block("table", tables_at[position], page=page_index))
+            continue
         kept = [
             (size, bold, text)
             for size, bold, text in block_lines
@@ -364,6 +408,34 @@ def _parse_pdf(data: bytes) -> ParsedDocument:
             "pages_not_read": max(0, pages_without_text - ocr_pages) if ocr_enabled else pages_without_text,
         },
     )
+
+
+def _pdf_tables(page: Any) -> list[tuple[tuple[float, float, float, float], str]]:
+    """Ruled tables on a page: bounding box and the cells as ``| a | b |`` rows."""
+    try:
+        found = page.find_tables()
+    except Exception:  # table detection is best-effort; the text is still read without it
+        return []
+    tables = []
+    for table in found.tables:
+        rows = [
+            [" ".join(str(cell or "").split()) for cell in row]
+            for row in table.extract()
+            if any(str(cell or "").strip() for cell in row)
+        ]
+        if len(rows) >= 2 and max(len(r) for r in rows) >= 2:
+            tables.append((tuple(table.bbox), "\n".join("| " + " | ".join(row) + " |" for row in rows)))
+    return tables
+
+
+def _table_containing(bbox: Any, tables: list[tuple[tuple[float, float, float, float], str]]) -> int | None:
+    if not bbox:
+        return None
+    x, y = (bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2
+    for index, ((x0, y0, x1, y1), _) in enumerate(tables):
+        if x0 - 2 <= x <= x1 + 2 and y0 - 2 <= y <= y1 + 2:
+            return index
+    return None
 
 
 def _join_pdf_lines(lines: list[str]) -> str:

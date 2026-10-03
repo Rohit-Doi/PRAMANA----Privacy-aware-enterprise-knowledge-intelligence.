@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from pramana.knowledge.parsers import Block, ParsedDocument
+from pramana.knowledge.parsers import Block, ParsedDocument, table_as_statements
 from pramana.shared.text import estimate_tokens, normalize_text, split_sentences
 
 SECTION_SEPARATOR = " › "
@@ -55,6 +55,8 @@ def build_canonical_text(parsed: ParsedDocument) -> tuple[str, list[tuple[Block,
     cursor = 0
     for block in parsed.blocks:
         text = normalize_text(block.text)
+        if block.kind == "table":
+            text = table_as_statements(text)
         if not text:
             continue
         if parts:

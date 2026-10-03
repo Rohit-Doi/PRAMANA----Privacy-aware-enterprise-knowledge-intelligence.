@@ -91,3 +91,29 @@ def test_a_span_across_two_sentences_quotes_both() -> None:
     end = MEMO.index("$412.5 million") + 5
     quote = quotable(MEMO, start, end)
     assert quote.startswith("Aurelia Systems proposes") and quote.endswith("30% in stock.")
+
+
+async def test_a_less_relevant_passage_is_quoted_only_when_the_reader_is_clearly_confident() -> None:
+    top = "The overpayment was discovered during the annual payroll audit. It covered eleven months."
+    lower = "The President has authorised a settlement of up to $75,000, inclusive of costs."
+    passages = [Passage("E1", top, 2.7), Passage("E2", lower, -5.0)]
+    unsure = FakeReader({top: ("eleven months", -0.9), lower: ("$75,000", 1.2)})
+    assert await extractive_answer("What settlement was authorised?", passages, unsure) == ""  # type: ignore[arg-type]
+    confident = FakeReader({top: ("eleven months", -0.9), lower: ("$75,000", 4.0)})
+    answer = await extractive_answer("What settlement was authorised?", passages, confident)  # type: ignore[arg-type]
+    assert answer.endswith("[E2].") and "$75,000" in answer
+
+
+def test_a_lookup_line_is_split_from_the_draft() -> None:
+    from pramana.agents.nodes.response_generation import split_lookup
+
+    draft, query = split_lookup(
+        "Purchases above $40,000 need the approval of the Dean of Research [E1].\nLOOKUP: Dean of Research name"
+    )
+    assert draft == "Purchases above $40,000 need the approval of the Dean of Research [E1]."
+    assert query == "Dean of Research name"
+    assert split_lookup("INSUFFICIENT_EVIDENCE\nlookup: <Registrar of the institute>") == (
+        "INSUFFICIENT_EVIDENCE",
+        "Registrar of the institute",
+    )
+    assert split_lookup("A plain answer [E1].") == ("A plain answer [E1].", "")

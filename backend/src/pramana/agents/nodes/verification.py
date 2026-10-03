@@ -17,7 +17,7 @@ from pramana.privacy.risk import injection_flags
 from pramana.retrieval.retriever import Evidence
 
 RELEVANCE_WINDOW = 9.0
-RELEVANCE_FLOOR = -6.0
+RELEVANCE_FLOOR = -8.0
 
 
 async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:

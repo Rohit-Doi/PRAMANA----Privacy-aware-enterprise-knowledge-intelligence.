@@ -83,11 +83,12 @@ async def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--hotpot", action="store_true", help="run the HotpotQA questions instead")
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--set", default="blind", help="authored set under eval/ whose questions to ask")
     args = parser.parse_args()
     for stream in (sys.stdout, sys.stderr):
         stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
 
-    path = BLIND / ("hotpot_questions.jsonl" if args.hotpot else "questions.jsonl")
+    path = BLIND / "hotpot_questions.jsonl" if args.hotpot else ROOT / "eval" / args.set / "questions.jsonl"
     items = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()][: args.limit]
     runtime = await start_runtime()
     records: list[dict[str, Any]] = []
@@ -130,7 +131,7 @@ async def main() -> int:
     finally:
         await stop_runtime()
 
-    name = "blind-hotpot" if args.hotpot else "blind-institute"
+    name = "blind-hotpot" if args.hotpot else f"{args.set}-questions"
     out = ROOT / "data" / "eval" / "results" / f"{name}-{datetime.now():%Y%m%d-%H%M%S}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(records, ensure_ascii=False, indent=1), encoding="utf-8")

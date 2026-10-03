@@ -354,11 +354,16 @@ class ValidationEngine:
             )
 
         # ── LLM judge for the uncertain band ────────────────────────────
+        # Only claims the local checks did not accept are sent, so the judge can rescue a correct
+        # sentence the small models were unsure of but can never overturn one they accepted: in a
+        # blind test it rejected correct sentences that were well grounded.
         uncertain = [
             c
             for c in results.values()
-            if self._settings.uncertain_low <= c.signals["probability"] < self._settings.uncertain_high
+            if c.verdict not in (Verdict.SUPPORTED, Verdict.CONFLICTING)
+            and c.signals["probability"] >= self._settings.uncertain_low
             and c.signals["numbers_ok"] == 1.0
+            and not nothing_supports(c.signals)
         ]
         if use_judge and uncertain and self._llm is not None and self._llm.configured:
             started = time.perf_counter()

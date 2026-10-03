@@ -21,6 +21,7 @@ MAX_PASSAGES = 6
 RELEVANCE_WINDOW = 2.0
 # Reader margin (answer score minus "no answer" score) from which a passage counts as answering.
 MIN_MARGIN = 0.0
+STRONG_MARGIN = 3.5
 MIN_QUOTE_WORDS = 3
 MIN_UNPUNCTUATED_WORDS = 8
 
@@ -38,6 +39,21 @@ async def extractive_answer(question: str, evidence: list[Evidence], reader: Ext
         quote = quotable(item.text, reading.start, reading.end)
         if quote:
             return f"{quote.rstrip('.!?')} [{item.ref}]."
+    # Nothing among the most relevant passages. A passage the ranker placed lower may still hold the
+    # answer when the question is worded unlike the document; it is accepted only if the reader is
+    # clearly confident.
+    others = [e for e in evidence[:MAX_PASSAGES] if e not in candidates]
+    if others:
+        ranked = sorted(
+            zip(await reader.read(question, [e.text for e in others]), others, strict=True),
+            key=lambda pair: -(pair[0].margin if pair[0] else float("-inf")),
+        )
+        for reading, item in ranked:
+            if reading is None or reading.margin < STRONG_MARGIN:
+                break
+            quote = quotable(item.text, reading.start, reading.end)
+            if quote:
+                return f"{quote.rstrip('.!?')} [{item.ref}]."
     return ""
 
 

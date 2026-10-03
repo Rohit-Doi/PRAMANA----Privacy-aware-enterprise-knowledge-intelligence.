@@ -1,0 +1,87 @@
+From: Odile Trennick <odile.trennick@brennholt-transit.example>
+To: Executive Leadership Team <elt@brennholt-transit.example>
+Cc: Halcyon Reeve <halcyon.reeve@brennholt-transit.example>, Sunniva Hartigan <sunniva.hartigan@brennholt-transit.example>
+Subject: CONFIDENTIAL - Post-incident summary: TapLine validator outage, Saturday 14 February
+Date: Mon, 16 Feb 2026 11:05:00 -0600
+Message-ID: <20260216110500.2290@brennholt-transit.example>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+
+Colleagues,
+
+This is the summary of Saturday's TapLine outage that I promised on the
+weekend call. A full report will follow within ten working days.
+
+What happened
+
+At 06:12 on Saturday 14 February, TapLine validators began rejecting every
+card presented. The fault affected 412 validators: all of those on Routes
+14 and 22, on route C1, and at the gates for route F2. Validators on other
+routes were not affected because they connect through the older payment
+gateway.
+
+Service was not interrupted. Following the standing instruction for
+validator failure, drivers and gate staff let passengers travel without
+tapping. The fault was cleared at 10:47, so the outage lasted 4 hours and
+35 minutes. We classed it as a Severity 1 incident.
+
+Cause
+
+The security certificate on the newer payment gateway, TL-GW2, expired at
+06:00 that morning. The certificate had been installed by our supplier,
+Syntrel Systems, when the gateway went live two years ago. Its expiry date
+was not recorded in our own monitoring, and Syntrel's reminder went to the
+mailbox of an engineer who left them last year.
+
+The on-call engineer was paged at 06:20 and identified the cause at 08:05.
+Most of the remaining time was spent waiting for Syntrel to issue and
+install a new certificate, because we do not hold the rights to do that
+ourselves.
+
+Impact
+
+- Fares not collected: we estimate $38,600, based on the same Saturday in
+  the previous three weeks.
+- Passengers: roughly 21,000 boardings were made without a tap. Nobody was
+  charged incorrectly and no penalty fares were issued on the affected
+  routes during the outage.
+- Personal data: none was exposed or lost. I have confirmed this with the
+  Data Protection Officer, and no report to the regulator is needed.
+- Customer Centre: 164 calls about the fault between 06:30 and 11:00.
+
+Supplier position
+
+Our contract with Syntrel requires 99.9% availability in each calendar
+month. Saturday's outage alone takes February below that. The remedy in the
+contract is a service credit of 5% of the monthly fee. The monthly fee is
+$64,000, so the credit is small compared with the lost fares. I have asked
+Cormac's team whether we can recover the lost fare revenue as well and will
+report back.
+
+Actions
+
+1. All certificates on both gateways have been checked. The next expiry is
+   on the older gateway on 9 August 2026.
+2. Certificate expiry dates are now in our monitoring system, with alerts at
+   30 days, 14 days and 3 days before expiry. Done on Sunday.
+3. Syntrel will give our on-call engineers the rights to install a
+   certificate themselves. Due by 27 February.
+4. We will test failover from TL-GW2 to the older gateway, which should have
+   taken over automatically and did not. Due by 31 March.
+5. I will bring the full report, including the failover finding, to the
+   Audit and Risk Committee at its next meeting after tomorrow's.
+
+One point for the validator upgrade in next year's capital programme: the
+new validators will be able to accept taps offline and settle them later,
+which would have made Saturday a non-event for passengers and for revenue.
+
+Please do not circulate the lost-fares figure outside this group. Sunniva
+has a short public line if anyone is asked: there was a technical fault with
+card readers on some routes on Saturday morning, nobody was overcharged, and
+it has been fixed.
+
+Odile
+
+Odile Trennick
+Chief Information Officer
+Brennholt Regional Transit Authority

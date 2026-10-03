@@ -1,0 +1,146 @@
+BRENNHOLT REGIONAL TRANSIT AUTHORITY
+SAFETY AND SECURITY
+
+SECURITY STANDING ORDER SSO-04
+DEPOT ACCESS, KEYS AND GUARDING
+
+Effective from: 15 September 2025
+Issued by: Head of Safety and Security
+Classification: CONFIDENTIAL - depot managers, supervisors and security
+staff only. Not to be displayed on noticeboards.
+
+
+1. APPLICATION
+
+1.1 This order applies at MLD, PLY, STM, AGV and FWD, and at the ferry
+terminal at Quillon Pier outside public opening hours.
+
+1.2 It replaces all earlier local instructions on depot access. Depot
+managers may add local instructions but may not relax anything in this
+order.
+
+
+2. SECURITY ZONES
+
+2.1 Every depot is divided into three zones.
+
+Zone 1 is the staff car park, the mess room and the administration offices.
+Any member of staff with a valid pass may enter Zone 1 at any time.
+
+Zone 2 is the vehicle yard, the workshops and the wash bay. Entry is
+limited to staff whose duties require it and to escorted visitors. A
+high-visibility vest must be worn.
+
+Zone 3 is the fuel store, the cash room, the traction power room, the
+charging switchgear and the key safe. Entry is limited to staff named on
+the depot's Zone 3 list, which the depot manager signs and reviews every
+three months.
+
+2.2 At AGV the signalling equipment room is also Zone 3. At FWD the
+maintenance berth and the fuel barge mooring are Zone 3.
+
+
+3. VISITORS AND CONTRACTORS
+
+3.1 Every visitor signs in at the gatehouse, shows photo identification and
+is issued a dated visitor pass. Visitors are escorted at all times in Zones
+2 and 3.
+
+3.2 A visitor arriving after 20:00 may be admitted only if the pass is
+countersigned by the depot manager or, in the manager's absence, by the
+depot supervisor on duty.
+
+3.3 Contractors working in a depot for more than five days are issued a
+contractor pass valid for no longer than 90 days. The sponsoring manager is
+responsible for collecting the pass at the end of the work.
+
+
+4. KEYS AND ALARM CODES
+
+4.1 Vehicle keys are kept in the key safe and issued against the duty
+sheet. A vehicle key must never be left in an unattended vehicle in the
+yard.
+
+4.2 Zone 3 keys are held by the depot manager and one named deputy. A
+spare set is sealed and held in the Security Control Room.
+
+4.3 Alarm codes are changed every 90 days, and immediately when anyone who
+knows a code leaves the Authority or moves to another depot.
+
+4.4 The loss of any key or pass must be reported to the Security Control
+Room within one hour of discovery.
+
+
+5. GUARDING
+
+5.1 Guarding is provided under contract by Redvane Guarding. The contract
+runs until 31 August 2027.
+
+5.2 Between 22:00 and 05:00 there must be at least two guards on duty at
+STM and at AGV, and at least one at each of MLD, PLY and FWD.
+
+5.3 Guards patrol the perimeter and Zone 2 every two hours during those
+hours and record each patrol at the electronic checkpoints. A missed
+patrol is reported to the Security Control Room before the end of the
+shift.
+
+5.4 Guards do not enter Zone 3 except in an emergency or when accompanied
+by a member of staff on the Zone 3 list.
+
+
+6. CAMERAS
+
+6.1 Recordings from depot cameras are kept for 31 days and then
+overwritten. Recordings from cameras at Quillon Pier are kept for 45 days.
+
+6.2 Recordings needed for an investigation or a claim are copied and kept
+separately on the instruction of the Head of Safety and Security or the
+General Counsel.
+
+6.3 Only the Security Control Room and the depot manager may view
+recordings. Requests from the police are passed to the Security Control
+Room.
+
+
+7. THREAT LEVELS
+
+7.1 The Head of Safety and Security sets the threat level for each depot.
+The levels are GREEN (normal), AMBER (heightened) and RED (specific
+threat).
+
+7.2 At AMBER, vehicle searches are carried out on every vehicle entering
+Zone 2 and contractor passes are checked daily.
+
+7.3 At RED, the depot is locked down: visitors are refused, a second guard
+is added at depots that normally have one, and vehicles leave only on the
+authority of the Duty Controller. Only the Head of Safety and Security may
+declare or lift RED.
+
+
+8. REPORTING
+
+8.1 The Security Control Room at Calloway House is staffed 24 hours a day.
+It is reached on extension 4400 or, from outside, on +1 312 555 0100.
+
+8.2 Any intrusion, theft, assault or damage is reported to the Security
+Control Room at once and followed by a written report on form S-12 within
+24 hours.
+
+8.3 The Head of Safety and Security reports security incidents to the
+Safety Committee every quarter.
+
+
+9. FUEL AND CASH
+
+9.1 Fuel stock at MLD, PLY and FWD is dipped and reconciled every day. A
+discrepancy of more than 150 gallons in a week is reported as a security
+incident.
+
+9.2 Cash in a depot cash room must not exceed $25,000 overnight. Cash
+collections are made by the contracted carrier at varied times.
+
+
+10. REVIEW
+
+This order is reviewed every 12 months. Depot managers are audited against
+it twice a year by the Safety and Security team.

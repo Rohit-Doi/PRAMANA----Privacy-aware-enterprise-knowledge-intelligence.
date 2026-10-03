@@ -130,3 +130,54 @@ def test_unsupported_and_corrupt_files_are_rejected() -> None:
 def test_mime_detection_uses_the_extension() -> None:
     assert detect_mime("a.PDF") == "application/pdf"
     assert detect_mime("notes.md").startswith("text/")
+
+
+# ── Tables ──────────────────────────────────────────────────────────────────
+def test_a_table_row_becomes_a_statement_with_its_headers() -> None:
+    from pramana.knowledge.parsers import table_as_statements
+
+    table = "| Office | Holder |\n| Registrar | Ms. Solveig Marchetti |\n| Bursar | Mr. Tomas Egeland |"
+    assert table_as_statements(table) == (
+        "Office: Registrar; Holder: Ms. Solveig Marchetti.\nOffice: Bursar; Holder: Mr. Tomas Egeland."
+    )
+    # Empty cells are skipped; a single row or a single column is left as plain text.
+    assert table_as_statements("| Item | Charge |\n| Lost key |  |") == "Item: Lost key."
+    assert table_as_statements("| only one row | here |") == "only one row; here"
+
+
+def test_tables_in_a_document_are_chunked_as_statements() -> None:
+    from pramana.knowledge.chunking import chunk_document
+
+    source = "# Fees\n\n| Item | Charge |\n|---|---|\n| Lost room key | $35 |\n| Lost access card | $20 |\n"
+    text, chunks = chunk_document(parse_document(source.encode(), filename="fees.md"))
+    assert "Item: Lost room key; Charge: $35." in text
+    assert "|" not in text
+    assert any("Charge: $20" in c.text for c in chunks)
+
+
+def test_a_ruled_table_in_a_pdf_is_read_as_a_table() -> None:
+    pytest.importorskip("reportlab")
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Table, TableStyle
+
+    from pramana.knowledge.chunking import chunk_document
+
+    styles = getSampleStyleSheet()
+    table = Table([["Venue", "Examination capacity"], ["Marlowe Auditorium", "310"], ["Hall A", "240"]])
+    table.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.5, colors.black)]))
+    buffer = io.BytesIO()
+    SimpleDocTemplate(buffer, pagesize=A4).build(
+        [
+            Paragraph("Examination venues", styles["Heading1"]),
+            Paragraph("Capacities are fixed.", styles["BodyText"]),
+            table,
+        ]
+    )
+    parsed = parse_document(buffer.getvalue(), filename="venues.pdf")
+    assert "table" in kinds(parsed)
+    text, _ = chunk_document(parsed)
+    assert "Venue: Marlowe Auditorium; Examination capacity: 310." in text
+    assert "Capacities are fixed." in text
+    assert text.count("Marlowe Auditorium") == 1  # the cells are not also emitted as loose text

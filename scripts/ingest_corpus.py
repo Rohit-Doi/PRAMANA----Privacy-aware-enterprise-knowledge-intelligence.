@@ -69,8 +69,15 @@ async def register_all(collections: set[str] | None) -> int:
         async with session_scope() as db:
             service = DocumentService(db, blobs=services.blobs, vectors=services.vectors, graph=services.graph)
             if supersedes:
+                # The predecessor is the live document registered from that manifest path (the newest, if
+                # a rebuilt file was registered more than once).
                 previous = (
-                    await db.execute(select(Document.id).where(Document.meta["manifest_path"].astext == supersedes))
+                    await db.execute(
+                        select(Document.id)
+                        .where(Document.meta["manifest_path"].astext == supersedes, Document.status != "deleted")
+                        .order_by(Document.created_at.desc())
+                        .limit(1)
+                    )
                 ).scalar_one_or_none()
                 if previous is not None:
                     new = NewDocument(**{**_fields(new), "supersedes_id": previous})

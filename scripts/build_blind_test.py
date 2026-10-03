@@ -112,41 +112,39 @@ def to_docx(markdown: str) -> bytes:
     return buffer.getvalue()
 
 
-def to_html(markdown: str) -> str:
-    parts = ["<html><body style='font-family: sans-serif; font-size: 11pt'>"]
+def to_pdf(markdown: str) -> bytes:
+    """A typeset PDF with ruled tables, as a word processor would export it."""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+    styles = getSampleStyleSheet()
+    cell_style = styles["BodyText"].clone("cell", fontSize=8.5, leading=10.5)
+    flow: list[object] = []
     for kind, value in blocks_of(markdown):
         if kind == "heading":
             level, text = value  # type: ignore[misc]
-            parts.append(f"<h{min(level, 4)}>{html.escape(plain(text))}</h{min(level, 4)}>")
+            flow.append(Paragraph(html.escape(plain(text)), styles[f"Heading{min(level, 3)}"]))
         elif kind == "table":
-            parts.append("<table border='1' cellpadding='4' style='border-collapse: collapse'>")
-            for r, row in enumerate(value):  # type: ignore[arg-type]
-                tag = "th" if r == 0 else "td"
-                parts.append("<tr>" + "".join(f"<{tag}>{html.escape(plain(c))}</{tag}>" for c in row) + "</tr>")
-            parts.append("</table>")
+            rows = [[Paragraph(html.escape(plain(c)), cell_style) for c in row] for row in value]  # type: ignore[union-attr]
+            table = Table(rows, repeatRows=1)
+            table.setStyle(
+                TableStyle(
+                    [
+                        ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ]
+                )
+            )
+            flow.extend([table, Spacer(1, 8)])
         elif kind == "list":
-            parts.extend(f"<p>{html.escape(plain(item))}</p>" for item in value)  # type: ignore[union-attr]
+            flow.extend(Paragraph(html.escape(plain(item)), styles["BodyText"]) for item in value)  # type: ignore[union-attr]
         else:
-            parts.append(f"<p>{html.escape(plain(str(value)))}</p>")
-    parts.append("</body></html>")
-    return "\n".join(parts)
-
-
-def to_pdf(markdown: str) -> bytes:
-    import pymupdf
-
-    story = pymupdf.Story(html=to_html(markdown))
+            flow.append(Paragraph(html.escape(plain(str(value))), styles["BodyText"]))
     buffer = io.BytesIO()
-    writer = pymupdf.DocumentWriter(buffer)
-    page_box = pymupdf.paper_rect("a4")
-    content_box = page_box + (56, 56, -56, -56)  # noqa: RUF005 - rectangle arithmetic, not a list
-    more = True
-    while more:
-        device = writer.begin_page(page_box)
-        more, _ = story.place(content_box)
-        story.draw(device)
-        writer.end_page()
-    writer.close()
+    SimpleDocTemplate(buffer, pagesize=A4, leftMargin=56, rightMargin=56, topMargin=56, bottomMargin=56).build(flow)
     return buffer.getvalue()
 
 
@@ -200,29 +198,31 @@ CONVERT = {"docx": to_docx, "pdf": to_pdf, "scan": to_scan, "pptx": to_pptx}
 EXTENSION = {"docx": ".docx", "pdf": ".pdf", "scan": ".pdf", "pptx": ".pptx"}
 
 
-def build_institute() -> list[dict[str, object]]:
-    if not (BLIND / "documents.jsonl").exists():
-        print("institute: eval/blind/documents.jsonl not found, skipped")
+def build_set(name: str) -> list[dict[str, object]]:
+    """Convert one authored document set (eval/<name>) into data/custom/<name>."""
+    source_dir = ROOT / "eval" / name
+    if not (source_dir / "documents.jsonl").exists():
+        print(f"{name}: eval/{name}/documents.jsonl not found, skipped")
         return []
     rows = [
         json.loads(line)
-        for line in (BLIND / "documents.jsonl").read_text(encoding="utf-8").splitlines()
+        for line in (source_dir / "documents.jsonl").read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
-    out_dir = CUSTOM / "blind"
+    out_dir = CUSTOM / name
     out_dir.mkdir(parents=True, exist_ok=True)
     produced: dict[str, str] = {}
     manifest: list[dict[str, object]] = []
     for row in rows:
-        source = BLIND / row["file"]
+        source = source_dir / row["file"]
         target_format = row.get("target_format", "md")
         if target_format in CONVERT:
-            name = source.stem + ("-scan" if target_format == "scan" else "") + EXTENSION[target_format]
-            (out_dir / name).write_bytes(CONVERT[target_format](source.read_text(encoding="utf-8")))
+            filename = source.stem + ("-scan" if target_format == "scan" else "") + EXTENSION[target_format]
+            (out_dir / filename).write_bytes(CONVERT[target_format](source.read_text(encoding="utf-8")))
         else:
-            name = source.name
-            (out_dir / name).write_bytes(source.read_bytes())
-        produced[row["file"]] = f"custom/blind/{name}"
+            filename = source.name
+            (out_dir / filename).write_bytes(source.read_bytes())
+        produced[row["file"]] = f"custom/{name}/{filename}"
     for row in rows:
         manifest.append(
             {
@@ -235,11 +235,11 @@ def build_institute() -> list[dict[str, object]]:
                 "version": str(row.get("version", "1")),
                 "supersedes": produced.get(row["supersedes"]) if row.get("supersedes") else None,
                 "source_type": "policy",
-                "collection": "blind",
+                "collection": name,
                 "license": "Fictional; written for the PRAMANA blind test",
             }
         )
-    print(f"institute: {len(manifest)} documents written to {out_dir}")
+    print(f"{name}: {len(manifest)} documents written to {out_dir}")
     return manifest
 
 
@@ -302,6 +302,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--hotpot", type=int, default=0, help="number of HotpotQA questions to sample (0 = none)")
     parser.add_argument("--seed", type=int, default=20261003)
+    parser.add_argument("--sets", nargs="+", default=["blind"], help="authored sets under eval/ to build")
     args = parser.parse_args()
     for stream in (sys.stdout, sys.stderr):
         stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
@@ -313,9 +314,10 @@ def main() -> int:
         if manifest_path.exists()
         else []
     )
-    rebuilt = {"blind"} | ({"hotpot"} if args.hotpot else set())
+    rebuilt = set(args.sets) | ({"hotpot"} if args.hotpot else set())
     rows = [r for r in existing if r.get("collection") not in rebuilt]
-    rows += build_institute()
+    for name in args.sets:
+        rows += build_set(name)
     if args.hotpot:
         rows += build_hotpot(args.hotpot, args.seed)
     manifest_path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")

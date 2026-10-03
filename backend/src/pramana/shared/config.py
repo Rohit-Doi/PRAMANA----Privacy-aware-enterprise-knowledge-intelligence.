@@ -104,13 +104,17 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 8
     rrf_k: int = 60
     min_evidence_score: float = Field(
-        default=-2.5, description="Reranker logit of the best passage below which the system does not answer."
+        default=-8.0,
+        description=(
+            "Reranker logit of the best passage below which the system does not even draft. Set low on "
+            "purpose: a reworded question scores far below a literal one; whether the passages answer it "
+            "is decided by the drafting model and the verifier, not by this gate."
+        ),
     )
 
     # ── Validation ───────────────────────────────────────────────────────
     support_threshold: float = 0.60
     uncertain_low: float = 0.30
-    uncertain_high: float = 0.90
     max_correction_rounds: int = 2
     min_supported_ratio: float = 0.80
 

@@ -60,6 +60,7 @@ ml = [
 data = [
     "datasets>=3.0",
     "faker>=30.0",
+    "reportlab>=5.0.1",
 ]
 dev = [
     "pytest>=8.3",
