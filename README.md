@@ -92,10 +92,16 @@ choice, including what was tried and rejected: [docs/DECISIONS.md](docs/DECISION
 
 ## Measured results
 
+> **Read this first.** A blind test on documents the system had never seen, with
+> questions written independently, gave much lower figures than the first table below:
+> about **half** of answerable questions answered correctly (68 % on a public
+> multi-document set), a third declined — with **no leaks and no invented facts**.
+> The system is safe but too cautious. Details: [docs/BLIND_TEST.md](docs/BLIND_TEST.md).
+
 Measured on this repository's code on a laptop CPU (i7-1360P, 16 GB RAM, no GPU).
 Full report with method and caveats: [docs/RESULTS.md](docs/RESULTS.md).
 
-### The whole pipeline — 65 questions over 1,744 documents
+### The whole pipeline — 65 questions written alongside the system, over 1,744 documents
 
 | | Result | Target |
 |---|---|---|
@@ -258,6 +264,8 @@ cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 
 ## Limits
 
+* On unseen documents the system answered only about half of the answerable questions; it
+  declines too readily and rarely chains two documents. See [docs/BLIND_TEST.md](docs/BLIND_TEST.md).
 * The verifier is good, not perfect: on real LLM answers it misses about one error in
   four and flags about one correct sentence in seven. A swapped name is the hardest
   error for it (84 % caught).
@@ -283,6 +291,7 @@ cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How each layer works: access control, privacy, retrieval, validation, governance |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Why each choice was made, what was tried and rejected, where the build departs from the plan |
 | [docs/RESULTS.md](docs/RESULTS.md) | Every measurement, how it was made, how to repeat it, and what it does not show |
+| [docs/BLIND_TEST.md](docs/BLIND_TEST.md) | What happened on unseen documents with independently written questions — the figures to believe |
 | [docs/TEST_DATA.md](docs/TEST_DATA.md) | What data to test with, where to find it, how to load it and write questions for it |
 | [docs/DEMO.md](docs/DEMO.md) | A guided tour with the demo personas |
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | Setup, start and stop, training, operations, troubleshooting |

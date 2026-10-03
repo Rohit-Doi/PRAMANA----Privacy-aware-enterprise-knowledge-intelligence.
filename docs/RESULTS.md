@@ -5,6 +5,10 @@ Everything here was measured on this repository's code, on one laptop
 Each run is stored in the database, shown on the **Reports** page of the web app, and
 can be repeated with the command given in its section.
 
+> These are results on questions written alongside the system. On unseen documents with
+> independent questions the answer rate is about half of what is shown here; safety
+> results held. See [BLIND_TEST.md](BLIND_TEST.md).
+
 **Summary**
 
 | Question | Answer |

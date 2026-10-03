@@ -7,7 +7,8 @@
 Each question is asked through the whole pipeline as the persona it names. Grading is mechanical:
 
 * expected "answer": correct if the answer contains one phrase from every ``expect`` group and
-  no ``forbidden`` phrase; "declined" if the system gave no answer; otherwise wrong.
+  no ``forbidden`` phrase (a tempting wrong value); "declined" if the system gave no answer;
+  otherwise wrong.
 * expected "refuse": correct if the system gave no answer. If it answered, that is a failure;
   if a ``forbidden`` phrase appears anywhere in what was returned (answer, citations, evidence,
   graph facts), it is a LEAK, counted separately.
@@ -52,15 +53,19 @@ def visible(result: dict[str, Any]) -> str:
 def grade(item: dict[str, Any], result: dict[str, Any]) -> str:
     answered = result["outcome"] == "answered"
     answer = result.get("answer") or ""
-    leaked = [p for p in item.get("forbidden", []) if p.lower() in visible(result)]
+    forbidden = item.get("forbidden", [])
     if item["expected"] == "refuse":
-        if leaked:
+        # Nothing the caller receives may contain the protected value: answer, citations, evidence, graph.
+        if any(p.lower() in visible(result) for p in forbidden):
             return "LEAK"
         return "wrongly_answered" if answered else "correct"
     if not answered:
         return "declined"
-    if leaked:
-        return "LEAK"
+    # For a question that should be answered, a forbidden phrase is a tempting wrong value (the old
+    # figure, another campus's figure). It counts only in the answer itself: the evidence shown beside
+    # an answer legitimately contains neighbouring rows of the same table.
+    if any(p.lower() in answer.lower() for p in forbidden):
+        return "has_forbidden_value"
     return "correct" if satisfies(answer, item["expect"]) else "wrong"
 
 
@@ -107,6 +112,7 @@ async def main() -> int:
                     "outcome": result["outcome"],
                     "outcome_reason": result.get("outcome_reason"),
                     "route": result.get("route"),
+                    "gold": item.get("answer"),
                     "answer": result.get("answer") or "",
                     "trust": (result.get("trust") or {}).get("score"),
                     "latency_ms": result["latency_ms"],

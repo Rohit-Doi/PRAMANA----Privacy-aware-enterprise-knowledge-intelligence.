@@ -1,0 +1,3827 @@
+[
+ {
+  "id": "h001",
+  "question": "Which country in Florida is the airport associated with transportation in Jacksonville, Florida?",
+  "answer": "Jacksonville International Airport is located in Duval County, Florida [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Jacksonville International Airport",
+   "Transportation in Jacksonville, Florida"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 92.9,
+  "latency_ms": 19261,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Transportation in Jacksonville, Florida",
+   "Jacksonville International Airport",
+   "Imeson Field",
+   "Jacksonville Skyway",
+   "Jacksonville Terminal Subdivision",
+   "Rosa Parks Transit Station",
+   "Jacksonville metropolitan area"
+  ],
+  "claims": [
+   {
+    "text": "Jacksonville International Airport is located in Duval County, Florida.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Duval County"
+ },
+ {
+  "id": "h002",
+  "question": "Home was an animation film that included which Rihanna song that premiered on February 24, 2015?",
+  "answer": "The animation film \"Home\" included the song \"Towards the Sun\" recorded by Rihanna [E1]. The song premiered on BBC Radio 1 on February 24, 2015 [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Home (soundtrack)",
+   "Towards the Sun (song)"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 89.0,
+  "latency_ms": 9289,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Towards the Sun (song)",
+   "Birthday Cake (song)"
+  ],
+  "claims": [
+   {
+    "text": "The animation film \"Home\" included the song \"Towards the Sun\" recorded by Rihanna.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The song premiered on BBC Radio 1 on February 24, 2015.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Towards the Sun"
+ },
+ {
+  "id": "h003",
+  "question": "Which 1962 film starring Tom Courtenay is based on a short story of the same name?",
+  "answer": "The 1962 film starring Tom Courtenay that is based on a short story of the same name is \"The Loneliness of the Long Distance Runner\" [E1][E3][E4]. The film is an adaptation of a 1959 short story by Alan Sillitoe [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "The Loneliness of the Long Distance Runner (film)",
+   "Tom Courtenay"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 91.8,
+  "latency_ms": 13550,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "The Loneliness of the Long-Distance Runner",
+   "Private Potter",
+   "The Loneliness of the Long Distance Runner (film)",
+   "Tom Courtenay",
+   "A Dandy in Aspic",
+   "45 Years",
+   "Otley (film)",
+   "King Rat (film)"
+  ],
+  "claims": [
+   {
+    "text": "The 1962 film starring Tom Courtenay that is based on a short story of the same name is \"The Loneliness of the Long Distance Runner\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The film is an adaptation of a 1959 short story by Alan Sillitoe.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "The Loneliness of the Long Distance Runner"
+ },
+ {
+  "id": "h004",
+  "question": "John Roger Kirkpatrick Scott was a member of the U.S. House of Representatives from a Commonwealth that borders what to the east?",
+  "answer": "John Roger Kirkpatrick Scott was a member of the U.S. House of Representatives from Pennsylvania [E1]. INSUFFICIENT_EVIDENCE",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "John Roger Kirkpatrick Scott",
+   "Pennsylvania"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 92.8,
+  "latency_ms": 5541,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "John Roger Kirkpatrick Scott",
+   "William Sebring Kirkpatrick",
+   "William Huntington Kirkpatrick"
+  ],
+  "claims": [
+   {
+    "text": "John Roger Kirkpatrick Scott was a member of the U.S. House of Representatives from Pennsylvania.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "INSUFFICIENT_EVIDENCE",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "New Jersey",
+  "read_verdict": "incomplete"
+ },
+ {
+  "id": "h005",
+  "question": "The Simpsons episode that aired on February 19, 2012 entitled \"At Long Last Leave\" represented what milestone for the show? ",
+  "answer": "The Simpsons episode entitled \"At Long Last Leave\" represented the 500th episode of the series [E1][E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "At Long Last Leave",
+   "The Simpsons (season 23)"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 96.6,
+  "latency_ms": 8406,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "The Simpsons (season 23)",
+   "At Long Last Leave",
+   "Little Orphan Millie",
+   "You Kent Always Say What You Want",
+   "The Simpsons 138th Episode Spectacular",
+   "A Star Is Born Again",
+   "The Itchy &amp; Scratchy &amp; Poochie Show",
+   "Good Night (The Simpsons short)"
+  ],
+  "claims": [
+   {
+    "text": "The Simpsons episode entitled \"At Long Last Leave\" represented the 500th episode of the series.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "show's 500th episode",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h006",
+  "question": "Which producer from the 2015 British documentary film about the life and death of British singer-songwriter Amy Winehouse also worked on the film Oasis: Supersonic as a film producer?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Amy (2015 film)",
+   "Oasis: Supersonic"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3994,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Amy (2015 film)",
+   "Amy (soundtrack)",
+   "Tears Dry on Their Own",
+   "Amy Winehouse Foundation",
+   "Paul Staveley O'Duffy"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "James Gay-Rees"
+ },
+ {
+  "id": "h007",
+  "question": "What apartment complex originally constructed in 1927 is included in Manhattan Community Board 6?",
+  "answer": "Tudor City is an apartment complex located on the southern edge of Turtle Bay on the East Side of Manhattan in New York City [E2]. Construction of Tudor City commenced in 1927 [E2]. Turtle Bay is one of the neighborhoods included in Manhattan Community Board 6 [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Manhattan Community Board 6",
+   "Tudor City"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 92.5,
+  "latency_ms": 13169,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Manhattan Community Board 6",
+   "Tudor City",
+   "Kips Bay, Manhattan",
+   "Manhattan Community Board 9",
+   "Manhattan Community Board 1",
+   "Manhattan Community Board 7",
+   "Manhattan Community Board 10",
+   "Manhattan Community Board 11"
+  ],
+  "claims": [
+   {
+    "text": "Tudor City is an apartment complex located on the southern edge of Turtle Bay on the East Side of Manhattan in New York City.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Construction of Tudor City commenced in 1927.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Turtle Bay is one of the neighborhoods included in Manhattan Community Board 6.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "Tudor City"
+ },
+ {
+  "id": "h008",
+  "question": "How many albums have been sold by the singer who released the 2002 single \"Sk8er Boi\"?  ",
+  "answer": "Since her professional debut, Avril Lavigne has sold more than 40 million albums worldwide [E1][E4].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Avril Lavigne",
+   "Sk8er Boi"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 92.6,
+  "latency_ms": 9474,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Sk8er Boi",
+   "Big Boi discography",
+   "TV track",
+   "Avril Lavigne",
+   "Mama Told Me",
+   "Chase the Clouds",
+   "Özgürlük İçimizde",
+   "Marie-Claire D'Ubaldo"
+  ],
+  "claims": [
+   {
+    "text": "Since her professional debut, Avril Lavigne has sold more than 40 million albums worldwide.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "40 million"
+ },
+ {
+  "id": "h009",
+  "question": "What is older, Downfall or Dark Tower?",
+  "answer": "Downfall is a two-player game that was first marketed by the Milton Bradley Company in 1970 [E1]. Dark Tower is an electronic board game by the Milton Bradley Company that came out in 1981 [E3]. Therefore, Downfall is older than the Dark Tower game [E1][E3].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Dark Tower (game)",
+   "Downfall (game)"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 91.3,
+  "latency_ms": 12414,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Downfall (game)",
+   "Almoayyed Tower",
+   "Dark Tower (game)",
+   "The Dark Tower (series)",
+   "The Dark Tower: The Wind Through the Keyhole",
+   "The Dark Tower II: The Drawing of the Three",
+   "The Dark Tower: The Sorcerer",
+   "All-World"
+  ],
+  "claims": [
+   {
+    "text": "Downfall is a two-player game that was first marketed by the Milton Bradley Company in 1970.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Dark Tower is an electronic board game by the Milton Bradley Company that came out in 1981.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Therefore, Downfall is older than the Dark Tower game.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "Downfall"
+ },
+ {
+  "id": "h010",
+  "question": "What band is a tribute to a band originally known as the Grizzly River Boys?",
+  "answer": "Diamond Rio is a band that was originally known as the Grizzly River Boys [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Diamond Rio",
+   "Nashville Tribute Band"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.1,
+  "latency_ms": 6583,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Diamond Rio",
+   "Nashville Tribute Band",
+   "The Hillmen (album)"
+  ],
+  "claims": [
+   {
+    "text": "Diamond Rio is a band that was originally known as the Grizzly River Boys.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Nashville Tribute Band",
+  "read_verdict": "incomplete"
+ },
+ {
+  "id": "h011",
+  "question": "Which channel produced the ninth volume of the tv series that premiered as the same date as RuPaul's first album?",
+  "answer": "The television series \"RuPaul's Drag Race\" premiered on the same day as the release of \"Realness\", which is RuPaul's first album to feature a Parental Advisory warning label [E1]. \"RuPaul's Drag Race\" is produced by World of Wonder for Logo TV and, beginning with the ninth season, VH1 [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Realness (RuPaul album)",
+   "RuPaul's Drag Race"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 92.0,
+  "latency_ms": 20523,
+  "llm_calls": 3,
+  "withheld": 0,
+  "evidence_titles": [
+   "Realness (RuPaul album)",
+   "RuPaul's Drag Race",
+   "The Hits Album 9",
+   "All-Time Top 100 TV Themes",
+   "Collection 009",
+   "Unbalance Unbalance"
+  ],
+  "claims": [
+   {
+    "text": "The television series \"RuPaul's Drag Race\" premiered on the same day as the release of \"Realness\", which is RuPaul's first album to feature a Parental Advisory warning label.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "\"RuPaul's Drag Race\" is produced by World of Wonder for Logo TV and, beginning with the ninth season, VH1.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "VH1"
+ },
+ {
+  "id": "h012",
+  "question": "What film was the screen debut of the musician nicknamed \"Lady Day\"?",
+  "answer": "The musician nicknamed \"Lady Day\" is Billie Holiday [E1]. The screen debut of Billie Holiday was the 1935 musical short titled Symphony in Black: A Rhapsody of Negro Life [E3].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Billie Holiday",
+   "Symphony in Black"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.1,
+  "latency_ms": 9493,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Billie Holiday",
+   "Paul Quinichette",
+   "Symphony in Black",
+   "Gardenias for Lady Day",
+   "Southern Gothic (album)",
+   "Lady Day",
+   "Summer Holiday (1963 film)",
+   "Thank God It's Friday (film)"
+  ],
+  "claims": [
+   {
+    "text": "The musician nicknamed \"Lady Day\" is Billie Holiday.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The screen debut of Billie Holiday was the 1935 musical short titled Symphony in Black: A Rhapsody of Negro Life.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Symphony in Black"
+ },
+ {
+  "id": "h013",
+  "question": "What is the name of the county that Cari Roccaro is from?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Cari Roccaro",
+   "East Islip, New York"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 4055,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Cari Roccaro"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Suffolk"
+ },
+ {
+  "id": "h014",
+  "question": "A Therapy was written and directed by what French-Polish film director who was born in Paris?",
+  "answer": "The 2012 comedy short film A Therapy was written and directed by Roman Polanski [E2]. Roman Polanski is a French-Polish film director, producer, writer, and actor who was born in Paris [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "A Therapy",
+   "Roman Polanski"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 92.2,
+  "latency_ms": 10631,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Roman Polanski",
+   "A Therapy",
+   "Walerian Borowczyk",
+   "Pascal Kané",
+   "Christian de Chalonge",
+   "Julie Delpy",
+   "Marie Epstein",
+   "Jeon Soo-il"
+  ],
+  "claims": [
+   {
+    "text": "The 2012 comedy short film A Therapy was written and directed by Roman Polanski.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Roman Polanski is a French-Polish film director, producer, writer, and actor who was born in Paris.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Rajmund Roman Thierry Polański",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h015",
+  "question": "The third emperor in the Year of the Four Emperors had how many wives? ",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Galeria Fundana",
+   "Vitellius"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 4514,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Year of the Four Emperors",
+   "Otho",
+   "Vitellius",
+   "Flavian dynasty",
+   "Galeria Fundana",
+   "Tacitus",
+   "Snow Flower and the Secret Fan",
+   "History of the Roman Empire"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "second"
+ },
+ {
+  "id": "h016",
+  "question": "\"Horrible Bosses\" is written by a writer in which career?",
+  "answer": "Michael Markowitz is a writer, producer, and actor who began his comedy career in The Mee-Ow Show [E3]. Jonathan Goldstein is an American screenwriter, television writer/producer, and film director [E4]. Both writers worked on \"Horrible Bosses\" alongside John Francis Daley [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Horrible Bosses",
+   "Michael Markowitz"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 97.1,
+  "latency_ms": 15285,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Horrible Bosses",
+   "Horrible Bosses 2",
+   "Michael Markowitz",
+   "Jonathan Goldstein (filmmaker)",
+   "Brendan Hunt (actor)",
+   "Jason Sudeikis",
+   "Jason Bateman"
+  ],
+  "claims": [
+   {
+    "text": "Michael Markowitz is a writer, producer, and actor who began his comedy career in The Mee-Ow Show.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "Jonathan Goldstein is an American screenwriter, television writer/producer, and film director.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "Both writers worked on \"Horrible Bosses\" alongside John Francis Daley.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "comedy"
+ },
+ {
+  "id": "h017",
+  "question": "Professional cyclist Sara Symington competed in which Olympic Games held in Sydeney, Australia?",
+  "answer": "Professional cyclist Sara Symington represented Great Britain at the 2000 Summer Olympics [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "2000 Summer Olympics",
+   "Sara Symington"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 85.6,
+  "latency_ms": 7077,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Sara Symington"
+  ],
+  "claims": [
+   {
+    "text": "Professional cyclist Sara Symington represented Great Britain at the 2000 Summer Olympics.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "2000 Summer Olympic Games",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h018",
+  "question": "Who is the star of the 2003 comedy that has a single from Candycoatedwaterdrops on its soundtrack?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Bruce Almighty",
+   "Candycoatedwaterdrops"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3402,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Candycoatedwaterdrops",
+   "Why Not (song)",
+   "Malibu Spring Break",
+   "Good Boy!",
+   "Bruce Almighty",
+   "Don't Let Me Get Me",
+   "Frankie and Johnny Are Married",
+   "Ang Tanging Ina N'yong Lahat"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Jim Carrey"
+ },
+ {
+  "id": "h019",
+  "question": "The name od the Jason Hook album \"Safety Dunce\" is a play on the words of a song released in what year? ",
+  "answer": "The Jason Hook album \"Safety Dunce\" is an obvious play on words of the song \"The Safety Dance\" by Men Without Hats [E1]. \"The Safety Dance\" was released in Canada in 1983 [E3].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Safety Dunce",
+   "The Safety Dance"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 97.6,
+  "latency_ms": 12391,
+  "llm_calls": 3,
+  "withheld": 0,
+  "evidence_titles": [
+   "Safety Dunce",
+   "I Feel Immortal",
+   "The Safety Dance"
+  ],
+  "claims": [
+   {
+    "text": "The Jason Hook album \"Safety Dunce\" is an obvious play on words of the song \"The Safety Dance\" by Men Without Hats.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "\"The Safety Dance\" was released in Canada in 1983.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "1983"
+ },
+ {
+  "id": "h020",
+  "question": "In what year was the 1965 World Series MVP elected to the Baseball Hall of Fame?",
+  "answer": "Sandy Koufax was named the MVP of the 1965 World Series [E1]. Sandy Koufax was elected to the Baseball Hall of Fame in the year 1972 [E7].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "1965 World Series",
+   "Sandy Koufax"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.1,
+  "latency_ms": 13212,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "1965 World Series",
+   "Katsuo Osugi",
+   "Bob Gibson",
+   "1980 World Series",
+   "1968 Detroit Tigers season",
+   "Paul Molitor",
+   "Sandy Koufax",
+   "Jeff Bagwell"
+  ],
+  "claims": [
+   {
+    "text": "Sandy Koufax was named the MVP of the 1965 World Series.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "Sandy Koufax was elected to the Baseball Hall of Fame in the year 1972.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "1972"
+ },
+ {
+  "id": "h021",
+  "question": "San Marco and Medina are both what type of game?",
+  "answer": "San Marco is a designer board game [E1]. Medina is a board game [E2].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Medina (board game)",
+   "San Marco (board game)"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 94.8,
+  "latency_ms": 9191,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "San Marco (board game)",
+   "Medina (board game)",
+   "Italian cruiser San Marco",
+   "San Marco 1",
+   "San Marco Altarpiece",
+   "Porta San Marco, Siena",
+   "Museo Nazionale di San Marco",
+   "San Marco programme"
+  ],
+  "claims": [
+   {
+    "text": "San Marco is a designer board game.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Medina is a board game.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "board"
+ },
+ {
+  "id": "h022",
+  "question": "What city and nation was the location of the 2015 Pacific Games where the Kiribati national basketball team finished with a 0-4 record?",
+  "answer": "The Kiribati national basketball team competed at the 2015 Pacific Games and finished with an 0-4 record [E1]. The 2015 Pacific Games were located in Port Moresby, Papua New Guinea [E2][E4].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Basketball at the 2015 Pacific Games",
+   "Kiribati national basketball team"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 96.6,
+  "latency_ms": 8934,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Kiribati national basketball team",
+   "Kiribati at the 2015 Pacific Games",
+   "Basketball at the 2015 Pacific Games",
+   "2015 Pacific Games",
+   "Australia at the 2015 Pacific Games",
+   "Men's football at the 2015 Pacific Games",
+   "Powerlifting at the 2015 Pacific Games",
+   "Women's football at the 2015 Pacific Games"
+  ],
+  "claims": [
+   {
+    "text": "The Kiribati national basketball team competed at the 2015 Pacific Games and finished with an 0-4 record.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The 2015 Pacific Games were located in Port Moresby, Papua New Guinea.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Port Moresby, Papua New Guinea"
+ },
+ {
+  "id": "h023",
+  "question": "William Davis Ticknor, Sr. served on the board of a chemical and biotechnology company created in what year?",
+  "answer": "William Davis Ticknor, Sr. served on the board of Commercial Solvents Corporation [E1]. INSUFFICIENT_EVIDENCE Not covered: the year the company was created.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Commercial Solvents Corporation",
+   "William Davis Ticknor, Sr."
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.1,
+  "latency_ms": 10752,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "William Davis Ticknor, Sr.",
+   "William Ticknor"
+  ],
+  "claims": [
+   {
+    "text": "William Davis Ticknor, Sr. served on the board of Commercial Solvents Corporation.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "INSUFFICIENT_EVIDENCE",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Not covered: the year the company was created.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "1919",
+  "read_verdict": "incomplete"
+ },
+ {
+  "id": "h024",
+  "question": "Do both Lee Tamahori and Robert Redford work as a director?",
+  "answer": "Lee Tamahori is a filmmaker best known for directing various films [E1]. Robert Redford works as a director as well [E2].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Lee Tamahori",
+   "Robert Redford"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 94.3,
+  "latency_ms": 7704,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Lee Tamahori",
+   "Robert Redford",
+   "The Edge (1997 film)",
+   "The Devil's Double",
+   "Along Came a Spider (film)",
+   "Next (2007 film)",
+   "Mahana (film)",
+   "XXX: State of the Union"
+  ],
+  "claims": [
+   {
+    "text": "Lee Tamahori is a filmmaker best known for directing various films.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Robert Redford works as a director as well.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "yes",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h025",
+  "question": "During the Carnival in Rio de Janeiro who is the official singer of the samba school Mangueira?",
+  "answer": "The official singer at samba school Mangueira's carnaval parades was Jamelão [E1]. Jamelão, whose real name was José Bispo Clementino dos Santos, performed in every Carnaval from 1949 to 2006 [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Jamelão",
+   "Rio Carnival"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 91.2,
+  "latency_ms": 8953,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Jamelão",
+   "Andrea de Andrade",
+   "Estação Primeira de Mangueira",
+   "LIESA",
+   "Unidos do Porto da Pedra",
+   "Castor de Andrade",
+   "Império Serrano",
+   "Acadêmicos do Salgueiro"
+  ],
+  "claims": [
+   {
+    "text": "The official singer at samba school Mangueira's carnaval parades was Jamelão.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Jamelão, whose real name was José Bispo Clementino dos Santos, performed in every Carnaval from 1949 to 2006.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "José Bispo Clementino dos Santos"
+ },
+ {
+  "id": "h026",
+  "question": "A journal to which Jim Rasenberger contributes is the official journal of an institute located in what city?",
+  "answer": "Jim Rasenberger has contributed to publications including Smithsonian [E1]. Smithsonian is the official journal published by the Smithsonian Institution in Washington, D.C [E4].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Jim Rasenberger",
+   "Smithsonian (magazine)"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 94.0,
+  "latency_ms": 9109,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Jim Rasenberger",
+   "Journal of Investigative Medicine",
+   "PEN America",
+   "Smithsonian (magazine)",
+   "Journal of Business &amp; Securities Law",
+   "The Henry James Review"
+  ],
+  "claims": [
+   {
+    "text": "Jim Rasenberger has contributed to publications including Smithsonian.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Smithsonian is the official journal published by the Smithsonian Institution in Washington, D.C.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Washington, D.C."
+ },
+ {
+  "id": "h027",
+  "question": "What conference does the team that drafted Derrick Hamilton in 2004 belong to?",
+  "answer": "Derrick Hamilton was drafted by the San Francisco 49ers in the third round of the 2004 NFL Draft [E1]. Not covered: What conference the San Francisco 49ers belong to.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Derrick Hamilton",
+   "San Francisco 49ers"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 92.8,
+  "latency_ms": 11367,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Derrick Hamilton",
+   "Derrick Hamilton (basketball)",
+   "Derrick Walton"
+  ],
+  "claims": [
+   {
+    "text": "Derrick Hamilton was drafted by the San Francisco 49ers in the third round of the 2004 NFL Draft.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Not covered: What conference the San Francisco 49ers belong to.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "National Football Conference (NFC) West",
+  "read_verdict": "incomplete"
+ },
+ {
+  "id": "h028",
+  "question": "How big is the campus of the University that Ben Bahan is a professor at ?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Ben Bahan",
+   "Gallaudet University"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 4568,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Ben Bahan",
+   "David Hassan"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "99 acre campus"
+ },
+ {
+  "id": "h029",
+  "question": "What two ideals are the foundation of Neo-libertarianism?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "American exceptionalism",
+   "Neo-libertarianism"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3938,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Neo-libertarianism",
+   "Democratic confederalism"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "democracy and personal freedom"
+ },
+ {
+  "id": "h030",
+  "question": "Ithihasa and the Indian music composer of  \"Chronic Bachelor\", \"Udayananu Tharam\", \"Naran\", \"Puthiya Mukham,\" \"Urumi\", \"Grandmaster\" and \"Bhaskar the Rascal\" are known in what type of films/cinema?",
+  "answer": "Ithihasa is a 2014 Malayalam fantasy comedy film. [E2] The Indian music composer of \"Chronic Bachelor\", \"Udayananu Tharam\", \"Naran\", \"Puthiya Mukham,\" \"Urumi\", \"Grandmaster\" and \"Bhaskar the Rascal\" is best known for his compositions in Malayalam cinema [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Deepak Dev",
+   "Ithihasa"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 96.1,
+  "latency_ms": 10247,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Deepak Dev",
+   "Ithihasa",
+   "Vijaya Bhaskar",
+   "Casanovva",
+   "Mithoon",
+   "Udayananu Tharam",
+   "Monty Sharma"
+  ],
+  "claims": [
+   {
+    "text": "Ithihasa is a 2014 Malayalam fantasy comedy film.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "The Indian music composer of \"Chronic Bachelor\", \"Udayananu Tharam\", \"Naran\", \"Puthiya Mukham,\" \"Urumi\", \"Grandmaster\" and \"Bhaskar the Rascal\" is best known for his compositions in Malayalam cinema.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Malayalam"
+ },
+ {
+  "id": "h031",
+  "question": "Who directed the film that Mads Mikkelsen won the award for Best Actor for his performance in at the 58th Bodil Awards?",
+  "answer": "Mads Mikkelsen won the award for Best Actor for his performance in \"Pusher II\" at the 58th Bodil Awards [E1]. The evidence does not state who directed \"Pusher II\" [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "58th Bodil Awards",
+   "Pusher II"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 89.8,
+  "latency_ms": 14536,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "58th Bodil Awards",
+   "65th Bodil Awards",
+   "56th Bodil Awards",
+   "64th Bodil Awards",
+   "59th Bodil Awards",
+   "57th Bodil Awards",
+   "50th Bodil Awards",
+   "Pāvels Gumennikovs"
+  ],
+  "claims": [
+   {
+    "text": "Mads Mikkelsen won the award for Best Actor for his performance in \"Pusher II\" at the 58th Bodil Awards.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "The evidence does not state who directed \"Pusher II\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Nicolas Winding Refn",
+  "read_verdict": "incomplete"
+ },
+ {
+  "id": "h032",
+  "question": "Which star of A Family Affair was born in September of 1948?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "A Family Affair (1984 film)",
+   "Samuel Hui"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 4056,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "A Family Affair (1984 film)",
+   "Kathy Garver",
+   "Family Affair (Sly and the Family Stone song)",
+   "Family Affair (Mary J. Blige song)",
+   "William D. Russell (director)",
+   "Samuel Hui",
+   "Everybody Is a Star",
+   "A Moment"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Samuel Hui"
+ },
+ {
+  "id": "h033",
+  "question": "What is the name of the statue whose replica have been created in many landmarks world-wide such as near Pont de Grenelle in Paris?",
+  "answer": "Hundreds of replicas of the Statue of Liberty have been created worldwide [E2]. The full name of the Statue of Liberty is \"Liberty Enlightening the World\" [E2]. A replica of the Statue of Liberty is located near the pont de Grenelle in Paris [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Pont de Grenelle",
+   "Replicas of the Statue of Liberty"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 90.6,
+  "latency_ms": 22644,
+  "llm_calls": 4,
+  "withheld": 0,
+  "evidence_titles": [
+   "Pont de Grenelle",
+   "Replicas of the Statue of Liberty",
+   "Musée de Radio France",
+   "Pont de la Concorde (Paris)",
+   "Magic-City",
+   "La Motte-Picquet – Grenelle"
+  ],
+  "claims": [
+   {
+    "text": "Hundreds of replicas of the Statue of Liberty have been created worldwide.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The full name of the Statue of Liberty is \"Liberty Enlightening the World\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "A replica of the Statue of Liberty is located near the pont de Grenelle in Paris.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "Liberty Enlightening the World"
+ },
+ {
+  "id": "h034",
+  "question": " The Nantahala National Forest and the Croatan National Forest are both located in which state?",
+  "answer": "The Nantahala National Forest is located in the American state of North Carolina [E2]. The Croatan National Forest is located on the Atlantic coast of North Carolina [E1]. Both the Nantahala National Forest and the Croatan National Forest are located in the state of North Carolina [E1][E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Croatan National Forest",
+   "Nantahala National Forest"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 97.7,
+  "latency_ms": 13195,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Croatan National Forest",
+   "Nantahala National Forest",
+   "Pisgah National Forest",
+   "Southern Nantahala Wilderness",
+   "Nantahala Lake",
+   "Ellicott Rock Wilderness",
+   "Unicoi Mountains",
+   "Wesser Bald"
+  ],
+  "claims": [
+   {
+    "text": "The Nantahala National Forest is located in the American state of North Carolina.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The Croatan National Forest is located on the Atlantic coast of North Carolina.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "Both the Nantahala National Forest and the Croatan National Forest are located in the state of North Carolina.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "North Carolina"
+ },
+ {
+  "id": "h035",
+  "question": "What year did a blacklisted screenwriter share an Academy Award with Michael Kanin?",
+  "answer": "Michael Kanin shared an Academy Award with Ring Lardner Jr. in 1942 for writing the Katharine Hepburn-Spencer Tracy film comedy \"Woman of the Year\" [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Michael Kanin",
+   "Ring Lardner Jr."
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.5,
+  "latency_ms": 6590,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Michael Kanin",
+   "Frank Tarloff",
+   "They Made Her a Spy",
+   "They Knew What They Wanted (film)",
+   "Bachelor Mother"
+  ],
+  "claims": [
+   {
+    "text": "Michael Kanin shared an Academy Award with Ring Lardner Jr. in 1942 for writing the Katharine Hepburn-Spencer Tracy film comedy \"Woman of the Year\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "1942"
+ },
+ {
+  "id": "h036",
+  "question": "Philip Carlo, the author of the biography of the mob assasin Richard Kuklinsk, died of which diease?i, ",
+  "answer": "Philip Carlo died of amyotrophic lateral sclerosis, which is commonly known as Lou Gehrig's Disease [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Philip Carlo",
+   "Richard Kuklinski"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 91.3,
+  "latency_ms": 6104,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Philip Carlo",
+   "Richard Kuklinski"
+  ],
+  "claims": [
+   {
+    "text": "Philip Carlo died of amyotrophic lateral sclerosis, which is commonly known as Lou Gehrig's Disease.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Lou Gehrig's Disease"
+ },
+ {
+  "id": "h037",
+  "question": "Rolls-Royce Welland's name is taken from this river that is low long",
+  "answer": "The name of the Rolls-Royce Welland is taken from the River Welland [E1]. The River Welland is a lowland river in the east of England, some 65 mi long [E3].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "River Welland",
+   "Rolls-Royce Welland"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 96.4,
+  "latency_ms": 9095,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Rolls-Royce Welland",
+   "Rolls-Royce Turbomeca Adour",
+   "River Welland",
+   "Rolls-Royce Conway",
+   "HMS Welland (1904)",
+   "Rolls-Royce Derwent"
+  ],
+  "claims": [
+   {
+    "text": "The name of the Rolls-Royce Welland is taken from the River Welland.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The River Welland is a lowland river in the east of England, some 65 mi long.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "65 mi"
+ },
+ {
+  "id": "h038",
+  "question": "Which technique did the director at Pzena Investment Management outline?",
+  "answer": "Joel Greenblatt, who is a director at Pzena Investment Management, outlined an investment technique called magic formula investing that uses the principles of value investing [E2][E3].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Joel Greenblatt",
+   "Magic formula investing"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 80.9,
+  "latency_ms": 12326,
+  "llm_calls": 4,
+  "withheld": 0,
+  "evidence_titles": [
+   "Richard Pzena",
+   "Joel Greenblatt",
+   "Magic formula investing"
+  ],
+  "claims": [
+   {
+    "text": "Joel Greenblatt, who is a director at Pzena Investment Management, outlined an investment technique called magic formula investing that uses the principles of value investing.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "outlined by Joel Greenblatt",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h039",
+  "question": "Are both Adolfo Bioy Casares and James Norman Hall Argentinian authors?",
+  "answer": "Adolfo Bioy Casares was an Argentine fiction writer, journalist, and translator [E1]. James Norman Hall was an American author [E8]. Therefore, both individuals are not Argentinian authors.",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Adolfo Bioy Casares",
+   "James Norman Hall"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 90.8,
+  "latency_ms": 11644,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Adolfo Bioy Casares",
+   "The Hero of Women",
+   "The Invention of Morel",
+   "La aventura de un fotógrafo en La Plata",
+   "In Memoriam (film)",
+   "Hugo Santiago",
+   "The Book of Fantasy",
+   "James Norman Hall"
+  ],
+  "claims": [
+   {
+    "text": "Adolfo Bioy Casares was an Argentine fiction writer, journalist, and translator.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "James Norman Hall was an American author.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Therefore, both individuals are not Argentinian authors.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "no",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h040",
+  "question": "What band did Gator Country guitarist that co-wrote Bloody Reunion come from?",
+  "answer": "Duane Roland co-wrote \"Bloody Reunion\" [E1]. Duane Roland was a guitarist for the Southern hard rock band Molly Hatchet [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Duane Roland",
+   "Gator Country"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 91.9,
+  "latency_ms": 16110,
+  "llm_calls": 3,
+  "withheld": 0,
+  "evidence_titles": [
+   "Duane Roland",
+   "Gator Country",
+   "Bruce Crump",
+   "Jimmy Farrar"
+  ],
+  "claims": [
+   {
+    "text": "Duane Roland co-wrote \"Bloody Reunion\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Duane Roland was a guitarist for the Southern hard rock band Molly Hatchet.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Molly Hatchet"
+ },
+ {
+  "id": "h041",
+  "question": "Between Joe Orton and Henry James, which author is the adjective \"Ortonesque\" used to refer to his work?",
+  "answer": "Between Joe Orton and Henry James, the adjective \"Ortonesque\" is used to refer to the work of Joe Orton [E1].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Henry James",
+   "Joe Orton"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 85.7,
+  "latency_ms": 7631,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Joe Orton",
+   "Henry James",
+   "The Ruffian on the Stair",
+   "What the Butler Saw (play)",
+   "Simon Bent"
+  ],
+  "claims": [
+   {
+    "text": "Between Joe Orton and Henry James, the adjective \"Ortonesque\" is used to refer to the work of Joe Orton.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "John Kingsley \"Joe\" Orton",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h042",
+  "question": "What was the specialization of an American naval officer who led the aircraft of the United States Antarctic Service to photograph Cox Point?",
+  "answer": "Admiral Richard E. Byrd was an American naval officer who specialized in feats of exploration [E1][E3]. Admiral Richard E. Byrd led the aircraft of the United States Antarctic Service to photograph Cox Point [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Cox Point",
+   "Richard E. Byrd"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 96.6,
+  "latency_ms": 10511,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Cox Point",
+   "Coor Crags",
+   "Richard E. Byrd",
+   "Erb Range",
+   "Maury Glacier",
+   "Wells Saddle",
+   "Reichle Mesa"
+  ],
+  "claims": [
+   {
+    "text": "Admiral Richard E. Byrd was an American naval officer who specialized in feats of exploration.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Admiral Richard E. Byrd led the aircraft of the United States Antarctic Service to photograph Cox Point.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "feats of exploration"
+ },
+ {
+  "id": "h043",
+  "question": "This man who was born on April 25th, 1947, was a member of this lower house of the Hawaii State Legislature.",
+  "answer": "Robert \"Bobby\" Bunda, who was born on April 25, 1947, was a member of the Hawaii House of Representatives from 1983 through 1994 [E1]. The Hawaii House of Representatives serves as the lower house of the Hawaii State Legislature [E3].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Hawaii House of Representatives",
+   "Robert Bunda"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.9,
+  "latency_ms": 9824,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Robert Bunda",
+   "Romeo Munoz Cachola",
+   "Hawaii House of Representatives",
+   "Hawaii State Legislature",
+   "Hawaii Senate"
+  ],
+  "claims": [
+   {
+    "text": "Robert \"Bobby\" Bunda, who was born on April 25, 1947, was a member of the Hawaii House of Representatives from 1983 through 1994.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The Hawaii House of Representatives serves as the lower house of the Hawaii State Legislature.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Robert \"Bobby\" Bunda"
+ },
+ {
+  "id": "h044",
+  "question": "Are Rob Parissi and Robert Pollard both musicians",
+  "answer": "Rob Parissi is an American singer, songwriter, and guitarist [E1]. Robert Pollard is an American musician and singer-songwriter [E2].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Rob Parissi",
+   "Robert Pollard"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 96.8,
+  "latency_ms": 11717,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Rob Parissi",
+   "Robert Pollard",
+   "Play That Funky Music",
+   "Robert Pollard Is Off to Business",
+   "Choreographed Man of War",
+   "Weatherman and Skin Goddess",
+   "Elephant Jokes",
+   "The Crawling Distance"
+  ],
+  "claims": [
+   {
+    "text": "Rob Parissi is an American singer, songwriter, and guitarist.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Robert Pollard is an American musician and singer-songwriter.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "yes",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h045",
+  "question": "What actor from the show Murphy Brown also had a role in a show with fellow actor Steve Howey? ",
+  "answer": "Christopher Rich is an actor from the show \"Murphy Brown\" who also had a role in the show \"Reba\" [E1]. Steve Howey also had a role in the show \"Reba\" alongside Christopher Rich [E7].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Christopher Rich (actor)",
+   "Reba (season 1)"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 92.8,
+  "latency_ms": 12881,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Christopher Rich (actor)",
+   "Johnny Brown (actor)",
+   "Doug Dale",
+   "Jay Thomas",
+   "Grizz Chapman",
+   "The Middle (TV series)",
+   "Reba (season 1)"
+  ],
+  "claims": [
+   {
+    "text": "Christopher Rich is an actor from the show \"Murphy Brown\" who also had a role in the show \"Reba\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Steve Howey also had a role in the show \"Reba\" alongside Christopher Rich.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Christopher Rich"
+ },
+ {
+  "id": "h046",
+  "question": "When was the band who composited \"Discipline\" formed?",
+  "answer": "I found related sources, but could not verify an answer against them, so I am not giving one.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Discipline (instrumental)",
+   "King Crimson"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "unverified",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 9602,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Discipline (band)",
+   "Catholic Discipline",
+   "Discipline (instrumental)"
+  ],
+  "claims": [
+   {
+    "text": "The progressive rock band King Crimson, which composed the instrumental \"Discipline\", is not mentioned regarding its formation date in the provided evidence.",
+    "verdict": "CONTRADICTED",
+    "in_answer": false
+   }
+  ],
+  "sentences_kept": 0,
+  "gold": "1968"
+ },
+ {
+  "id": "h047",
+  "question": "Who plays opposite the double Olivier Award-winning English actress in the 2000 TV film following the relationship between \"Carry On\" film actors Sid James and Barbara Windsor?",
+  "answer": "Geoffrey Hutchings plays Sid James opposite Barbara Windsor, who is played by Samantha Spiro [E1][E2]. Samantha Spiro is a double Olivier Award-winning English actress [E2]. The 2000 TV film \"Cor, Blimey!\" follows the relationship between Sid James and Barbara Windsor [E1][E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Cor, Blimey!",
+   "Samantha Spiro"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 97.8,
+  "latency_ms": 16058,
+  "llm_calls": 3,
+  "withheld": 0,
+  "evidence_titles": [
+   "Cor, Blimey!",
+   "Samantha Spiro",
+   "Carry On Henry",
+   "Carry On Abroad",
+   "Carry On Doctor",
+   "Carry On Girls",
+   "Carry On Again Doctor",
+   "Carry On Matron"
+  ],
+  "claims": [
+   {
+    "text": "Geoffrey Hutchings plays Sid James opposite Barbara Windsor, who is played by Samantha Spiro.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Samantha Spiro is a double Olivier Award-winning English actress.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The 2000 TV film \"Cor, Blimey!\" follows the relationship between Sid James and Barbara Windsor.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "Geoffrey Hutchings"
+ },
+ {
+  "id": "h048",
+  "question": "Which body of water flows through more states, Tamiami Canal or Genesee River?",
+  "answer": "The Tamiami Canal is located in southern Florida [E1]. Therefore, the Genesee River flows through more states than the Tamiami Canal [E1][E2].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Genesee River",
+   "Tamiami Canal"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 84.8,
+  "latency_ms": 12956,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Tamiami Canal",
+   "Genesee River",
+   "Oatka Creek",
+   "Black Creek (Genesee River)",
+   "Genesee Valley Park",
+   "Broad Street Bridge (Rochester, New York)"
+  ],
+  "claims": [
+   {
+    "text": "The Tamiami Canal is located in southern Florida.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Therefore, the Genesee River flows through more states than the Tamiami Canal.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The Genesee River flows through 2 states, specifically Pennsylvania and New York.",
+    "verdict": "UNSUPPORTED",
+    "in_answer": false
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Genesee River"
+ },
+ {
+  "id": "h049",
+  "question": "Cyrina Fiallo has guest starred on which Michael Jacobs-created sitcom?",
+  "answer": "Cyrina Fiallo has guest starred on the Michael Jacobs-created sitcom \"Girl Meets World\" [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Cyrina Fiallo",
+   "Girl Meets World"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 85.6,
+  "latency_ms": 7689,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Cyrina Fiallo",
+   "Lucecita"
+  ],
+  "claims": [
+   {
+    "text": "Cyrina Fiallo has guest starred on the Michael Jacobs-created sitcom \"Girl Meets World\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Girl Meets World"
+ },
+ {
+  "id": "h050",
+  "question": "Who is the mother of Mary Robinson in Shakespeare's \"The Winter's Tale\"",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Mary Robinson (poet)",
+   "Perdita (The Winter's Tale)"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3430,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Mary Robinson (poet)",
+   "Mary Gish",
+   "Perdita (The Winter's Tale)",
+   "Mary Blair",
+   "Nicholas Robinson (historian)",
+   "Edna O'Brien"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Leontes"
+ },
+ {
+  "id": "h051",
+  "question": "What is the official English name of the country in which Ain Timguenai is located?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Ain Timguenai",
+   "Morocco"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3482,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Ain Timguenai"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "the Kingdom of Morocco"
+ },
+ {
+  "id": "h052",
+  "question": "Which 8-year old star of an epistolary novel turned musical by Alice Walker also voiced Frankie Greene in a Disney series?",
+  "answer": "Diamond White voiced Frankie Greene in a Disney series [E1]. In 2007 at the age of 8, Diamond White starred in a Chicago-based production of \"The Color Purple\" that also toured nationally [E1]. \"The Color Purple\" is a 1982 epistolary novel by American author Alice Walker that was later adapted into a film and musical of the same name [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Diamond White (singer)",
+   "The Color Purple"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.4,
+  "latency_ms": 11753,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Diamond White (singer)",
+   "The Color Purple",
+   "Scott Sanders (producer)",
+   "Alice Walker: Beauty in Truth",
+   "Max Charles"
+  ],
+  "claims": [
+   {
+    "text": "Diamond White voiced Frankie Greene in a Disney series.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "In 2007 at the age of 8, Diamond White starred in a Chicago-based production of \"The Color Purple\" that also toured nationally.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "\"The Color Purple\" is a 1982 epistolary novel by American author Alice Walker that was later adapted into a film and musical of the same name.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "Diamond White"
+ },
+ {
+  "id": "h053",
+  "question": "Shannon Purser played the role of June Acosta in a 2017 horror film directed by who?",
+  "answer": "Shannon Purser played the role of June Acosta in the 2017 horror film \"Wish Upon\" [E1]. The provided evidence does not mention the name of the director [E1]. Not covered: Who directed the 2017 horror film Wish Upon.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Shannon Purser",
+   "Wish Upon"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 89.1,
+  "latency_ms": 6737,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Shannon Purser"
+  ],
+  "claims": [
+   {
+    "text": "Shannon Purser played the role of June Acosta in the 2017 horror film \"Wish Upon\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The provided evidence does not mention the name of the director.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Not covered: Who directed the 2017 horror film Wish Upon.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "John R. Leonetti",
+  "read_verdict": "incomplete"
+ },
+ {
+  "id": "h054",
+  "question": "The 2009 Fort Hood mass shooting was committed by who?",
+  "answer": "The 2009 Fort Hood mass shooting was committed by Nidal Hasan, who was a U.S. Army major and psychiatrist [E1]. Nidal Hasan is also known as Nidal Malik Hasan [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "2009 Fort Hood shooting",
+   "Nidal Hasan"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 96.7,
+  "latency_ms": 9268,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "2009 Fort Hood shooting",
+   "Nidal Hasan",
+   "Michael Mulligan"
+  ],
+  "claims": [
+   {
+    "text": "The 2009 Fort Hood mass shooting was committed by Nidal Hasan, who was a U.S. Army major and psychiatrist.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Nidal Hasan is also known as Nidal Malik Hasan.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Nidal Hasan"
+ },
+ {
+  "id": "h055",
+  "question": "Which KaBoom! Entertainment Inc. film is based on a story by Rudyard Kipling?",
+  "answer": "The kids and family label of Phase 4 Films known as KaBoom! Entertainment Inc. focuses on curating feature film content that includes \"The Jungle Book\" [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "KaBoom! Entertainment Inc.",
+   "The Jungle Book"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 83.2,
+  "latency_ms": 16492,
+  "llm_calls": 3,
+  "withheld": 0,
+  "evidence_titles": [
+   "KaBoom! Entertainment Inc.",
+   "The Jungle Book (1994 film)",
+   "The Jungle Book",
+   "My Boy Jack (film)",
+   "Stalky &amp; Co.",
+   "His Chance in Life",
+   "In Black and White (short story collection)",
+   "Learoyd, Mulvaney and Ortheris"
+  ],
+  "claims": [
+   {
+    "text": "The kids and family label of Phase 4 Films known as KaBoom!",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Entertainment Inc. focuses on curating feature film content that includes \"The Jungle Book\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "The Jungle Book (1894)",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h056",
+  "question": "Thirukkalacherry is a village in which Indian town?",
+  "answer": "Thirukkalachery is a small village located in Tranquebar (Tharangambadi) Taluk, Nagapattinam District, Tamil Nadu, India [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Tharangambadi",
+   "Thirukkalacherry"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.7,
+  "latency_ms": 5738,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Thirukkalacherry",
+   "Masilamaniswara Temple, Thiruvaduthurai"
+  ],
+  "claims": [
+   {
+    "text": "Thirukkalachery is a small village located in Tranquebar (Tharangambadi) Taluk, Nagapattinam District, Tamil Nadu, India.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Tharangambadi"
+ },
+ {
+  "id": "h057",
+  "question": "Seven Brief Lessons on Physics was written by an Italian physicist that has worked in France since what year?",
+  "answer": "Seven Brief Lessons on Physics was written by Carlo Rovelli, an Italian theoretical physicist and writer [E1][E2]. Carlo Rovelli has worked in France since 2000 [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Carlo Rovelli",
+   "Seven Brief Lessons on Physics"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 96.4,
+  "latency_ms": 10295,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Seven Brief Lessons on Physics",
+   "Carlo Rovelli",
+   "Claudio Pellegrini",
+   "Aldo Pontremoli",
+   "Antonino Lo Surdo",
+   "Sergio Ferrara",
+   "Guido Caldarelli"
+  ],
+  "claims": [
+   {
+    "text": "Seven Brief Lessons on Physics was written by Carlo Rovelli, an Italian theoretical physicist and writer.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Carlo Rovelli has worked in France since 2000.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "2000"
+ },
+ {
+  "id": "h058",
+  "question": "What character did the star of Into The Homeland play on the TV show Nashville?",
+  "answer": "Powers Boothe starred in Into The Homeland [E1][E2]. Powers Boothe played Lamar Wyatt on the TV show Nashville [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Into the Homeland",
+   "Powers Boothe"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 94.3,
+  "latency_ms": 8231,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Into the Homeland",
+   "Powers Boothe",
+   "Kathy Garver"
+  ],
+  "claims": [
+   {
+    "text": "Powers Boothe starred in Into The Homeland.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "Powers Boothe played Lamar Wyatt on the TV show Nashville.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Lamar Wyatt"
+ },
+ {
+  "id": "h059",
+  "question": "What Congressional district featured Republican nomiee Willie Vaden in 2004, 2006, and 2008?",
+  "answer": "Republican nominee Willie Vaden ran in Texas's 27th congressional district in 2004, 2006, and 2008 [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Texas's 27th congressional district",
+   "Willie Vaden"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.9,
+  "latency_ms": 6272,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Willie Vaden",
+   "Pennsylvania's 10th congressional district"
+  ],
+  "claims": [
+   {
+    "text": "Republican nominee Willie Vaden ran in Texas's 27th congressional district in 2004, 2006, and 2008.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Texas's 27th congressional district"
+ },
+ {
+  "id": "h060",
+  "question": "Which of the former British Leyland companies is best know for it's two-seat open sports cars?",
+  "answer": "MG is best known for its two-seat open sports cars [E1]. MG is an English automotive marque registered by the now defunct MG Car Company Limited, which began in the 1920s [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "MG Cars",
+   "Rover Group"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 91.6,
+  "latency_ms": 9596,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "MG Cars",
+   "Leyland Motors",
+   "British Leyland",
+   "Leyland National",
+   "Rover Group",
+   "Land Rover Group",
+   "Austin Rover Group",
+   "Nuffield Press"
+  ],
+  "claims": [
+   {
+    "text": "MG is best known for its two-seat open sports cars.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "MG is an English automotive marque registered by the now defunct MG Car Company Limited, which began in the 1920s.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "MG Car Company Limited"
+ },
+ {
+  "id": "h061",
+  "question": "Michael Braz completed a libretto for what Georgia college, founded in 1906?",
+  "answer": "Michael Braz completed an English language libretto for an opera composed for the centenary of Georgia Southern University [E1]. Georgia Southern University was founded in 1906 as a land grant college [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "A Scholar Under Siege",
+   "Georgia Southern University"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 92.9,
+  "latency_ms": 8691,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "A Scholar Under Siege",
+   "Georgia Southern University",
+   "Georgia College &amp; State University",
+   "University of Georgia",
+   "James E. Boyd (scientist)",
+   "University of Georgia College of Engineering",
+   "History of the University of North Georgia"
+  ],
+  "claims": [
+   {
+    "text": "Michael Braz completed an English language libretto for an opera composed for the centenary of Georgia Southern University.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Georgia Southern University was founded in 1906 as a land grant college.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "A Scholar Under Siege",
+  "read_verdict": "key_disputed"
+ },
+ {
+  "id": "h062",
+  "question": "which American actress, singer, and songwriter too the tour of  I Stand tour ",
+  "answer": "For the person asking, the American actress, singer, and songwriter who took the I Stand tour is Idina Menzel [E1][E6].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "I Stand tour",
+   "Idina Menzel"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 89.5,
+  "latency_ms": 7949,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "I Stand tour",
+   "Barefoot at the Symphony Tour",
+   "Divine Intervention Tour",
+   "The Girlie Show World Tour",
+   "List of Sy Smith concert tours",
+   "Idina Menzel",
+   "The Sun Comes Out World Tour",
+   "MDNA World Tour (album)"
+  ],
+  "claims": [
+   {
+    "text": "For the person asking, the American actress, singer, and songwriter who took the I Stand tour is Idina Menzel.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Idina Kim Menzel",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h063",
+  "question": "Who was the murderer sent to \"Old Smokey\" for allegedly commiting \"The Crime of the Century\"?",
+  "answer": "The murderer sent to \"Old Smokey\" for allegedly committing \"The Crime of the Century\" was Richard Hauptmann [E1][E2]. Richard Hauptmann was convicted of the abduction and murder of the 20-month-old son of aviator Charles Lindbergh and his wife Anne Morrow Lindbergh, a case known as \"The Crime of the Century\" [E2]. Richard Hauptmann was executed in the electric chair at the New Jersey State Prison, which is known by the euphemistic name Old Smokey [E1][E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Old Smokey",
+   "Richard Hauptmann"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 90.8,
+  "latency_ms": 15535,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Old Smokey",
+   "Richard Hauptmann",
+   "Cordelia Botkin",
+   "Live in Old Smokey",
+   "On Top of Old Smoky",
+   "Old Sparky",
+   "Richard Kuklinski"
+  ],
+  "claims": [
+   {
+    "text": "The murderer sent to \"Old Smokey\" for allegedly committing \"The Crime of the Century\" was Richard Hauptmann.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Richard Hauptmann was convicted of the abduction and murder of the 20-month-old son of aviator Charles Lindbergh and his wife Anne Morrow Lindbergh, a case known as \"The Crime of the Century\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Richard Hauptmann was executed in the electric chair at the New Jersey State Prison, which is known by the euphemistic name Old Smokey.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "Richard Hauptmann"
+ },
+ {
+  "id": "h064",
+  "question": "Are Portland International Airport and Gerald R. Ford International Airport both located in Oregon?",
+  "answer": "Portland International Airport is located in the U.S. state of Oregon [E1]. Gerald R. Ford International Airport is located in Cascade Township approximately 13 mi southeast of Grand Rapids, Michigan [E3]. Therefore, Portland International Airport and Gerald R. Ford International Airport are not both located in Oregon [E1][E3].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Gerald R. Ford International Airport",
+   "Portland International Airport"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 94.2,
+  "latency_ms": 15922,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Portland International Airport",
+   "Portland International Airport MAX Station",
+   "Gerald R. Ford International Airport",
+   "Portland International Airport carpet",
+   "United Airlines Flight 173",
+   "Portland Air National Guard Base",
+   "PenAir"
+  ],
+  "claims": [
+   {
+    "text": "Portland International Airport is located in the U.S. state of Oregon.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Gerald R. Ford International Airport is located in Cascade Township approximately 13 mi southeast of Grand Rapids, Michigan.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Therefore, Portland International Airport and Gerald R. Ford International Airport are not both located in Oregon.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "no",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h065",
+  "question": "What is the current model of the iconic mascot co-created by Harold Bell?",
+  "answer": "The current motto of Woodsy Owl, the iconic mascot co-created by Harold Bell, is \"Lend a hand — care for the land!\" [E1][E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Harold Bell",
+   "Woodsy Owl"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 91.7,
+  "latency_ms": 6758,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Harold Bell",
+   "Woodsy Owl"
+  ],
+  "claims": [
+   {
+    "text": "The current motto of Woodsy Owl, the iconic mascot co-created by Harold Bell, is \"Lend a hand — care for the land!\"",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "\"Lend a hand — care for the land!\""
+ },
+ {
+  "id": "h066",
+  "question": "Who was born first Iain Pears or Richard Llewellyn ?",
+  "answer": "Richard Llewellyn (born 8 December 1906) was born before Iain Pears (born 1 January 1955) [E1][E2].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Iain Pears",
+   "Richard Llewellyn"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 85.1,
+  "latency_ms": 7500,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Iain Pears",
+   "Richard Llewellyn",
+   "Richard Llewellyn Williams",
+   "Rich Brooks",
+   "How Green Was My Valley"
+  ],
+  "claims": [
+   {
+    "text": "Richard Llewellyn (born 8 December 1906) was born before Iain Pears (born 1 January 1955).",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Richard Dafydd Vivian Llewellyn",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h067",
+  "question": "Which became a Cathedral first St Chad's Cathedral, Birmingham or Chelmsford Cathedral?",
+  "answer": "St Chad's Cathedral, Birmingham was raised to cathedral status in 1852 [E1]. Chelmsford Cathedral became a cathedral when the Anglican Diocese of Chelmsford was created in 1914 [E3].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Chelmsford Cathedral",
+   "St Chad's Cathedral, Birmingham"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 91.9,
+  "latency_ms": 14906,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "St Chad's Cathedral, Birmingham",
+   "St Philip's Cathedral, Birmingham",
+   "Chelmsford Cathedral",
+   "Bishop's House, Birmingham",
+   "Dean of Chelmsford",
+   "St Chad's College, Durham"
+  ],
+  "claims": [
+   {
+    "text": "St Chad's Cathedral, Birmingham was raised to cathedral status in 1852.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Chelmsford Cathedral became a cathedral when the Anglican Diocese of Chelmsford was created in 1914.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Therefore, St Chad's Cathedral, Birmingham became a cathedral first.",
+    "verdict": "UNSUPPORTED",
+    "in_answer": false
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Metropolitan Cathedral Church and Basilica of Saint Chad",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h068",
+  "question": "High Water is a song by Bob Dylan it was based on the 1927 Lousiana Flood. Another song recorded by Dylan about the event is When the Levee Breaks who is the Husband and Wife team that wrote and recorded this song in 1929 ?",
+  "answer": "\"When the Levee Breaks\" is a blues song written and first recorded by the husband and wife team Kansas Joe McCoy and Memphis Minnie in 1929 [E8].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "High Water (For Charley Patton)",
+   "When the Levee Breaks"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.2,
+  "latency_ms": 6843,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "High Water (For Charley Patton)",
+   "Shelter from the Storm",
+   "All I Really Want to Do",
+   "High water mark",
+   "To Ramona",
+   "Mama, You Been on My Mind",
+   "Just Like Tom Thumb's Blues",
+   "When the Levee Breaks"
+  ],
+  "claims": [
+   {
+    "text": "\"When the Levee Breaks\" is a blues song written and first recorded by the husband and wife team Kansas Joe McCoy and Memphis Minnie in 1929.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Joe McCoy and Memphis Minnie"
+ },
+ {
+  "id": "h069",
+  "question": "what city was the chapel that Princess Anne got married in located?",
+  "answer": "The marriage of Anne, Princess Royal and Prince William of Orange took place at the French Chapel in St James's Palace, London [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "St James's Palace",
+   "Wedding anthem for Princess Anne"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 91.2,
+  "latency_ms": 7403,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Wedding anthem for Princess Anne",
+   "Princess Anne, Virginia",
+   "Princess Anne, Duchess of Calabria",
+   "Princess Gardens",
+   "Francis Land House",
+   "Princess Anne High School",
+   "Princess Anne's Battery",
+   "Norfolk, Virginia Beach and Southern Railroad"
+  ],
+  "claims": [
+   {
+    "text": "The marriage of Anne, Princess Royal and Prince William of Orange took place at the French Chapel in St James's Palace, London.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "City of Westminster",
+  "read_verdict": "incomplete"
+ },
+ {
+  "id": "h070",
+  "question": " The Human Condition is a film trilogy that follows a Japanese pacifist and socialist as he tries to survive in a political system that strives to regulate what?",
+  "answer": "The Human Condition is a film trilogy that follows the life of Kaji, a Japanese pacifist and socialist, as he tries to survive in the totalitarian and oppressive world of World War II-era Japan [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "The Human Condition (film series)",
+   "Totalitarianism"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.3,
+  "latency_ms": 6973,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "The Human Condition (film series)",
+   "The Human Condition (novel)",
+   "Junpei Gomikawa"
+  ],
+  "claims": [
+   {
+    "text": "The Human Condition is a film trilogy that follows the life of Kaji, a Japanese pacifist and socialist, as he tries to survive in the totalitarian and oppressive world of World War II-era Japan.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "every aspect of public and private life",
+  "read_verdict": "incomplete"
+ },
+ {
+  "id": "h071",
+  "question": "Qazi is a Kashmiri singer that won \"Fame Gurukul\" along with a singer born where?",
+  "answer": "Qazi Touqeer won \"Fame Gurukul\" along with Ruprekha Banerjee [E1]. Ruprekha Banerjee was born in Kolkata [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Qazi Touqeer",
+   "Ruprekha Banerjee"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 98.2,
+  "latency_ms": 8574,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Qazi Touqeer",
+   "Ruprekha Banerjee",
+   "Keerthi Sagathia",
+   "Kailash Mehra Sadhu"
+  ],
+  "claims": [
+   {
+    "text": "Qazi Touqeer won \"Fame Gurukul\" along with Ruprekha Banerjee.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Ruprekha Banerjee was born in Kolkata.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Kolkata"
+ },
+ {
+  "id": "h072",
+  "question": "What is the nickname of the island that is 1,415 km further to the east-southeast of Tokyo?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Minami-Tori-shima",
+   "Wake Island"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 8332,
+  "llm_calls": 3,
+  "withheld": 0,
+  "evidence_titles": [
+   "Minami-Tori-shima",
+   "Wake Island"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Wake Atoll"
+ },
+ {
+  "id": "h073",
+  "question": "What type of film is Jordan Roberts 2017 film release?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Ferdinand (film)",
+   "Jordan Roberts (writer)"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3304,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Jordan Roberts (writer)",
+   "Burn Your Maps",
+   "Around the Bend",
+   "You're Not You",
+   "3,2,1... Frankie Go Boom",
+   "Jordan Roberts (footballer, born 1993)",
+   "Rangbaz",
+   "Wish Upon"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "3D computer-animated comedy"
+ },
+ {
+  "id": "h074",
+  "question": "Which three-time Olivier Award winning English actress starred in the 1981 BBC television serial, Sons and Lovers?",
+  "answer": "Dame Eileen June Atkins, DBE starred in the 1981 BBC television serial, Sons and Lovers [E1][E3]. Eileen Atkins is also a three-time Olivier Award winner [E3].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Eileen Atkins",
+   "Sons and Lovers (1981 TV serial)"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 94.5,
+  "latency_ms": 12258,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Sons and Lovers (1981 TV serial)",
+   "Samantha Spiro",
+   "Eileen Atkins",
+   "Frances de la Tour",
+   "Michael Gambon",
+   "Michelle Terry",
+   "Alex Jennings",
+   "Juliet Aubrey"
+  ],
+  "claims": [
+   {
+    "text": "Dame Eileen June Atkins, DBE starred in the 1981 BBC television serial, Sons and Lovers.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Eileen Atkins is also a three-time Olivier Award winner.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Dame Eileen June Atkins"
+ },
+ {
+  "id": "h075",
+  "question": "What role did the actor who played Colonel Sherman T. Potter in \"M*A*S*H\" play in \"Kentucky Jones\"",
+  "answer": "Harry Morgan played the role of Colonel Sherman T. Potter in \"M*A*S*H\" [E1]. In the television series \"Kentucky Jones\", Harry Morgan was featured in the series as Seldom Jackson, a former jockey who assists Dr. Jones [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Harry Morgan",
+   "Kentucky Jones"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 95.8,
+  "latency_ms": 11116,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Harry Morgan",
+   "Kentucky Jones",
+   "AfterMASH",
+   "Paul Winters",
+   "Max Charles",
+   "Sam Clemmett",
+   "Powers Boothe",
+   "Victor Beaumont"
+  ],
+  "claims": [
+   {
+    "text": "Harry Morgan played the role of Colonel Sherman T. Potter in \"M*A*S*H\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "In the television series \"Kentucky Jones\", Harry Morgan was featured in the series as Seldom Jackson, a former jockey who assists Dr. Jones.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Seldom Jackson"
+ },
+ {
+  "id": "h076",
+  "question": "What country is the Selun located in?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Canton of St. Gallen",
+   "Selun"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3506,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Selun"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Switzerland"
+ },
+ {
+  "id": "h077",
+  "question": "The Lowry Hotel is named after an artist, many of whose drawings and paintings depict what town?",
+  "answer": "The Lowry Hotel is named after the artist L. S. Lowry, many of whose drawings and paintings depict Pendlebury, Lancashire, where the artist lived and worked for more than 40 years, and also Salford and its surrounding areas [E1][E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "L. S. Lowry",
+   "Lowry Hotel"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 80.7,
+  "latency_ms": 7465,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Lowry Hotel",
+   "L. S. Lowry"
+  ],
+  "claims": [
+   {
+    "text": "The Lowry Hotel is named after the artist L. S. Lowry, many of whose drawings and paintings depict Pendlebury, Lancashire, where the artist lived and worked for more than 40 years, and also Salford and its surrounding areas.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Pendlebury, Lancashire"
+ },
+ {
+  "id": "h078",
+  "question": "On which continent did Pia Miller make her appearance, in the teen magazine, Dolly?",
+  "answer": "Pia Miller came to prominence after winning Dolly's annual modelling competition [E1]. Dolly was an Australian bimonthly teen magazine started in Australia and New Zealand [E2]. Not covered: The specific continent on which Pia Miller made her appearance in the magazine.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Dolly (magazine)",
+   "Pia Miller"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 90.0,
+  "latency_ms": 9675,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Pia Miller",
+   "Dolly (magazine)",
+   "Kat Chapman",
+   "Dolly Martin"
+  ],
+  "claims": [
+   {
+    "text": "Pia Miller came to prominence after winning Dolly's annual modelling competition.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Dolly was an Australian bimonthly teen magazine started in Australia and New Zealand.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Not covered: The specific continent on which Pia Miller made her appearance in the magazine.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Australia and New Zealand are located on the continent of Australia and Oceania.",
+    "verdict": "UNSUPPORTED",
+    "in_answer": false
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Australia"
+ },
+ {
+  "id": "h079",
+  "question": "What government position was held by the woman who portrayed Corliss Archer in the film Kiss and Tell?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Kiss and Tell (1945 film)",
+   "Shirley Temple"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3850,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Kiss and Tell (1945 film)",
+   "A Kiss for Corliss",
+   "Janet Waldo",
+   "Meet Corliss Archer (TV series)"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Chief of Protocol"
+ },
+ {
+  "id": "h080",
+  "question": "What is the name of the ethnic group who settled in Canada in the 17th century that participated in a conflict with Irish Catholic immigrants in the Shiners' War?",
+  "answer": "The ethnic group who settled in Canada in the 17th century and participated in a conflict with Irish Catholic immigrants in the Shiners' War is the French Canadians [E1][E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "French Canadians",
+   "Shiners' War"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 87.5,
+  "latency_ms": 8741,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Shiners' War",
+   "French Canadians",
+   "History of Irish Americans in Boston",
+   "History of the Irish Americans in Philadelphia",
+   "Ancient Order of Hibernians"
+  ],
+  "claims": [
+   {
+    "text": "The ethnic group who settled in Canada in the 17th century and participated in a conflict with Irish Catholic immigrants in the Shiners' War is the French Canadians.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "French Canadians"
+ },
+ {
+  "id": "h081",
+  "question": "Who is the author of the 1993 production Madge Ryan participated in?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Madge Ryan",
+   "Medea (play)"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3500,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Madge Ryan",
+   "David and Jonathan (film)",
+   "Madge Jenison",
+   "Summer Holiday (1963 film)",
+   "Michael Kanin"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Euripides"
+ },
+ {
+  "id": "h082",
+  "question": "Are both The Sundays and The Radio Dept. dream pop bands? ",
+  "answer": "The Radio Dept. is a dream pop band from Lund, Sweden [E1]. The Sundays are an English alternative rock band [E3].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "The Radio Dept.",
+   "The Sundays"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 90.3,
+  "latency_ms": 15188,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "The Radio Dept.",
+   "The Radio Dept. discography",
+   "The Sundays",
+   "Letting Up Despite Great Faults",
+   "Lesser Matters"
+  ],
+  "claims": [
+   {
+    "text": "The Radio Dept. is a dream pop band from Lund, Sweden.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "The Sundays are an English alternative rock band.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Therefore, The Radio Dept. is a dream pop band, while The Sundays are an alternative rock band rather than a dream pop band.",
+    "verdict": "PARTIAL",
+    "in_answer": false
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "no",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h083",
+  "question": "Ghostkeeper's plot is inspired by a legend that lends its name to what type of medical condition?",
+  "answer": "Ghostkeeper's plot is inspired by the Windigo legend of North America [E1]. The legend lends its name to the controversial modern medical term Wendigo psychosis [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Ghostkeeper",
+   "Wendigo"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 92.7,
+  "latency_ms": 7107,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Ghostkeeper",
+   "Wendigo"
+  ],
+  "claims": [
+   {
+    "text": "Ghostkeeper's plot is inspired by the Windigo legend of North America.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The legend lends its name to the controversial modern medical term Wendigo psychosis.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "psychosis"
+ },
+ {
+  "id": "h084",
+  "question": "Name an American actress who starred both in High School High and General Hospital.",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "High School High",
+   "Tia Carrere"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 4277,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Sarah Joy Brown",
+   "Tia Carrere",
+   "General Hospital cast members",
+   "Jason Morgan (General Hospital)",
+   "Malinda Williams",
+   "Port Charles",
+   "High School High",
+   "Shirley Temple"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Tia Carrere"
+ },
+ {
+  "id": "h085",
+  "question": "Who developed the jet fighters operated by the 41st Tactical Squadron of the Polish Air Force?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "41st Tactical Squadron",
+   "Mikoyan MiG-29"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 4267,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "41st Tactical Squadron",
+   "40th Tactical Squadron",
+   "1st Tactical Squadron",
+   "3rd Tactical Squadron",
+   "22nd Air Base",
+   "31st Tactical Air Base",
+   "23rd Air Base",
+   "Łask Air Base"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "the Mikoyan design bureau"
+ },
+ {
+  "id": "h086",
+  "question": "Which member of Odd Future also had a guest appearance on the album too Cozy?",
+  "answer": "2: Too Cozy [E1][E4][E5].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Cozy Tapes Vol. 2: Too Cozy",
+   "Frank Ocean"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 79.3,
+  "latency_ms": 30459,
+  "llm_calls": 4,
+  "withheld": 0,
+  "evidence_titles": [
+   "Cozy Tapes Vol. 2: Too Cozy",
+   "The OF Tape Vol. 2",
+   "Trouble on My Mind",
+   "Odd Future",
+   "Frank Ocean discography",
+   "The Odd Future Tape",
+   "Purple Naked Ladies",
+   "12 Odd Future Songs"
+  ],
+  "claims": [
+   {
+    "text": "2: Too Cozy.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Frank Ocean, who is a member of the hip hop collective Odd Future, had a guest appearance on the album Cozy Tapes Vol.",
+    "verdict": "CONTRADICTED",
+    "in_answer": false
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Frank Ocean",
+  "read_verdict": "incomplete"
+ },
+ {
+  "id": "h087",
+  "question": "What year did the father of Willem van Oldenbarnevelt die?",
+  "answer": "The father of Willem van Oldenbarnevelt was Johan van Oldenbarnevelt [E1]. Johan van Oldenbarnevelt died on 13 May 1619 [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Johan van Oldenbarnevelt",
+   "Willem van Oldenbarnevelt"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 90.9,
+  "latency_ms": 10905,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Willem van Oldenbarnevelt",
+   "Johan van Oldenbarnevelt",
+   "Willem Zijderveld",
+   "William of Nassau (1601–1627)",
+   "Adriaen van de Velde",
+   "Willem van den Blocke",
+   "Hendrick van Cleve III"
+  ],
+  "claims": [
+   {
+    "text": "The father of Willem van Oldenbarnevelt was Johan van Oldenbarnevelt.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Johan van Oldenbarnevelt died on 13 May 1619.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "1619"
+ },
+ {
+  "id": "h088",
+  "question": "What Ruben Fleischer film did No One's Gonna Love You appear in?",
+  "answer": "The film \"Zombieland\" is directed by Ruben Fleischer [E4].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "No One's Gonna Love You",
+   "Zombieland"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 82.6,
+  "latency_ms": 22968,
+  "llm_calls": 4,
+  "withheld": 0,
+  "evidence_titles": [
+   "No One's Gonna Love You",
+   "Gangster Squad (film)",
+   "30 Minutes or Less",
+   "Zombieland",
+   "Somebody's Gonna Love You",
+   "Clairvoyant (EP)",
+   "Mail Order Family",
+   "You're Gonna Love Tomorrow"
+  ],
+  "claims": [
+   {
+    "text": "The film \"Zombieland\" is directed by Ruben Fleischer.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "The song \"No One's Gonna Love You\" appeared in the film \"Zombieland\".",
+    "verdict": "UNSUPPORTED",
+    "in_answer": false
+   }
+  ],
+  "sentences_kept": 1,
+  "gold": "Zombieland"
+ },
+ {
+  "id": "h089",
+  "question": "Which Houston, TX based store did Paul Traub participate in the bankruptcy hearing?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Paul Traub",
+   "Stage Stores"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 4219,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Paul Traub",
+   "Hamilton Paul Traub"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Stage Stores"
+ },
+ {
+  "id": "h090",
+  "question": "Which author has won more Pulitzer Prizes, Thomas Friedman or Henri Bergson?",
+  "answer": "Thomas Friedman is a three time Pulitzer Prize winner [E1]. Henri Bergson is a French philosopher [E2].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Henri Bergson",
+   "Thomas Friedman"
+  ],
+  "verdict": "review",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 97.0,
+  "latency_ms": 22364,
+  "llm_calls": 3,
+  "withheld": 0,
+  "evidence_titles": [
+   "Thomas Friedman",
+   "Henri Bergson",
+   "Moina Mathers",
+   "2011 Pulitzer Prize",
+   "Samuel Eliot Morison"
+  ],
+  "claims": [
+   {
+    "text": "Thomas Friedman is a three time Pulitzer Prize winner.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Henri Bergson is a French philosopher.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Thomas Loren Friedman",
+  "read_verdict": "correct"
+ },
+ {
+  "id": "h091",
+  "question": "In which football league does the son of Souleyman Sané play?",
+  "answer": "The son of Souleyman Sané is Leroy Sané [E1]. Leroy Sané plays for the Premier League club Manchester City [E2].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Leroy Sané",
+   "Souleyman Sané"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 95.2,
+  "latency_ms": 6271,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Souleyman Sané",
+   "Leroy Sané"
+  ],
+  "claims": [
+   {
+    "text": "The son of Souleyman Sané is Leroy Sané.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Leroy Sané plays for the Premier League club Manchester City.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Premier League"
+ },
+ {
+  "id": "h092",
+  "question": "Who directed the 1971 film in which Pat Ashton starred in?",
+  "answer": "Pat Ashton starred in the 1971 English TV-sitcom film spin-off \"On the Buses\" [E1]. The 1971 British comedy film \"On the Buses\" was directed by Harry Booth [E5].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "On the Buses (film)",
+   "Pat Ashton"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 96.7,
+  "latency_ms": 9682,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Pat Ashton",
+   "Rainbow Bridge (film)",
+   "Together (1971 film)",
+   "Christian de Chalonge",
+   "On the Buses (film)",
+   "The Tales of Beatrix Potter (ballet)",
+   "Thick as Thieves (TV series)",
+   "In the First Place"
+  ],
+  "claims": [
+   {
+    "text": "Pat Ashton starred in the 1971 English TV-sitcom film spin-off \"On the Buses\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The 1971 British comedy film \"On the Buses\" was directed by Harry Booth.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "Harry Booth"
+ },
+ {
+  "id": "h093",
+  "question": "On what river is the city where Stade 24 Novembre is located situated on?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Kinshasa",
+   "Stade 24 Novembre"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 4488,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Stade 24 Novembre",
+   "Stade 7 Novembre du Kef",
+   "AS Dragons"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "the Congo River"
+ },
+ {
+  "id": "h094",
+  "question": "Which singer is younger, Terri Nunn or Sonya Scarlet? ",
+  "answer": "Sonya Scarlet is younger than Terri Nunn [E1][E2]. Terri Nunn was born on June 26, 1961 [E1]. Sonya Scarlet was born on 2 April 1980 [E2].",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Sonya Scarlet",
+   "Terri Nunn"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.5,
+  "latency_ms": 11241,
+  "llm_calls": 2,
+  "withheld": 0,
+  "evidence_titles": [
+   "Terri Nunn",
+   "Sonya Scarlet",
+   "Moment of Truth (Terri Nunn album)",
+   "Candyland (album)",
+   "Information (Berlin album)",
+   "Pleasure Victim",
+   "Sex (I'm A...)",
+   "Berlin (band)"
+  ],
+  "claims": [
+   {
+    "text": "Sonya Scarlet is younger than Terri Nunn.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Terri Nunn was born on June 26, 1961.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Sonya Scarlet was born on 2 April 1980.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 3,
+  "gold": "Sonya Scarlet"
+ },
+ {
+  "id": "h095",
+  "question": "Gretchen Gotay graduated from what American public research university that is located approximately 72 miles northeast of Atlanta?",
+  "answer": "Gretchen Gotay graduated with a master's degree in sports management from the University of Georgia [E2]. The University of Georgia is an American public research university located approximately 72 mile northeast of Atlanta [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Gretchen Gotay",
+   "University of Georgia"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 93.5,
+  "latency_ms": 9917,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "University of Georgia",
+   "Gretchen Gotay",
+   "University of Maryland, Baltimore County"
+  ],
+  "claims": [
+   {
+    "text": "Gretchen Gotay graduated with a master's degree in sports management from the University of Georgia.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "The University of Georgia is an American public research university located approximately 72 mile northeast of Atlanta.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "The University of Georgia"
+ },
+ {
+  "id": "h096",
+  "question": "What is the population of the county Rockingham County which Little Bay Bridge meet the river between it",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Little Bay Bridge",
+   "Newington, New Hampshire"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3550,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Little Bay Bridge",
+   "Newington, New Hampshire",
+   "Brentwood, New Hampshire",
+   "Great Bay (New Hampshire)",
+   "Little Bay, Newfoundland and Labrador",
+   "Oyster River (New Hampshire)",
+   "Harrisonburg, Virginia",
+   "Irondequoit Bay Bridge"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "The population was 753"
+ },
+ {
+  "id": "h097",
+  "question": "What magazine has been contributed to by the poet who created the album \"The Nikki Giovanni Poetry Collection\"?",
+  "answer": "Nikki Giovanni is the poet who has been nominated for a Grammy Award for her album \"The Nikki Giovanni Poetry Collection\" [E1]. Nikki Giovanni has been a contributor to PEN America: A Journal for Writers and Readers [E3].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Nikki Giovanni",
+   "PEN America"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 95.6,
+  "latency_ms": 10512,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Nikki Giovanni",
+   "Pamela Sneed",
+   "PEN America",
+   "Chesya Burke",
+   "Soma Mei Sheng Frazier",
+   "The Poetry Collection"
+  ],
+  "claims": [
+   {
+    "text": "Nikki Giovanni is the poet who has been nominated for a Grammy Award for her album \"The Nikki Giovanni Poetry Collection\".",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   },
+   {
+    "text": "Nikki Giovanni has been a contributor to PEN America: A Journal for Writers and Readers.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "PEN America"
+ },
+ {
+  "id": "h098",
+  "question": "Until when did this region exist as an organized incorporated territory of the United States, for which Samuel Thurston served as its first delegate?",
+  "answer": "The Territory of Oregon existed until February 14, 1859, when the southwestern portion of the territory was admitted to the Union as the State of Oregon [E3]. Samuel Thurston served as the first delegate from the Oregon Territory to the United States Congress [E1].",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Oregon Territory",
+   "Samuel Thurston"
+  ],
+  "verdict": "correct",
+  "outcome": "answered",
+  "outcome_reason": "",
+  "route": "external",
+  "trust": 96.5,
+  "latency_ms": 10924,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Samuel Thurston",
+   "Southwest Territory",
+   "Oregon Territory",
+   "Iowa Territory",
+   "List of Governors of Dakota Territory",
+   "Arkansas Territory",
+   "Wisconsin Territory",
+   "Nebraska Territory"
+  ],
+  "claims": [
+   {
+    "text": "The Territory of Oregon existed until February 14, 1859, when the southwestern portion of the territory was admitted to the Union as the State of Oregon.",
+    "verdict": "CONFLICTING",
+    "in_answer": true
+   },
+   {
+    "text": "Samuel Thurston served as the first delegate from the Oregon Territory to the United States Congress.",
+    "verdict": "SUPPORTED",
+    "in_answer": true
+   }
+  ],
+  "sentences_kept": 2,
+  "gold": "February 14, 1859"
+ },
+ {
+  "id": "h099",
+  "question": "Who wrote the lyrics to the 2016/2017 Australian production that stars Gretel Scarlett as Kathy Selden?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "bridge",
+  "level": "hard",
+  "supporting_titles": [
+   "Gretel Scarlett",
+   "Singin' in the Rain (musical)"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 3772,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Gretel Scarlett",
+   "Debbie Reynolds"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Arthur Freed"
+ },
+ {
+  "id": "h100",
+  "question": "Was Talking Heads and Man or Astro-man? formed further north?",
+  "answer": "The sources you can access do not contain enough information to answer this.",
+  "type": "comparison",
+  "level": "hard",
+  "supporting_titles": [
+   "Man or Astro-man?",
+   "Talking Heads"
+  ],
+  "verdict": "declined",
+  "outcome": "abstained",
+  "outcome_reason": "insufficient_evidence",
+  "route": "external",
+  "trust": null,
+  "latency_ms": 4714,
+  "llm_calls": 1,
+  "withheld": 0,
+  "evidence_titles": [
+   "Man or Astro-man?",
+   "Talking Heads",
+   "No Talking, Just Head",
+   "Talking Heads: 77",
+   "Talking Heads Africa",
+   "More Songs About Buildings and Food"
+  ],
+  "claims": [],
+  "sentences_kept": 0,
+  "gold": "Talking Heads"
+ }
+]
