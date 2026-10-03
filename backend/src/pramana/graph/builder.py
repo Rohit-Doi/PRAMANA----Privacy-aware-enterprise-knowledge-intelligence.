@@ -38,7 +38,7 @@ SCHEMA_STATEMENTS = (
 )
 
 # Which extractor each collection gets when a whole corpus is loaded. Single uploads use "full".
-DEFAULT_MODES = {"aurelia": "full", "uploads": "full"}
+DEFAULT_MODES = {"aurelia": "full", "uploads": "full", "blind": "full"}
 BULK_MODE = "fast"
 
 
