@@ -16,7 +16,6 @@ import json
 import os
 import sys
 from datetime import datetime
-from pathlib import Path
 
 from pramana.evaluation.store import save_eval_run
 from pramana.evaluation.suites import access_suite, end_to_end_suite, retrieval_suite
@@ -33,7 +32,7 @@ async def main() -> int:
     parser.add_argument("--golden", default=None, help="your own question file (JSON lines) instead of the bundled one")
     args = parser.parse_args()
     if args.golden:
-        os.environ["GOLDEN_FILE"] = str(Path(args.golden).resolve())
+        os.environ["GOLDEN_FILE"] = os.path.abspath(args.golden)  # noqa: ASYNC240 - once, at start-up
 
     runtime = await start_runtime()
     results_dir = runtime.settings.data_dir / "eval" / "results"
