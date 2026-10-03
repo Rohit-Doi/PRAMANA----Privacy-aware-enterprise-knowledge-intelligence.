@@ -188,7 +188,9 @@ set, which therefore stopped being blind; its re-run is a development check only
 
 Development check on the first set after the changes: 50 of 72 answerable questions
 correct (was 37), 14 declined (was 26). The original golden questions were unchanged
-at 53 of 55.
+at 53 of 55 correct, though slower (median 8.6 s, was 6.1 s), and the share of answer
+sentences marked plainly "supported" fell from 95 % to 91 %: with more passages in view,
+more sentences are flagged as conflicting with some other document in the mixed library.
 
 ## Part 3 — the second blind test
 
@@ -264,7 +266,7 @@ somewhat easier or harder than the first.
   organisation would need to configure what its regions are called.
 * **Reworded questions (4 declined of 16).** The passage was not among those retrieved,
   or the model did not recognise it as the answer.
-* **Quoting from restricted documents (3 of the incomplete answers).** The local reader
+* **Quoting from restricted documents (4 of the incomplete answers).** The local reader
   quoted a nearby sentence — a header line, a general rule instead of the specific
   figure. It did not invent anything, but it did not answer.
 * **ID numbers for the executive.** Identifiers are removed before text goes to the
