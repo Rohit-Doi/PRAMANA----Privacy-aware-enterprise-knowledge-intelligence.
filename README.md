@@ -92,11 +92,12 @@ choice, including what was tried and rejected: [docs/DECISIONS.md](docs/DECISION
 
 ## Measured results
 
-> **Read this first.** A blind test on documents the system had never seen, with
-> questions written independently, gave much lower figures than the first table below:
-> about **half** of answerable questions answered correctly (68 % on a public
-> multi-document set), a third declined — with **no leaks and no invented facts**.
-> The system is safe but too cautious. Details: [docs/BLIND_TEST.md](docs/BLIND_TEST.md).
+> **Read this first.** The figures in the first table below come from questions written
+> alongside the system. Two blind tests — unseen documents, questions written
+> independently — are the ones to believe: **51 %** of answerable questions correct on the
+> first; after the causes were fixed, **72 %** on a second, different one (plain facts and
+> table lookups 24 of 24, questions chaining two documents 6 of 16). In both: **no leaks,
+> no invented facts**. Details: [docs/BLIND_TEST.md](docs/BLIND_TEST.md).
 
 Measured on this repository's code on a laptop CPU (i7-1360P, 16 GB RAM, no GPU).
 Full report with method and caveats: [docs/RESULTS.md](docs/RESULTS.md).
@@ -264,8 +265,10 @@ cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 
 ## Limits
 
-* On unseen documents the system answered only about half of the answerable questions; it
-  declines too readily and rarely chains two documents. See [docs/BLIND_TEST.md](docs/BLIND_TEST.md).
+* On unseen documents the system answers about 72 % of answerable questions (second blind
+  test). Questions that chain two documents mostly stop at the first step, and "my
+  division" questions fail unless the organisation's names for its regions are known.
+  See [docs/BLIND_TEST.md](docs/BLIND_TEST.md).
 * The verifier is good, not perfect: on real LLM answers it misses about one error in
   four and flags about one correct sentence in seven. A swapped name is the hardest
   error for it (84 % caught).
