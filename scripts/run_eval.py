@@ -13,8 +13,10 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import sys
 from datetime import datetime
+from pathlib import Path
 
 from pramana.evaluation.store import save_eval_run
 from pramana.evaluation.suites import access_suite, end_to_end_suite, retrieval_suite
@@ -28,7 +30,10 @@ async def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--suites", nargs="+", choices=sorted(SUITES), default=["retrieval", "access"])
     parser.add_argument("--limit", type=int, default=None, help="use only the first N items of each dataset")
+    parser.add_argument("--golden", default=None, help="your own question file (JSON lines) instead of the bundled one")
     args = parser.parse_args()
+    if args.golden:
+        os.environ["GOLDEN_FILE"] = str(Path(args.golden).resolve())
 
     runtime = await start_runtime()
     results_dir = runtime.settings.data_dir / "eval" / "results"

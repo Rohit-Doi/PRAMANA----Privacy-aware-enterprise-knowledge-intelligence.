@@ -7,6 +7,7 @@ together with pass/fail gates. Nothing is simulated.
 from __future__ import annotations
 
 import json
+import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -50,7 +51,9 @@ class SuiteResult:
         return all(g["passed"] for g in self.gates)
 
 
-def load_golden(path: Path = GOLDEN_PATH) -> list[dict[str, Any]]:
+def load_golden(path: Path | None = None) -> list[dict[str, Any]]:
+    """The question set: the bundled one, or your own file named in GOLDEN_FILE (see docs/TEST_DATA.md)."""
+    path = path or Path(os.environ.get("GOLDEN_FILE") or GOLDEN_PATH)
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 

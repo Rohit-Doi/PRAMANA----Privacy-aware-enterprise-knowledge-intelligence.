@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 952" width="980" height="952" role="img" aria-label="PRAMANA architecture: eight layers, datastores, local models and one external model">
+<rect width="980" height="952" rx="12" fill="#ffffff" stroke="#d9dee6"/>
+<text x="40.0" y="40.0" font-size="20" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">PRAMĀṆA — architecture</text>
+<text x="40.0" y="62.0" font-size="13" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Eight layers. Everything except the drafting model runs on your own machine.</text>
+<rect x="40" y="84" width="900" height="72" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="40" y="84" width="6" height="72" rx="3" fill="#2a78d6"/>
+<text x="60.0" y="112.0" font-size="14" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">1  Users</text>
+<text x="290.0" y="112.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Web app: Ask · Verify Studio · Compare roles · Sources · Knowledge graph</text>
+<text x="290.0" y="132.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Policies · Users · Audit log · Monitoring · Reports · Analytics · Settings</text>
+<line x1="490.0" y1="156" x2="490.0" y2="168" stroke="#8a94a3" stroke-width="1.5"/><path d="M485.0,167 L490.0,174 L495.0,167 Z" fill="#8a94a3"/>
+<rect x="40" y="174" width="900" height="72" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="40" y="174" width="6" height="72" rx="3" fill="#2a78d6"/>
+<text x="60.0" y="202.0" font-size="14" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">2  Authentication</text>
+<text x="290.0" y="202.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Password (Argon2id) + optional TOTP · 15-minute access token · rotating refresh cookie</text>
+<text x="290.0" y="222.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Identity always comes from the verified session and the database, never from the request</text>
+<line x1="490.0" y1="246" x2="490.0" y2="258" stroke="#8a94a3" stroke-width="1.5"/><path d="M485.0,257 L490.0,264 L495.0,257 Z" fill="#8a94a3"/>
+<rect x="40" y="264" width="900" height="72" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="40" y="264" width="6" height="72" rx="3" fill="#eb6834"/>
+<text x="60.0" y="292.0" font-size="14" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">3  Privacy layer</text>
+<text x="290.0" y="292.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Access scope from policy (OPA): role, department, sensitivity, region</text>
+<text x="290.0" y="312.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Personal-data detection (Presidio) · prompt-injection screening · egress ceiling for external models</text>
+<line x1="490.0" y1="336" x2="490.0" y2="348" stroke="#8a94a3" stroke-width="1.5"/><path d="M485.0,347 L490.0,354 L495.0,347 Z" fill="#8a94a3"/>
+<rect x="40" y="354" width="900" height="72" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="40" y="354" width="6" height="72" rx="3" fill="#eb6834"/>
+<text x="60.0" y="382.0" font-size="14" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">4  Multi-agent orchestrator</text>
+<text x="290.0" y="382.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">LangGraph state machine, seven agents, live progress events:</text>
+<text x="290.0" y="402.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">privacy → retrieval ∥ graph reasoning → verification → response → fact-checking ⟲ → governance</text>
+<line x1="490.0" y1="426" x2="490.0" y2="438" stroke="#8a94a3" stroke-width="1.5"/><path d="M485.0,437 L490.0,444 L495.0,437 Z" fill="#8a94a3"/>
+<rect x="40.0" y="444" width="440.0" height="138" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="40.0" y="444" width="6" height="138" rx="3" fill="#1baf7a"/>
+<text x="60.0" y="472.0" font-size="14" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">5  Knowledge intelligence</text>
+<text x="60.0" y="496.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Hybrid GraphRAG:</text>
+<text x="60.0" y="514.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">meaning (dense vectors) + keywords (BM25)</text>
+<text x="60.0" y="532.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">+ entity graph with PageRank</text>
+<text x="60.0" y="550.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">→ rank fusion → cross-encoder reranking</text>
+<text x="60.0" y="568.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Every query filtered by the access scope</text>
+<rect x="500.0" y="444" width="440.0" height="138" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="500.0" y="444" width="6" height="138" rx="3" fill="#1baf7a"/>
+<text x="520.0" y="472.0" font-size="14" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">6  Validation and fact-checking</text>
+<text x="520.0" y="496.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Per sentence: grounding · entailment (two readings)</text>
+<text x="520.0" y="514.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">· unsupported spans · numbers and names</text>
+<text x="520.0" y="532.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">→ calibrated confidence → overriding rules</text>
+<text x="520.0" y="550.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">→ LLM judge with verbatim quote (uncertain only)</text>
+<text x="520.0" y="568.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Failed sentences are rewritten once or removed</text>
+<line x1="482.0" y1="513" x2="492.0" y2="513" stroke="#8a94a3" stroke-width="1.5"/><path d="M491.0,508 L498.0,513 L491.0,518 Z" fill="#8a94a3"/>
+<line x1="490.0" y1="582" x2="490.0" y2="594" stroke="#8a94a3" stroke-width="1.5"/><path d="M485.0,593 L490.0,600 L495.0,593 Z" fill="#8a94a3"/>
+<rect x="40" y="600" width="900" height="72" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="40" y="600" width="6" height="72" rx="3" fill="#2a78d6"/>
+<text x="60.0" y="628.0" font-size="14" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">7  Trust and governance</text>
+<text x="290.0" y="628.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Trust score with its components · review queue for low-trust answers</text>
+<text x="290.0" y="648.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Hash-chained, append-only audit log · immutable policy versions</text>
+<line x1="490.0" y1="672" x2="490.0" y2="684" stroke="#8a94a3" stroke-width="1.5"/><path d="M485.0,683 L490.0,690 L495.0,683 Z" fill="#8a94a3"/>
+<rect x="40" y="690" width="900" height="72" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="40" y="690" width="6" height="72" rx="3" fill="#2a78d6"/>
+<text x="60.0" y="718.0" font-size="14" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">8  Output</text>
+<text x="290.0" y="718.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Answer with a verdict per sentence · citations with the quoted passage highlighted</text>
+<text x="290.0" y="738.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Count of withheld sources · downloadable validation report — or an honest refusal</text>
+<text x="40.0" y="800.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">What it runs on</text>
+<rect x="40.0" y="812" width="286.6666666666667" height="112" rx="8" fill="#ffffff" stroke="#d9dee6"/>
+<text x="54.0" y="836.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Datastores (Docker)</text>
+<text x="54.0" y="858.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">PostgreSQL — users, documents, runs, audit</text>
+<text x="54.0" y="876.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Qdrant — dense + keyword vectors</text>
+<text x="54.0" y="894.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Neo4j — entities and relations</text>
+<text x="54.0" y="912.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Redis — limits, cache · OPA — policy</text>
+<rect x="346.6666666666667" y="812" width="286.6666666666667" height="112" rx="8" fill="#ffffff" stroke="#d9dee6"/>
+<text x="360.7" y="836.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Local models (CPU)</text>
+<text x="360.7" y="858.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">bge-small embeddings · BM25 · MiniLM reranker</text>
+<text x="360.7" y="876.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">HHEM grounding · DeBERTa NLI · LettuceDetect</text>
+<text x="360.7" y="894.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">RoBERTa reader · GLiNER2 / spaCy extraction</text>
+<text x="360.7" y="912.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Presidio personal data · RapidOCR</text>
+<rect x="653.3333333333334" y="812" width="286.6666666666667" height="112" rx="8" fill="#ffffff" stroke="#d9dee6"/>
+<text x="667.3" y="836.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">External (one free key)</text>
+<text x="667.3" y="858.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Gemini — drafts answers and judges</text>
+<text x="667.3" y="876.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">uncertain sentences only.</text>
+<text x="667.3" y="894.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Sees pseudonymised text; never sees</text>
+<text x="667.3" y="912.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">evidence above the egress ceiling.</text>
+</svg>

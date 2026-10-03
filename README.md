@@ -6,86 +6,136 @@ against a source you are allowed to read — or no answer at all.
 
 *Pramāṇa* (Sanskrit): a means of valid knowledge; proof.
 
-| | |
+**Contents:** [What it is](#what-it-is) · [Why](#why-it-exists) · [How it works](#how-it-works) ·
+[Results](#measured-results) · [What you can do](#what-you-can-do-with-it) ·
+[Technology](#technology-and-why-each-piece-was-chosen) · [Run it](#quick-start) ·
+[Your own data](#testing-with-your-own-data) · [Limits](#limits) · [Documentation](#documentation)
+
+---
+
+## What it is
+
+A company's knowledge lives in policies, contracts, reports and e-mail. An AI assistant
+over those documents is useful only if three things hold, and an ordinary
+"chat with your documents" tool guarantees none of them:
+
+| The question a company asks | What PRAMĀṆA does |
 |---|---|
-| **Access-aware** | Role, department, sensitivity and region decide what a user can retrieve. The rule is enforced inside every datastore query and re-checked afterwards |
-| **Verified** | Each sentence is checked by local models (grounding, entailment, unsupported spans, numbers and names). Sentences that fail are rewritten once or removed |
-| **Private** | Personal data is masked for readers and pseudonymised before any prompt. Restricted material never leaves the machine: a local reading model quotes the sentence that answers, with no LLM call |
-| **Accountable** | Hash-chained audit log, versioned policies, trust score with its components, review queue, stored benchmark runs |
-| **One key** | Runs on a laptop CPU with one free API key. Every model except the drafting LLM is local |
+| *Will it show someone a document they are not allowed to read?* | Role, department, sensitivity and region decide what each person can retrieve. The rule is enforced inside every database query and checked again afterwards |
+| *Will it make things up?* | Every sentence of an answer is checked against the evidence by local models. Sentences that fail are rewritten once or removed. With weak evidence it says so instead of answering |
+| *Will our confidential data be sent to an AI company?* | Personal data is replaced by placeholders before any prompt. Restricted documents are never sent at all: a local model quotes the answering sentence |
+| *Can we prove afterwards what it did?* | Every request leaves an entry in an append-only, hash-chained audit log, with the policy version that decided it |
+
+It also works as a **checker for text written elsewhere**: paste the output of any AI
+tool into *Verify Studio* and each sentence is marked supported, unsupported or
+contradicted, with the passage it was measured against.
+
+## Why it exists
+
+The first version of this project was built for a hackathon. It had the right idea and
+the right diagram, but underneath it the search returned a fixed passage, the knowledge
+graph was a hard-coded list, the "fact-checker" counted shared words, the user's
+clearance level was read from the request itself, and the evaluation printed fixed
+numbers. It asked for five to seven API keys and used one.
+
+Version 2 keeps the idea and replaces the implementation. Three rules guided it:
+
+1. **Measure, don't claim.** Every number in this document comes from a stored
+   evaluation run that you can repeat. Targets that were missed are shown as missed.
+2. **Keep it local.** Search, verification, personal-data detection and OCR all run
+   on a laptop CPU. One free API key is needed, for drafting answers.
+3. **Refusing is a valid answer.** A wrong answer or a leaked document costs more than
+   "the sources you can access do not contain this".
+
+## How it works
+
+![Architecture: eight layers, datastores, local models and one external model](docs/images/architecture.svg)
+
+The eight layers, in the order a question passes through them:
+
+1. **Users** — a web app with twelve screens (listed [below](#what-you-can-do-with-it)).
+2. **Authentication** — password with optional authenticator-app code. Who you are is
+   taken from the verified session and the database, never from what the request says.
+3. **Privacy layer** — the policy engine turns your role, department and region into an
+   *access scope*. Identifiers in the question are redacted; attempts to instruct the
+   system ("ignore previous instructions…") are flagged.
+4. **Multi-agent orchestrator** — seven agents with a fixed order, one bounded
+   correction loop, and a rule that every path ends in the audit log.
+5. **Knowledge intelligence** — three searches run inside your scope: by meaning, by
+   keywords, and through a graph of entities. Their results are fused and reranked.
+6. **Validation** — each sentence of the draft is checked: is it grounded, is it
+   entailed, are its numbers and names in the source? A trained model turns the signals
+   into one confidence value; hard rules override it where the evidence is clear.
+7. **Trust and governance** — a trust score with its components, a review queue for
+   weak answers, the audit entry.
+8. **Output** — the answer with a verdict per sentence and the quoted passages, or a
+   refusal that says why.
+
+![What happens to one question: the seven agents and their exits](docs/images/request-flow.svg)
+
+Three design choices do most of the work:
+
+* **Access is a filter, not a check.** Asking "may this user read this document?" once
+  per document cannot be applied inside a vector search. Instead the policy returns a
+  scope, and the scope is compiled into the query of each datastore (Qdrant, Neo4j,
+  Postgres). Documents outside it are never candidates.
+* **Small verifiers, not one big judge.** An LLM checking an LLM is slow and shares its
+  blind spots. Four small local models plus literal checks are fast and independent;
+  the LLM is asked only about sentences the local models are unsure of, and must
+  return a verbatim quote that is then checked.
+* **An egress ceiling.** Evidence above a configured sensitivity is never put in a
+  prompt. A local reading model finds the answering sentence and quotes it. It can
+  also find *no* answer, in which case nothing is quoted.
+
+More detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). The reasoning behind each
+choice, including what was tried and rejected: [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Measured results
 
-Everything below was measured on this repository's code on a laptop CPU (i7-1360P,
-16 GB RAM, no GPU). Each run is stored and shown on the **Reports** page, and can be
-reproduced with the commands in [docs/RUNBOOK.md](docs/RUNBOOK.md).
+Measured on this repository's code on a laptop CPU (i7-1360P, 16 GB RAM, no GPU).
+Full report with method and caveats: [docs/RESULTS.md](docs/RESULTS.md).
 
-### Whole pipeline — 65 golden questions over 1,744 documents
+### The whole pipeline — 65 questions over 1,744 documents
 
 | | Result | Target |
 |---|---|---|
-| Answerable questions answered correctly | **53 of 55** (96.4 %); 0 wrong, 2 declined | ≥ 85 % |
+| Answerable questions answered correctly | **53 of 55** (96.4 %) — 0 wrong, 2 declined | ≥ 85 % |
 | Unanswerable questions declined | **10 of 10** | ≥ 80 % |
 | Sentences in final answers that are verified | 95.1 % | ≥ 95 % |
 | Restricted facts leaked to roles without access | **0** | 0 |
 | Median response time | 6.1 s (95th percentile 13.7 s) | ≤ 10 s |
-| LLM calls | 50 for 77 runs; 17 answers were quoted locally with none | ≤ 4 per question |
 
 ### Access control — 28 planted facts, asked as every role
 
-| | Result |
-|---|---|
-| Unauthorised attempts | 149 |
-| Leaks (planted value in any returned passage) | **0** |
-| Authorised lookups that found the fact | 47 of 47 |
+**149 unauthorised attempts, 0 leaks.** All 47 authorised lookups found the fact.
 
-### Retrieval — is the passage with the answer in the top 8?
+### Does the verifier catch unsupported sentences?
 
-| Configuration | Recall@8 | MRR |
-|---|---|---|
-| Meaning (dense) only | 92.7 % | 0.900 |
-| Keywords (BM25) only | 100 % | 0.975 |
-| Meaning + keywords | 100 % | 0.944 |
-| + graph, before reranking | 100 % | 0.805 |
-| Full pipeline, reranked | **100 %** | **0.977** |
+![Share of real errors caught by v1, a single grounding model and the v2 cascade on three benchmarks](docs/images/verifier-benchmarks.svg)
 
-The graph retriever does not help on these single-fact questions (it lowers the order
-before reranking, which then repairs it). It is there for questions that need two
-documents joined by an entity; that case is not measured here.
-
-### Verifier — does it catch unsupported sentences?
-
-Held-out data, split by source document. "v1" is the word-overlap check of the first
-version of this project, reproduced on the same sentences.
-
-| Benchmark | | Errors caught | False alarms | AUROC |
+| Benchmark (held out) | v1 | Single model | **v2** | v2 false alarms |
 |---|---|---|---|---|
-| **RAGTruth** — human-annotated errors in real LLM answers (846 sentences) | v2 | **77.5 %** | 14.0 % | **0.916** |
-| | single grounding model | 58.4 % | 14.4 % | 0.817 |
-| | v1 | 18.0 % | 8.2 % | 0.726 |
-| **Injected errors** in this corpus (485 sentences) | v2 | **95.2 %** | 0.0 % | **0.994** |
-| | single grounding model | 76.0 % | 0.0 % | 0.952 |
-| | v1 | 46.3 % | 0.0 % | 0.772 |
-| **HaluEval** — never used for fitting (245 answers) | v2 | **70.3 %** | 18.5 % | 0.765 |
-| | v1 | 10.7 % | 3.2 % | 0.802 |
+| RAGTruth — human-annotated errors in real LLM answers | 18.0 % | 58.4 % | **77.5 %** | 14.0 % |
+| Injected errors in this corpus | 46.3 % | 76.0 % | **95.2 %** | 0.0 % |
+| HaluEval — never used for fitting | 10.7 % | 60.3 % | **70.3 %** | 18.5 % |
 
-By kind of injected error, v2 catches: a changed number 100 %, a flipped meaning 93 %,
-an unrelated true statement 98 %, a swapped name or entity 84 %. Version 1 caught none of
-the first, second and fourth kinds.
+"v1" is the word-overlap check of the first version, reproduced on the same sentences.
 
-What these numbers do not show:
+![Errors caught by kind: changed number, flipped meaning, swapped name, unrelated statement](docs/images/verifier-by-error-type.svg)
 
-* On RAGTruth, at answer level (flag the answer if any sentence is flagged), F1 is 0.50
-  against a target of 0.70 that was set before measuring. Small CPU models do not reach
-  it; the target is left in place and shown as not met.
-* Roughly one supported sentence in seven is flagged on RAGTruth. In the answer pipeline
-  such a sentence gets a second opinion from the LLM judge; in Verify Studio the reader
-  sees the passage and decides.
-* The golden questions were written for the synthetic company documents by the same
+### Retrieval — is the passage with the answer among the top 8?
+
+**100 %** of the time with the full pipeline, at rank 1 in 96 % of cases (MRR 0.977).
+
+### What these numbers do not show
+
+* About one correct sentence in seven is flagged on RAGTruth. In the answer pipeline a
+  flagged sentence gets a second opinion; in Verify Studio the reader sees the passage.
+* One target set before measuring was missed: answer-level F1 on RAGTruth is 0.50
+  against 0.70. It is left in place and shown as not met.
+* The 65 questions were written for the synthetic company documents by the same
   process that built the system. They show the pipeline works end to end, not how it
-  performs on your documents.
-
-
+  will perform on your documents — see [Testing with your own data](#testing-with-your-own-data).
 
 ## What you can do with it
 
@@ -93,37 +143,36 @@ What these numbers do not show:
 |---|---|
 | **Ask** | Question → live view of the seven agents → answer with per-sentence verdicts, citations with highlighted quotes, trust score, reasoning, policy decision, downloadable report |
 | **Verify Studio** | Paste any text — from this or any other tool — and check it sentence by sentence against the knowledge base or a reference you paste |
-| **Compare** | The same question as two personas, side by side |
-| **Sources** | Upload (PDF, DOCX, PPTX, Markdown, HTML, text, e-mail; scanned PDFs and images via local OCR), suggested sensitivity, ingestion progress per stage, passages with personal data masked |
-| **Graph** | Explore entities and relations extracted from the documents you can read |
-| **Policies** | Role ceilings, egress ceiling, simulator ("what can this user see, and why?"), version history |
+| **Compare roles** | The same question as two people, side by side. You can preview only as someone whose access lies within your own |
+| **Sources** | Upload (PDF, DOCX, PPTX, Markdown, HTML, text, e-mail; scanned PDFs and images via local OCR), suggested sensitivity, ingestion progress, passages with personal data masked |
+| **Knowledge graph** | Explore entities and relations extracted from the documents you can read |
+| **Policies** | Role limits, egress ceiling, simulator ("what can this user see, and why?"), version history |
 | **Users** | Accounts, roles, departments, regions, MFA status |
 | **Audit** | Every decision, filterable; one-click verification of the hash chain |
-| **Monitoring** | Datastore health, model status, LLM usage and quota, latency per agent |
+| **Monitoring** | Datastore health, model status, LLM usage, time per agent |
 | **Reports / Analytics** | Verdict distribution, review queue, benchmark runs with pass/fail gates; usage and trust over time |
 | **Settings** | Profile, theme, MFA enrolment with recovery codes, sessions |
 
-## Architecture
+A guided tour, checked against the running system: [docs/DEMO.md](docs/DEMO.md).
 
-```
- Users ─► Authentication ─► Privacy layer ─► Multi-agent orchestrator
-                                                   │
-              ┌────────────────────────────────────┤
-              ▼                                    ▼
-   Knowledge intelligence                  Validation & fact-checking
-   dense + keyword + graph search          grounding · NLI · spans · literal checks
-   fusion · reranking                      calibrated confidence · judge · correction
-              └────────────────┬───────────────────┘
-                               ▼
-                    Trust & governance ─► Output
-                    trust score · audit chain · review
-```
+## Technology, and why each piece was chosen
 
-Seven agents in a LangGraph state machine: **privacy → retrieval ∥ graph reasoning →
-verification → response generation → fact checking (one correction loop) → governance**.
-
-Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) ·
-why each choice was made: [docs/DECISIONS.md](docs/DECISIONS.md)
+| Part | Technology | Why |
+|---|---|---|
+| API | FastAPI, one service with ten modules | seven "agents" do not need seven services; modules keep the boundaries without the network hops |
+| Orchestration | LangGraph | parallel branches, a bounded loop and "every path ends in the audit" are explicit and testable |
+| Access policy | Open Policy Agent (Rego) | policy as code, unit-tested, versioned; returns a scope that becomes a query filter |
+| Vector search | Qdrant | dense and keyword vectors in one collection, filtered inside the search |
+| Graph | Neo4j Community | real traversals with an access predicate on every hop |
+| Records | PostgreSQL | users, documents, runs, claims, audit log, policy versions, job queue |
+| Limits and cache | Redis | rate limits, LLM response cache, provider cool-downs |
+| Embeddings, reranker | bge-small, BM25, MiniLM cross-encoder (ONNX) | fast on CPU, no key, no cost per query |
+| Verification | HHEM, DeBERTa-v3 NLI, LettuceDetect, a trained logistic calibrator | independent small models; calibrated so that 0.8 means about 80 % |
+| Quoting restricted material | RoBERTa reader (SQuAD 2.0) | finds the answering words, and knows when there are none |
+| Personal data | Presidio + spaCy | detection, masking and reversible placeholders |
+| OCR | RapidOCR (ONNX) | scanned pages and images, 15 MB, local |
+| Drafting | Gemini free tier over plain HTTP | the only external dependency; optional fallbacks: Groq, Cerebras, a local Ollama model |
+| Web app | Next.js, React, Tailwind | twelve screens, light and dark |
 
 ## Quick start
 
@@ -152,10 +201,9 @@ cd frontend && npm ci && npm run build && npm run start
 ```
 
 Open http://localhost:3000 and sign in as a demo persona (password: `DEMO_PASSWORD` in
-`.env`). A guided tour is in [docs/DEMO.md](docs/DEMO.md); operations and
-troubleshooting are in [docs/RUNBOOK.md](docs/RUNBOOK.md).
+`.env`). Operations and troubleshooting: [docs/RUNBOOK.md](docs/RUNBOOK.md).
 
-## Keys
+### Keys
 
 | Key | Required | Used for |
 |---|---|---|
@@ -165,33 +213,43 @@ troubleshooting are in [docs/RUNBOOK.md](docs/RUNBOOK.md).
 
 Every other secret in `.env` is generated locally by `scripts/init_env.py`.
 
-## Data
+### Data that ships with the demo
 
-| Collection | Source | Licence | Use |
-|---|---|---|---|
-| Handbook | GitLab Handbook (450 pages) | upstream licence, attribution kept | public and internal policy text |
-| Regulations | GDPR, India DPDP Act, HIPAA Part 164, Sarbanes-Oxley, NIST CSF 2.0, NIST AI RMF, NIST SP 800-171 | public law / public domain | compliance questions |
-| Contracts | CUAD | CC BY 4.0 | long legal documents |
-| E-mail | Enron corpus sample | public record | messy real correspondence |
-| Aurelia Systems | generated by `scripts/generate_synthetic.py` | synthetic | confidential material no company publishes: pay bands, board minutes, an acquisition memo, an incident report |
-| RAGTruth, HaluEval | public benchmarks | see upstream | training and testing the verifier (not ingested) |
+| Collection | Source | Use |
+|---|---|---|
+| Handbook | GitLab Handbook (450 pages) | public and internal policy text |
+| Regulations | GDPR, India DPDP Act, HIPAA Part 164, Sarbanes-Oxley, NIST CSF 2.0, NIST AI RMF, NIST SP 800-171 | compliance questions |
+| Contracts | CUAD (49 contracts) | long legal documents |
+| E-mail | Enron corpus sample (1,099 messages) | messy real correspondence |
+| Aurelia Systems | generated by `scripts/generate_synthetic.py` | confidential material no company publishes: pay bands, board minutes, an acquisition memo, an incident report |
+| RAGTruth, HaluEval | public benchmarks | training and testing the verifier (not ingested) |
 
 All of it is downloaded or generated by the scripts; nothing has to be collected by hand.
-Your own documents go in through **Sources → Upload**.
+
+## Testing with your own data
+
+The demo proves the machinery. The real test is your documents and your questions.
+[docs/TEST_DATA.md](docs/TEST_DATA.md) explains what kind of data tests which part of
+the system, where to get it free, and how to load it:
+
+* a few documents — **Sources → Upload** in the web app;
+* a folder — put the files and a `manifest.jsonl` in `data/custom/` and run
+  `python scripts/ingest_corpus.py --collections custom`;
+* your own questions — `python scripts/run_eval.py --suites end_to_end --golden my-questions.jsonl`.
 
 ## Repository
 
 ```
-backend/     FastAPI service (src/pramana), migrations, tests
+backend/     FastAPI service (src/pramana), migrations, 140 tests
 frontend/    Next.js web app
 policies/    Access policy (Rego) and its tests
-scripts/     Setup, data, ingestion, training and evaluation commands
+scripts/     Setup, data, ingestion, training, evaluation and figure commands
 eval/        Golden questions for the demo tenant
-docs/        Architecture, decisions, runbook, demo walkthrough
+docs/        Architecture, decisions, results, test data, runbook, demo walkthrough
 compose.yaml Datastores; `--profile app` adds the API, worker and web app
 ```
 
-## Quality checks
+Quality checks:
 
 ```bash
 cd backend && uv run ruff check src tests ../scripts && uv run mypy && uv run pytest
@@ -200,11 +258,31 @@ cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 
 ## Limits
 
-* Scanned pages are read by a small OCR model. It has been tested only on clean printed pages; tables in scans lose their structure.
+* The verifier is good, not perfect: on real LLM answers it misses about one error in
+  four and flags about one correct sentence in seven. A swapped name is the hardest
+  error for it (84 % caught).
+* Scanned pages are read by a small OCR model, tested only on clean printed pages;
+  tables in scans lose their structure.
 * English only: the local models are English models.
-* The free LLM tier is rate-limited; its exact quota was not measured. The longest run here made 50 calls in about ten minutes without being throttled.
-* Answers from restricted material are a quoted sentence: they do not combine passages, and questions whose answer sits in a restricted table are declined.
-* Built and measured on one laptop; not load-tested. Both container images build
-  (web 293 MB, serves pages; backend 3.9 GB with CPU-only PyTorch, imports the application), but the full
-  `--profile app` stack and the CI workflow have not been run: the development machine
-  had no memory left for the former and the repository has no remote for the latter.
+* Answers from restricted material are a quoted sentence: they do not combine passages,
+  and a question whose answer sits in a restricted table is declined.
+* An administrator can change the policy, including the limits of their own role. The
+  change is recorded in the audit log but not blocked; a production deployment should
+  require a second approver.
+* The free LLM tier is rate-limited; its exact quota was not measured. The longest run
+  here made 50 calls in about ten minutes without being throttled.
+* Built and measured on one laptop; not load-tested. Both container images build, but
+  the full `--profile app` stack and the CI workflow have not been run: the development
+  machine had no memory left for the former and the repository has no remote for the
+  latter.
+
+## Documentation
+
+| Document | What it answers |
+|---|---|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How each layer works: access control, privacy, retrieval, validation, governance |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | Why each choice was made, what was tried and rejected, where the build departs from the plan |
+| [docs/RESULTS.md](docs/RESULTS.md) | Every measurement, how it was made, how to repeat it, and what it does not show |
+| [docs/TEST_DATA.md](docs/TEST_DATA.md) | What data to test with, where to find it, how to load it and write questions for it |
+| [docs/DEMO.md](docs/DEMO.md) | A guided tour with the demo personas |
+| [docs/RUNBOOK.md](docs/RUNBOOK.md) | Setup, start and stop, training, operations, troubleshooting |

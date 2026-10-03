@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 440" width="980" height="440" role="img" aria-label="Unsupported sentences caught">
+<rect width="980" height="440" rx="12" fill="#ffffff" stroke="#d9dee6"/>
+<text x="40.0" y="40.0" font-size="20" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Unsupported sentences caught</text>
+<text x="40.0" y="62.0" font-size="13" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Share of real errors flagged, on held-out data. Higher is better.</text>
+<rect x="40" y="78" width="12" height="12" rx="3" fill="#eb6834"/>
+<text x="58.0" y="89.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">v1 word overlap</text>
+<rect x="179" y="78" width="12" height="12" rx="3" fill="#2a78d6"/>
+<text x="197.0" y="89.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">single grounding model</text>
+<rect x="367" y="78" width="12" height="12" rx="3" fill="#1baf7a"/>
+<text x="385.0" y="89.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">v2 cascade</text>
+<line x1="70" y1="380.0" x2="950" y2="380.0" stroke="#d9dee6" stroke-width="1"/>
+<text x="60.0" y="384.0" font-size="11" fill="#8a94a3" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">0%</text>
+<line x1="70" y1="315.0" x2="950" y2="315.0" stroke="#d9dee6" stroke-width="1"/>
+<text x="60.0" y="319.0" font-size="11" fill="#8a94a3" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">25%</text>
+<line x1="70" y1="250.0" x2="950" y2="250.0" stroke="#d9dee6" stroke-width="1"/>
+<text x="60.0" y="254.0" font-size="11" fill="#8a94a3" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">50%</text>
+<line x1="70" y1="185.0" x2="950" y2="185.0" stroke="#d9dee6" stroke-width="1"/>
+<text x="60.0" y="189.0" font-size="11" fill="#8a94a3" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">75%</text>
+<line x1="70" y1="120.0" x2="950" y2="120.0" stroke="#d9dee6" stroke-width="1"/>
+<text x="60.0" y="124.0" font-size="11" fill="#8a94a3" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">100%</text>
+<path d="M145.66666666666666,380 V337.2 Q145.66666666666666,333.2 149.66666666666666,333.2 H187.66666666666666 Q191.66666666666666,333.2 191.66666666666666,337.2 V380 Z" fill="#eb6834"><title>RAGTruth real LLM answers — v1 word overlap: 18.0%</title></path>
+<text x="168.7" y="327.2" font-size="12" fill="#1b2330" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">18%</text>
+<path d="M193.66666666666666,380 V232.16 Q193.66666666666666,228.16 197.66666666666666,228.16 H235.66666666666666 Q239.66666666666666,228.16 239.66666666666666,232.16 V380 Z" fill="#2a78d6"><title>RAGTruth real LLM answers — single grounding model: 58.4%</title></path>
+<text x="216.7" y="222.2" font-size="12" fill="#1b2330" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">58%</text>
+<path d="M241.66666666666666,380 V182.5 Q241.66666666666666,178.5 245.66666666666666,178.5 H283.66666666666663 Q287.66666666666663,178.5 287.66666666666663,182.5 V380 Z" fill="#1baf7a"><title>RAGTruth real LLM answers — v2 cascade: 77.5%</title></path>
+<text x="264.7" y="172.5" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">78%</text>
+<text x="216.7" y="402.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">RAGTruth</text>
+<text x="216.7" y="418.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">real LLM answers</text>
+<path d="M439.0,380 V263.62 Q439.0,259.62 443.0,259.62 H481.0 Q485.0,259.62 485.0,263.62 V380 Z" fill="#eb6834"><title>Injected errors in this corpus — v1 word overlap: 46.3%</title></path>
+<text x="462.0" y="253.6" font-size="12" fill="#1b2330" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">46%</text>
+<path d="M487.0,380 V186.4 Q487.0,182.4 491.0,182.4 H529.0 Q533.0,182.4 533.0,186.4 V380 Z" fill="#2a78d6"><title>Injected errors in this corpus — single grounding model: 76.0%</title></path>
+<text x="510.0" y="176.4" font-size="12" fill="#1b2330" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">76%</text>
+<path d="M535.0,380 V136.48 Q535.0,132.48 539.0,132.48 H577.0 Q581.0,132.48 581.0,136.48 V380 Z" fill="#1baf7a"><title>Injected errors in this corpus — v2 cascade: 95.2%</title></path>
+<text x="558.0" y="126.5" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">95%</text>
+<text x="510.0" y="402.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">Injected errors</text>
+<text x="510.0" y="418.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">in this corpus</text>
+<path d="M732.3333333333333,380 V356.18 Q732.3333333333333,352.18 736.3333333333333,352.18 H774.3333333333333 Q778.3333333333333,352.18 778.3333333333333,356.18 V380 Z" fill="#eb6834"><title>HaluEval never used for fitting — v1 word overlap: 10.7%</title></path>
+<text x="755.3" y="346.2" font-size="12" fill="#1b2330" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">11%</text>
+<path d="M780.3333333333333,380 V227.22 Q780.3333333333333,223.22 784.3333333333333,223.22 H822.3333333333333 Q826.3333333333333,223.22 826.3333333333333,227.22 V380 Z" fill="#2a78d6"><title>HaluEval never used for fitting — single grounding model: 60.3%</title></path>
+<text x="803.3" y="217.2" font-size="12" fill="#1b2330" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">60%</text>
+<path d="M828.3333333333333,380 V201.22 Q828.3333333333333,197.22 832.3333333333333,197.22 H870.3333333333333 Q874.3333333333333,197.22 874.3333333333333,201.22 V380 Z" fill="#1baf7a"><title>HaluEval never used for fitting — v2 cascade: 70.3%</title></path>
+<text x="851.3" y="191.2" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">70%</text>
+<text x="803.3" y="402.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">HaluEval</text>
+<text x="803.3" y="418.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">never used for fitting</text>
+</svg>

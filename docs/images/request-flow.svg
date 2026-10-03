@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 638" width="980" height="638" role="img" aria-label="Request flow through the seven agents">
+<rect width="980" height="638" rx="12" fill="#ffffff" stroke="#d9dee6"/>
+<text x="40.0" y="40.0" font-size="20" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">What happens to one question</text>
+<text x="40.0" y="62.0" font-size="13" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Seven agents. Every path, including refusals and failures, ends in the audit log.</text>
+<text x="330.0" y="90.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">Question from a signed-in user</text>
+<line x1="330" y1="98" x2="330" y2="112" stroke="#8a94a3" stroke-width="1.5"/><path d="M325,111 L330,118 L335,111 Z" fill="#8a94a3"/>
+<rect x="140.0" y="118" width="380" height="58" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="140.0" y="118" width="6" height="58" rx="3" fill="#eb6834"/>
+<text x="158.0" y="142.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">1  Privacy agent</text>
+<text x="158.0" y="162.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">access scope from policy · redact identifiers · flag injection</text>
+<rect x="600" y="118" width="340" height="42" rx="8" fill="#ffffff" stroke="#d9dee6"/>
+<text x="614.0" y="138.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">No scope, or no permission</text>
+<text x="614.0" y="155.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">→ refused, recorded</text>
+<line x1="520.0" y1="147" x2="594" y2="147" stroke="#8a94a3" stroke-width="1.5"/><path d="M593,142 L600,147 L593,152 Z" fill="#8a94a3"/>
+<line x1="330" y1="176" x2="330" y2="192" stroke="#8a94a3" stroke-width="1.5"/><path d="M325,191 L330,198 L335,191 Z" fill="#8a94a3"/>
+<rect x="140.0" y="198" width="182.0" height="58" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="140.0" y="198" width="6" height="58" rx="3" fill="#1baf7a"/>
+<text x="156.0" y="222.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">2  Retrieval agent</text>
+<text x="156.0" y="242.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">meaning + keywords</text>
+<rect x="338.0" y="198" width="182.0" height="58" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="338.0" y="198" width="6" height="58" rx="3" fill="#1baf7a"/>
+<text x="354.0" y="222.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">3  Graph reasoning agent</text>
+<text x="354.0" y="242.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">entities → PageRank</text>
+<text x="530.0" y="232.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">in parallel, both inside the scope</text>
+<line x1="330" y1="256" x2="330" y2="272" stroke="#8a94a3" stroke-width="1.5"/><path d="M325,271 L330,278 L335,271 Z" fill="#8a94a3"/>
+<rect x="140.0" y="278" width="380" height="58" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="140.0" y="278" width="6" height="58" rx="3" fill="#1baf7a"/>
+<text x="158.0" y="302.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">4  Verification agent</text>
+<text x="158.0" y="322.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">fuse · rerank · re-check access · is the evidence good enough?</text>
+<rect x="600" y="278" width="340" height="58" rx="8" fill="#ffffff" stroke="#d9dee6"/>
+<text x="614.0" y="298.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Evidence too weak</text>
+<text x="614.0" y="315.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">→ “not enough information”, plus how many</text>
+<text x="614.0" y="331.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">relevant sources were withheld (if policy allows)</text>
+<line x1="520.0" y1="307" x2="594" y2="307" stroke="#8a94a3" stroke-width="1.5"/><path d="M593,302 L600,307 L593,312 Z" fill="#8a94a3"/>
+<line x1="330" y1="336" x2="330" y2="352" stroke="#8a94a3" stroke-width="1.5"/><path d="M325,351 L330,358 L335,351 Z" fill="#8a94a3"/>
+<rect x="140.0" y="358" width="380" height="58" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="140.0" y="358" width="6" height="58" rx="3" fill="#eb6834"/>
+<text x="158.0" y="382.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">5  Response generation agent</text>
+<text x="158.0" y="402.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">evidence may leave the machine?  yes → LLM   no → quote locally</text>
+<rect x="600" y="358" width="340" height="74" rx="8" fill="#ffffff" stroke="#d9dee6"/>
+<text x="614.0" y="378.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Evidence above the egress ceiling</text>
+<text x="614.0" y="395.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">→ a local reader quotes the answering sentence</text>
+<text x="614.0" y="411.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">→ if none: LLM with the permitted passages only</text>
+<text x="614.0" y="427.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">→ otherwise decline</text>
+<line x1="520.0" y1="387" x2="594" y2="387" stroke="#8a94a3" stroke-width="1.5"/><path d="M593,382 L600,387 L593,392 Z" fill="#8a94a3"/>
+<line x1="330" y1="416" x2="330" y2="432" stroke="#8a94a3" stroke-width="1.5"/><path d="M325,431 L330,438 L335,431 Z" fill="#8a94a3"/>
+<rect x="140.0" y="438" width="380" height="58" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="140.0" y="438" width="6" height="58" rx="3" fill="#1baf7a"/>
+<text x="158.0" y="462.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">6  Fact-checking agent</text>
+<text x="158.0" y="482.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">verdict per sentence · rewrite once · remove what still fails</text>
+<path d="M140.0,467.0 H106.0 V387.0 H134.0" fill="none" stroke="#8a94a3" stroke-width="1.5"/><path d="M133.0,382.0 L140.0,387.0 L133.0,392.0 Z" fill="#8a94a3"/>
+<text x="98.0" y="427.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">one</text>
+<text x="98.0" y="441.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">rewrite</text>
+<rect x="600" y="438" width="340" height="42" rx="8" fill="#ffffff" stroke="#d9dee6"/>
+<text x="614.0" y="458.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Nothing verifiable is left</text>
+<text x="614.0" y="475.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">→ no answer is given</text>
+<line x1="520.0" y1="467" x2="594" y2="467" stroke="#8a94a3" stroke-width="1.5"/><path d="M593,462 L600,467 L593,472 Z" fill="#8a94a3"/>
+<line x1="330" y1="496" x2="330" y2="512" stroke="#8a94a3" stroke-width="1.5"/><path d="M325,511 L330,518 L335,511 Z" fill="#8a94a3"/>
+<rect x="140.0" y="518" width="380" height="58" rx="8" fill="#f5f7fa" stroke="#d9dee6"/>
+<rect x="140.0" y="518" width="6" height="58" rx="3" fill="#2a78d6"/>
+<text x="158.0" y="542.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">7  Governance and audit agent</text>
+<text x="158.0" y="562.0" font-size="11" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">restore names for permitted readers · trust score · audit entry</text>
+<line x1="330" y1="576" x2="330" y2="592" stroke="#8a94a3" stroke-width="1.5"/><path d="M325,591 L330,598 L335,591 Z" fill="#8a94a3"/>
+<text x="330.0" y="612.0" font-size="13" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">Verified answer with citations — or a recorded refusal</text>
+</svg>

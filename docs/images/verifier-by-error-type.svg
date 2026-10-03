@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 440" width="980" height="440" role="img" aria-label="Errors caught, by kind of error">
+<rect width="980" height="440" rx="12" fill="#ffffff" stroke="#d9dee6"/>
+<text x="40.0" y="40.0" font-size="20" fill="#1b2330" font-weight="600" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Errors caught, by kind of error</text>
+<text x="40.0" y="62.0" font-size="13" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">Sentences from this corpus with one known error injected. Held-out half.</text>
+<rect x="40" y="78" width="12" height="12" rx="3" fill="#eb6834"/>
+<text x="58.0" y="89.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">v1 word overlap</text>
+<rect x="179" y="78" width="12" height="12" rx="3" fill="#1baf7a"/>
+<text x="197.0" y="89.0" font-size="12" fill="#5a6677" font-weight="400" text-anchor="start" font-family="Segoe UI, Helvetica, Arial, sans-serif">v2 cascade</text>
+<line x1="70" y1="380.0" x2="950" y2="380.0" stroke="#d9dee6" stroke-width="1"/>
+<text x="60.0" y="384.0" font-size="11" fill="#8a94a3" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">0%</text>
+<line x1="70" y1="315.0" x2="950" y2="315.0" stroke="#d9dee6" stroke-width="1"/>
+<text x="60.0" y="319.0" font-size="11" fill="#8a94a3" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">25%</text>
+<line x1="70" y1="250.0" x2="950" y2="250.0" stroke="#d9dee6" stroke-width="1"/>
+<text x="60.0" y="254.0" font-size="11" fill="#8a94a3" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">50%</text>
+<line x1="70" y1="185.0" x2="950" y2="185.0" stroke="#d9dee6" stroke-width="1"/>
+<text x="60.0" y="189.0" font-size="11" fill="#8a94a3" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">75%</text>
+<line x1="70" y1="120.0" x2="950" y2="120.0" stroke="#d9dee6" stroke-width="1"/>
+<text x="60.0" y="124.0" font-size="11" fill="#8a94a3" font-weight="400" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif">100%</text>
+<path d="M133.0,380 V380 Q133.0,378 135.0,378 H177.0 Q179.0,378 179.0,380 V380 Z" fill="#eb6834"><title>Changed number — v1 word overlap: 0.0%</title></path>
+<text x="156.0" y="372.0" font-size="12" fill="#1b2330" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">0%</text>
+<path d="M181.0,380 V124.0 Q181.0,120.0 185.0,120.0 H223.0 Q227.0,120.0 227.0,124.0 V380 Z" fill="#1baf7a"><title>Changed number — v2 cascade: 100.0%</title></path>
+<text x="204.0" y="114.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">100%</text>
+<text x="180.0" y="402.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">Changed number</text>
+<path d="M353.0,380 V380 Q353.0,378 355.0,378 H397.0 Q399.0,378 399.0,380 V380 Z" fill="#eb6834"><title>Flipped meaning — v1 word overlap: 0.0%</title></path>
+<text x="376.0" y="372.0" font-size="12" fill="#1b2330" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">0%</text>
+<path d="M401.0,380 V141.42 Q401.0,137.42 405.0,137.42 H443.0 Q447.0,137.42 447.0,141.42 V380 Z" fill="#1baf7a"><title>Flipped meaning — v2 cascade: 93.3%</title></path>
+<text x="424.0" y="131.4" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">93%</text>
+<text x="400.0" y="402.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">Flipped meaning</text>
+<path d="M573.0,380 V380 Q573.0,378 575.0,378 H617.0 Q619.0,378 619.0,380 V380 Z" fill="#eb6834"><title>Swapped name or entity — v1 word overlap: 0.0%</title></path>
+<text x="596.0" y="372.0" font-size="12" fill="#1b2330" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">0%</text>
+<path d="M621.0,380 V165.6 Q621.0,161.6 625.0,161.6 H663.0 Q667.0,161.6 667.0,165.6 V380 Z" fill="#1baf7a"><title>Swapped name or entity — v2 cascade: 84.0%</title></path>
+<text x="644.0" y="155.6" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">84%</text>
+<text x="620.0" y="402.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">Swapped name or entity</text>
+<path d="M793.0,380 V162.22 Q793.0,158.22 797.0,158.22 H835.0 Q839.0,158.22 839.0,162.22 V380 Z" fill="#eb6834"><title>Unrelated true statement — v1 word overlap: 85.3%</title></path>
+<text x="816.0" y="152.2" font-size="12" fill="#1b2330" font-weight="400" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">85%</text>
+<path d="M841.0,380 V128.68 Q841.0,124.68 845.0,124.68 H883.0 Q887.0,124.68 887.0,128.68 V380 Z" fill="#1baf7a"><title>Unrelated true statement — v2 cascade: 98.2%</title></path>
+<text x="864.0" y="118.7" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">98%</text>
+<text x="840.0" y="402.0" font-size="12" fill="#1b2330" font-weight="600" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">Unrelated true statement</text>
+</svg>

@@ -32,3 +32,4 @@ data/storage/
 .idea/
 Thumbs.db
 .DS_Store
+data/custom/

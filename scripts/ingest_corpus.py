@@ -36,7 +36,13 @@ async def register_all(collections: set[str] | None) -> int:
     data_dir = get_settings().data_dir
     items: list[tuple[NewDocument, str | None, str]] = []  # document, supersedes path, own path
 
-    for manifest in (data_dir / "synthetic" / "manifest.jsonl", data_dir / "raw" / "manifest.jsonl"):
+    # data/custom is for your own documents: put the files there with a manifest.jsonl beside them
+    # (see docs/TEST_DATA.md).
+    for manifest in (
+        data_dir / "synthetic" / "manifest.jsonl",
+        data_dir / "raw" / "manifest.jsonl",
+        data_dir / "custom" / "manifest.jsonl",
+    ):
         if manifest.exists():
             for new, row in manifest_documents(data_dir, manifest):
                 items.append((new, row.get("supersedes"), row["path"]))
