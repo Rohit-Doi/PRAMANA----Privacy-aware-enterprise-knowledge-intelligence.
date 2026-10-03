@@ -1,0 +1,73 @@
+MARROWGATE QUILL MUTUAL
+IT CHANGE MANAGEMENT PROCEDURE
+Reference: IT-PROC-11
+Effective from: 3 November 2025
+Owner: Chief Information Officer
+
+1. PURPOSE
+
+This procedure controls every change to the Society's production IT systems so that changes are tested, approved and reversible. It applies to the Halyard core banking system, the QuillOnline internet and mobile banking service, the branch network, the card systems and all supporting infrastructure.
+
+2. CHANGE CLASSES
+
+Every change is given one of four classes when it is raised.
+
+Class C1 - Standard change. Pre-approved, low risk, repeatable. Example: adding a user to a group. Lead time: none. Approver: IT Service Desk lead.
+
+Class C2 - Normal change. Tested change to one system. Lead time: 4 working days. Approver: Change Advisory Board.
+
+Class C3 - Major change. Affects more than one system or any member-facing service. Lead time: 11 working days. Approver: Change Advisory Board and the Chief Information Officer.
+
+Class C4 - Emergency change. Needed to restore service or close a critical security weakness. Lead time: none. Approver: the Chief Information Officer, or in their absence the Head of Information Security. Must be reviewed by the Change Advisory Board at its next meeting.
+
+3. CHANGE ADVISORY BOARD
+
+3.1 The Change Advisory Board (CAB) meets every Wednesday at 10:15.
+3.2 The CAB is chaired by the IT Service Delivery Manager. A representative of the information security team must be present for the CAB to decide any C3 change.
+3.3 Change requests must be submitted by 12:00 on the Monday before the meeting.
+3.4 A change that has not been implemented within 25 working days of approval lapses and must be re-submitted.
+
+4. MAINTENANCE WINDOW
+
+4.1 The weekly maintenance window is Sunday from 01:30 to 05:00.
+4.2 C2 and C3 changes to Halyard and QuillOnline may be implemented only in the maintenance window.
+4.3 QuillOnline must display a notice to members at least 3 days before any planned outage longer than 40 minutes.
+
+5. CHANGE FREEZES
+
+No C2 or C3 change may be implemented during a freeze. C4 changes remain possible.
+
+5.1 Year-end freeze: from 14 December to 4 January inclusive.
+5.2 AGM freeze: the 6 working days before the Annual General Meeting, because member voting runs on QuillOnline.
+5.3 Month-end freeze: the last 2 working days of each month for changes to Halyard only.
+5.4 The Chief Information Officer may declare an additional freeze at any time.
+
+6. TESTING AND BACK-OUT
+
+6.1 Every C2 and C3 change needs a written test record and a back-out plan.
+6.2 A C3 change must be rehearsed in the pre-production environment at least once.
+6.3 If a change cannot be completed or backed out by 04:15 in the maintenance window, the on-call engineer must start the back-out plan.
+
+7. RECOVERY OBJECTIVES
+
+The recovery objectives that a change must not weaken are:
+
+Halyard core banking: recovery time 5 hours, maximum data loss 20 minutes.
+QuillOnline: recovery time 3 hours, maximum data loss 20 minutes.
+Card authorisation: recovery time 45 minutes, maximum data loss nil.
+Branch network: recovery time 8 hours.
+Email and office systems: recovery time 26 hours.
+
+8. AFTER THE CHANGE
+
+8.1 A post-implementation review is completed within 8 working days for every C3 and C4 change.
+8.2 A failed change is recorded as an incident.
+8.3 The change success rate is reported monthly. The target is 96.5 percent of changes implemented without a back-out or an incident. In the twelve months to September 2025 the rate was 94.8 percent.
+
+9. ON-CALL
+
+IT engineers on the call rota are paid the on-call allowance for the band named in their area staff terms supplement. During a major incident standby declared by the Chief Information Officer, the standby band applies instead.
+
+10. REVIEW
+
+This procedure is reviewed every 12 months by the Chief Information Officer.
