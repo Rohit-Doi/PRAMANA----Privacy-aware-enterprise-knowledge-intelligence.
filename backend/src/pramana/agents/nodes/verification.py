@@ -15,6 +15,7 @@ from pramana.agents.state import AgentDeps, PipelineState
 from pramana.privacy.pii import mask_for_reader
 from pramana.privacy.risk import injection_flags
 from pramana.retrieval.retriever import Evidence
+from pramana.shared.types import Sensitivity
 
 
 async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
@@ -74,6 +75,15 @@ async def run(state: PipelineState, deps: AgentDeps) -> dict[str, Any]:
 
     if route == "external":
         pseudonymizer = state["pseudonymizer"]
+        if any(e.sensitivity_rank >= Sensitivity.CONFIDENTIAL for e in reader_evidence):
+            # A name recognised in the question gets its placeholder first, so that the same name in
+            # a passage is replaced by it even where the passage's wording hides that it is a name.
+            pseudonymizer.protect(
+                state["query_redacted"],
+                sensitivity_rank=int(Sensitivity.CONFIDENTIAL),
+                pseudonymize_contact=egress.pseudonymize_names,
+                restorable_ids=scope.can_read_pii,
+            )
         llm_evidence = [
             replace(
                 e,

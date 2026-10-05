@@ -41,6 +41,7 @@ SUPERSEDED_PENALTY = 0.25
 CALCULATED_CONFIDENCE = 0.8
 MIN_PARTNER_OVERLAP = 0.15
 JUDGE_OVERLAP = 0.7
+REGIONLESS = ("", "global", "all")
 EXTRA_SOURCES_PER_CLAIM = 2
 WIDE_CONTEXT_PASSAGES = 2
 WIDE_CONTEXT_CHARS = 2400
@@ -673,11 +674,16 @@ def source_header(evidence: Any) -> str:
     """One line naming the document and section a passage belongs to."""
     title = (getattr(evidence, "title", "") or "").strip()
     section = (getattr(evidence, "section_path", "") or "").strip()
+    # The drafting model is told which region a regional document is for; the verifier reads the same.
+    region = (getattr(evidence, "region", "") or "").strip().lower()
+    applies = f"This document applies to staff in the {region.upper()} region. " if region not in REGIONLESS else ""
     if not title and not section:
-        return ""
+        return applies
     if section and section != title and not section.startswith(title):
-        return f'From the document "{title}", section "{section}":\n' if title else f'Section "{section}":\n'
-    return f'From the document "{section or title}":\n'
+        head = f'From the document "{title}", section "{section}":\n' if title else f'Section "{section}":\n'
+    else:
+        head = f'From the document "{section or title}":\n'
+    return applies + head
 
 
 _SURROGATE_NAMES = (

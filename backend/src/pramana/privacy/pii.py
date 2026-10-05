@@ -40,6 +40,7 @@ HIGH_RISK = frozenset(
 CONTACT = frozenset({"PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "EMPLOYEE_ID", "IP_ADDRESS"})
 _SYSTEM_MARKER = re.compile(r"\[(?:E\d+(?:\s*[,;]\s*E\d+)*|G\d+|[A-Z_]+_\d+|REDACTED:[A-Z_]+)\]")
 ALL_ENTITIES = sorted(HIGH_RISK | CONTACT)
+MIN_KNOWN_VALUE_CHARS = 5
 
 # Capitalised phrases that statistical NER regularly mistakes for people in policy text.
 _NOT_A_PERSON = frozenset(
@@ -264,7 +265,7 @@ class Pseudonymizer:
         ``restorable_ids`` (the reader holds ``pii:read``) it is replaced by a numbered placeholder
         instead, so that the answer can name it and the value is put back locally for that reader.
         """
-        findings = self.engine.analyze(text)
+        findings = self._with_known_values(text, self.engine.analyze(text))
         contact_is_personal = pseudonymize_contact and sensitivity_rank >= Sensitivity.CONFIDENTIAL
         selected = [f for f in findings if f.high_risk or contact_is_personal]
 
@@ -276,6 +277,21 @@ class Pseudonymizer:
             return self._token(finding.entity_type, finding.text)
 
         return _replace(text, selected, label)
+
+    def _with_known_values(self, text: str, findings: list[PiiFinding]) -> list[PiiFinding]:
+        """Add every literal occurrence of a value that already has a placeholder.
+
+        Name recognition depends on context: a name found in a register row may be missed in the
+        question that asks about it. The model would then see a placeholder in one place and the
+        name in the other, and could not connect them.
+        """
+        known: list[PiiFinding] = []
+        for entity_type, value in self._reverse.values():
+            if len(value) < MIN_KNOWN_VALUE_CHARS:
+                continue
+            for match in re.finditer(rf"(?<!\w){re.escape(value)}(?!\w)", text, re.IGNORECASE):
+                known.append(PiiFinding(entity_type, match.start(), match.end(), 1.0, match.group(0)))
+        return _drop_overlaps([*findings, *known]) if known else findings
 
     def _token(self, entity_type: str, value: str) -> str:
         key = (entity_type, " ".join(value.split()).lower())

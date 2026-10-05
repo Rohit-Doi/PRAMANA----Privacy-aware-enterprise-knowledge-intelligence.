@@ -284,3 +284,23 @@ def test_a_quote_about_someone_else_is_not_an_answer() -> None:
     assert not about_the_named(["Ruairi Castellan-Moss"], row)
     assert about_the_named(["Ngozi Fairbrother-Kang"], row)
     assert about_the_named([], row)
+
+
+def test_a_name_replaced_in_a_passage_is_replaced_in_the_question_too() -> None:
+    pseudonymizer = Pseudonymizer(get_pii_engine())
+    row = "Maria Fernandez (maria.fernandez@aurelia-systems.example) is the first keyholder."
+    sent = pseudonymizer.protect(row, sensitivity_rank=Sensitivity.CONFIDENTIAL)
+    assert "[PERSON_1]" in sent
+    # Lower case, in a sentence where a name finder would not look for a person.
+    question = pseudonymizer.protect(
+        "keyholder list entry maria fernandez mobile", sensitivity_rank=Sensitivity.CONFIDENTIAL
+    )
+    assert "[PERSON_1]" in question and "fernandez" not in question.lower()
+
+
+def test_the_verifier_header_names_the_region_of_a_regional_document() -> None:
+    from pramana.validation.engine import source_header
+
+    regional = Shown("E1", "Staff terms", "Leave is 27 days.", "emea")
+    assert "EMEA region" in source_header(regional)
+    assert "region" not in source_header(Shown("E2", "Handbook", "x", "global"))
