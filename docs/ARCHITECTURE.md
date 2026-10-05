@@ -97,6 +97,10 @@ each audit entry records the version that decided it.
 
 * **High-risk identifiers** (government ids, bank and card numbers) are masked for
   everyone without the `pii:read` permission and are never sent to an external model.
+  For a reader who holds `pii:read` the identifier is replaced by a numbered placeholder
+  (`[US_SSN_1]`) instead of being removed, so the answer can refer to it; the value is
+  put back locally. A value that has a placeholder is replaced wherever it occurs, in
+  the passages and in the question alike.
 * **Contact-level data** (names, email addresses, phone numbers) is ordinary business
   information in PUBLIC and INTERNAL documents, and personal data in CONFIDENTIAL and
   RESTRICTED ones. There it is replaced by stable placeholders (`[PERSON_1]`) before a
@@ -122,7 +126,9 @@ each audit entry records the version that decided it.
 | Graph search | question entities → entity–passage subgraph → personalised PageRank | multi-hop questions where the answer passage shares no words with the question |
 | Fusion | weighted reciprocal rank fusion (k = 60; 1.0 / 1.0 / 0.7) | no score normalisation needed |
 | Reranking | `ms-marco-MiniLM-L-12` cross-encoder on the top 18 | precision at the top |
-| Abstention | best reranker score below a threshold → "not enough information" | no answer beats a wrong answer |
+| Focus | a name from the question that is in most documents of one collection (the organisation's own name) becomes a filter on that collection and is left out of the wording passages are ranked by | otherwise the rare name matches every title page and pushes out the passage with the answer |
+| Second search | when the first draft lacks the kind of thing asked for (a person, a date, an amount) or the model names what is missing, one more search inside the same scope: the offices, bodies and codes the draft names are looked up literally, the model's own query is reranked | "approved by the Director of Operations" needs the register that says who that is |
+| Abstention | no evidence, or the drafting model finds the evidence insufficient even after the second search → "not enough information" | no answer beats a wrong answer |
 
 ## Validation
 
@@ -138,7 +144,11 @@ For each sentence of a draft answer:
    CONFLICTING.
 4. **Spans** — LettuceDetect marks unsupported character spans.
 5. **Literal checks** — every number, identifier and proper name in the sentence must
-   appear in the evidence.
+   appear in the evidence. A calculation written out in the sentence
+   (`$46,800 / 2,080 = $22.50`) is checked arithmetically: its operands must be figures
+   from the passages and its result must be right; the result then counts as supported.
+   Protected values that the sentence links (a person and an id number) must stand
+   together in one row of the cited passage.
 6. **Calibration** — a logistic model, trained on labelled data, turns the signals into
    one probability. Its weights are constrained to the direction each signal can
    legitimately push (more grounding never lowers confidence).
@@ -146,7 +156,10 @@ For each sentence of a draft answer:
 7. **Overriding rules** — whatever the probability, a sentence is not supported if a
    figure in it is missing from the evidence, if the closest source sentence states the
    opposite, or if no detector finds any support at all.
-8. **Judge** — sentences in the uncertain band go to the LLM in one batched call. It
+8. **Two passages** — a sentence no single passage carries (an office from one, its
+   holder from another) is read once more against its primary passage and the passage
+   that best complements it, together.
+9. **Judge** — sentences in the uncertain band go to the LLM in one batched call. It
    must return a verbatim quote, and the quote is checked against the evidence. A
    one- or two-word answer ("Yes.") is judged together with the question it answers.
 

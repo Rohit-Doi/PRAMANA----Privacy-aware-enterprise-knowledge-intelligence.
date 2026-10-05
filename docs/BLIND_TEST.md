@@ -5,7 +5,8 @@ that built the system. This document reports what happened on material the syste
 never seen, with questions it was not built around. **The numbers here are much lower,
 and they are the ones to believe.**
 
-The first two blind tests were run on 3 October 2026 and the third on 4 October 2026. Each
+The first two blind tests were run on 3 October 2026, the third on 4 October and the fourth
+on 5 October. Each
 figure reported as blind is a first run: nothing was tuned on the questions beforehand.
 Re-runs made after fixes are labelled as such and are not blind.
 
@@ -21,13 +22,13 @@ Re-runs made after fixes are labelled as such and are not blind.
 | Protected facts leaked | 0 | **0** | **0** | — |
 | Unanswerable questions declined | 10 / 10 | 9 / 10 | 10 / 10 | — |
 
-**In one sentence:** on all three blind tests the system leaked nothing, invented nothing
-and resisted every attempt to talk it round. On the first it was far too cautious. After
-the causes were fixed, a second blind test on new documents gave 72 %. The fixes for what
-the second test found were then confirmed on its own questions (86 %, not blind) — but a
-**third blind test gave 68 %**: it found a different weakness. Each fix holds for the
-problem it was made for; unseen material keeps finding new ones. See
-[Part 4](#part-4--the-third-blind-test).
+**In one sentence:** on all four blind tests the system leaked nothing, invented nothing
+and resisted every attempt to talk it round. The share of answerable questions it answers
+correctly on unseen documents went 51 % → 72 % → 68 % → **72 %** (76 % on reading), with fixes
+between the tests: each fix worked for the failure it was made for, and each new test found
+a different one. Expect roughly **70–75 %** on new material, with nearly all of the rest
+declined rather than wrong. See [Part 4](#part-4--the-third-blind-test) and
+[Part 5](#part-5--the-fourth-blind-test).
 
 ## How the test was made blind
 
@@ -395,15 +396,102 @@ the retrieval check on the original questions (recall@8 1.00, MRR 0.975 — unch
   What can be promised is what was measured: it does not leak, and it prefers saying
   "I cannot verify this" to guessing.
 
+## Part 5 — the fourth blind test
+
+The changes made after the third test had no valid measurement (the free language-model
+quota ran out during the re-run). They were measured the next day, and then tested on a
+fourth unseen organisation.
+
+**Checks on the earlier material first (development data, not blind):** the original
+regression questions pass every gate on the final code — 52 of 55 correct, 10 of 10
+unanswerable declined, no leaks, median 8.3 s. The third set re-run gave 55 of 78 (from 53)
+with 21 of 22 refusals; tracing what still declined found two more causes, fixed before
+the fourth test:
+
+* **A name was a placeholder in the passage and plain text in the question.** Name
+  recognition depends on context: the same name was recognised in a register row and
+  missed in the question, so the model could not connect them. A value that has a
+  placeholder is now replaced wherever it occurs, and names in the question are
+  registered first.
+* **The verifier rejected "staff in the EMEA region get 27 days"**: the drafting model
+  was told the document's region and the verifier was not. Both now read the same header.
+
+### The blind result — 100 questions, one run
+
+*Ombrellick Growers' Cooperative Society* (a fictional farmers' cooperative): 28 documents
+by an independent author, 100 questions by an independent examiner, committed to git
+before indexing (`eval/blind4/`). No model outage affected the run.
+
+| | Result |
+|---|---|
+| Must refuse (22) | **21 correct**; 0 leaks |
+| Must answer (78), mechanical grading | **56 correct (72 %)**, 16 declined, 6 other |
+| Must answer (78), on reading | **59 correct (76 %)** |
+
+The three regraded answers gave the correct current figure and added what the older
+version said ("…14.5 %. The 2025 schedule applied 12 %"). The examiner's key forbade the
+old figure; the answer is right and says more than was asked. The one failed refusal
+answered "the date of the 2027 meeting is to be announced in February" to a question
+about that date — a true sentence from the calendar, not the date asked for.
+
+| Kind of answerable question | Test 4 | Test 3 | Test 2 |
+|---|---|---|---|
+| Fact stated plainly | 14 / 14 | 12 / 14 | 14 / 14 |
+| Reworded in everyday language | 14 / 16 | 9 / 16 | 12 / 16 |
+| A cell of a table | 8 / 10 | 8 / 10 | 10 / 10 |
+| Needs two documents | 10 / 16 | 11 / 16 | 6 / 16 |
+| Superseded and current version | 3 / 6 (6 / 6 on reading) | 3 / 6 | 5 / 6 |
+| "My area" (regional variants) | 1 / 6 | 4 / 6 | 1 / 6 |
+| Confidential content, authorised reader | 5 / 8 | 6 / 8 | 7 / 8 |
+| Personal data, entitled reader | 1 / 2 | 0 / 2 | 1 / 2 |
+
+**Confirmed on unseen material:** the fix for the third test's main failure. Plain and
+reworded questions: 28 of 30 (21 of 30 in test 3). Median time per question fell to 11 s.
+
+**What failed this time**
+
+* **"My area" (5 of 6 declined).** The organisation-name filter decided which
+  organisation a question was about from the collection that dominated the first search
+  hits. For "how many days of annual leave do I get" the hits were spread over every
+  organisation's leave policy, no collection dominated, and the filter did not engage.
+  *Fixed afterwards:* the organisation is the one in whose documents a name from the
+  question is ubiquitous, whichever collection the hits favour. Re-run on this set (not
+  blind): regional questions 5 of 6, total 59 of 78 mechanically, 62 on reading, refusals
+  and leaks unchanged.
+* **The executive's questions about RESTRICTED documents (7 declined).** This is a
+  limit of the design, not a bug. RESTRICTED text may not be sent to an external model.
+  Without a local model the system can only *quote* a sentence from it, and it declines
+  when no single sentence answers. Installing a local model (Ollama; see the runbook)
+  removes the limit; this machine has too little memory to run one alongside the rest.
+* **Two-document questions (10 of 16).** Four declined, two stopped at the office or the
+  meeting without the name or date.
+
+### Four tests together
+
+| | Test 1 | Test 2 | Test 3 | Test 4 |
+|---|---|---|---|---|
+| Answerable questions correct (first run) | 51 % | 72 % | 68 % | 72 % (76 % on reading) |
+| Must-refuse questions handled correctly | 23 / 24 | 22 / 22 | 20 / 22 | 21 / 22 |
+| Protected facts leaked | 0 | 0 | 0 | 0 |
+| Invented facts found | 0 | 0 | 0 | 0 |
+
+The pattern is consistent. Safety held in 400 questions on four organisations it had
+never seen. The answer rate on new material is in the low seventies and has moved little
+since the second test, although every specific failure found was fixed and the fix then
+confirmed: a new set of documents finds a new way to miss. Further gains now depend more
+on the parts that were held constant — a small reranker and embedding model chosen to run
+without a GPU, a free-tier drafting model, and no local model for restricted text — than
+on more rules.
+
 ## Limits of this test
 
 * About 100 questions per test: one question is about one percentage point; small
   differences mean nothing. The difference between 72 % and 68 % is within that noise.
 * The tests ran on a free language-model tier. Which model drafted an answer depended on
   how much quota was left that day; test 3 ran mostly on the fallback models.
-* The documents of the three fictional organisations were written by an AI author to a
+* The documents of the four fictional organisations were written by an AI author to a
   specification. They are unseen and realistic in form, but tidier than real paperwork,
-  and similar specifications shaped all three sets.
+  and similar specifications shaped all four sets.
 * One examiner wrote the keys. Six were found too strict on reading; others may be too
   lenient — several keys are bare numbers that could match by accident.
 * HotpotQA paragraphs are Wikipedia text that the drafting model may have seen in

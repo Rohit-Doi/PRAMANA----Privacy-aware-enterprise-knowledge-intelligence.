@@ -119,6 +119,32 @@ hash, and triggers reject modification. Verification needs only the table.
 
 ---
 
+## 13. What four blind tests changed
+
+Each blind test (see [BLIND_TEST.md](BLIND_TEST.md)) was followed by changes aimed at the
+cause of a failure, never at a question. The ones that shaped the design:
+
+* **A second search instead of a bigger first one.** Retrieving more passages did not
+  help chained questions; the second passage is relevant to the first answer, not to
+  the question. A deterministic check of what the draft lacks decides when to look again.
+* **Arithmetic is allowed, but only shown and checked.** Forbidding calculation lost
+  questions whose answer is a difference of two stated figures. The model must write
+  the calculation out; the verifier recomputes it.
+* **The organisation's name is a filter, not a search word.** Found on the third test:
+  a rare name on every title page dominates both searches.
+* **The relevance gate before drafting was removed.** A reworded question can score
+  very low on the right passage. Whether passages answer is left to the drafting model
+  and the verifier; the cost is one model call for questions that have no answer.
+* **No quoting when no model is available.** With the gate gone, quoting the nearest
+  sentence as a fallback produced answers that only sat near the topic. The system
+  now says the model is unavailable.
+* **Tried and kept out:** stronger rerankers (little gain on CPU), accepting a sentence
+  because its words all occur in one table row (a swapped role would pass).
+
+What the tests did not change: restricted text never goes to an external model. Without
+a local model, questions about RESTRICTED documents are answered by quotation or
+declined; this was the largest single group of declined questions in the fourth test.
+
 ## Departures from the plan
 
 | Planned | Built | Reason |

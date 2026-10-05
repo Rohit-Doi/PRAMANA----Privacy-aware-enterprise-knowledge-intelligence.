@@ -93,11 +93,13 @@ choice, including what was tried and rejected: [docs/DECISIONS.md](docs/DECISION
 ## Measured results
 
 > **Read this first.** The figures in the first table below come from questions written
-> alongside the system. Three blind tests — unseen documents, questions written
-> independently — are the ones to believe: **51 %**, **72 %** and **68 %** of answerable
-> questions correct, each on a different fictional organisation, with fixes between them.
-> Expect about 70 % on new material, with most of the rest declined rather than wrong.
-> In all three: **no leaks, no invented facts**. Details: [docs/BLIND_TEST.md](docs/BLIND_TEST.md).
+> alongside the system. Four blind tests — unseen documents, questions written
+> independently — are the ones to believe: **51 %**, **72 %**, **68 %** and **72 %** of
+> answerable questions correct, each on a different fictional organisation, with fixes
+> between them. Expect 70–75 % on new material, with nearly all of the rest declined rather
+> than wrong. In all four (400 questions): **no leaks, no invented facts**. Questions about
+> RESTRICTED documents can only be answered by quotation unless a local model is installed.
+> Details: [docs/BLIND_TEST.md](docs/BLIND_TEST.md).
 
 Measured on this repository's code on a laptop CPU (i7-1360P, 16 GB RAM, no GPU).
 Full report with method and caveats: [docs/RESULTS.md](docs/RESULTS.md).
