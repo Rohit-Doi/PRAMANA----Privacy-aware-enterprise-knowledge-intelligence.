@@ -375,17 +375,24 @@ class HybridRetriever:
         collections = [str(h.payload.get("collection") or "") for h in hits[:FOCUS_HITS]]
         if not phrases or not collections:
             return "", []
-        home = max(set(collections), key=collections.count)
-        if not home or collections.count(home) * 2 < len(collections):
+        # The organisation is the one in whose collection a name from the question is ubiquitous.
+        # Collections are tried in the order the search favoured them; other organisations'
+        # documents on the same subject (everyone has a leave policy) do not get a say.
+        by_frequency = sorted(set(collections) - {""}, key=lambda c: -collections.count(c))
+        home, focused = "", question
+        for collection in by_frequency:
+            names = [phrase for phrase in phrases if await self._ubiquitous(phrase, collection)]
+            if names:
+                home = collection
+                for phrase in names:
+                    focused = re.sub(
+                        rf"(?i)\b(?:(?:at|of|in|for|by|from|under)\s+)?(?:the\s+)?{re.escape(phrase)}(?:['’]s)?",
+                        " ",
+                        focused,
+                    )
+                break
+        if not home:
             return "", []
-        focused = question
-        for phrase in phrases:
-            if phrase.lower() in focused.lower() and await self._ubiquitous(phrase, home):
-                focused = re.sub(
-                    rf"(?i)\b(?:(?:at|of|in|for|by|from|under)\s+)?(?:the\s+)?{re.escape(phrase)}(?:['’]s)?",
-                    " ",
-                    focused,
-                )
         focused = re.sub(r"\s+([?.,!])", r"\1", re.sub(r"\s{2,}", " ", focused)).strip(" ,")
         if focused == question or len(re.findall(r"\w{3,}", focused)) < FOCUS_MIN_WORDS:
             return "", []
